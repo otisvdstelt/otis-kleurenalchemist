@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { strings } from '../../content/strings'
 import { isSpecial, type Ingredient } from '../../lib/alchemy/ingredients'
 import { store, useAlchemy } from '../../lib/store'
@@ -6,10 +7,12 @@ import { Potje } from './Potje'
 interface KastProps {
   ingredients: readonly Ingredient[] | undefined
   failed: boolean
+  /** De foto-knop, die bij de bijzondere potjes staat */
+  photo?: ReactNode
 }
 
 /** De planken vol potjes. Elk potje is een knop: erop drukken gooit het in de ketel */
-export function Kast({ ingredients, failed }: KastProps) {
+export function Kast({ ingredients, failed, photo }: KastProps) {
   const items = useAlchemy((s) => s.cauldron.items)
   const count = (id: string) => items.filter((item) => item === id).length
   const colours = ingredients?.filter((i) => !isSpecial(i)) ?? []
@@ -47,6 +50,7 @@ export function Kast({ ingredients, failed }: KastProps) {
               </li>
             ))}
           </ul>
+          {photo}
         </>
       )}
     </section>
