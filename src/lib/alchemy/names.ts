@@ -2,7 +2,7 @@
 // De woorden zelf staan in src/content/strings.ts. Hier staat alleen hoe ze gekozen worden
 
 import { fromHex } from './color.ts'
-import { isSpecial, type Ingredient } from './ingredients.ts'
+import { isSpecial, plainName, type Ingredient } from './ingredients.ts'
 import type { Brew } from './mix.ts'
 import { mulberry32, pick } from './prng.ts'
 
@@ -54,7 +54,7 @@ export function nameBrew(brew: Brew, ingredients: readonly Ingredient[], words: 
     else counts.set(ingredient.id, { ingredient, count: 1, first: index })
   })
   const ranked = [...counts.values()].sort((a, b) => b.count - a.count || a.first - b.first)
-  const noun = (i: Ingredient) => (i.id.startsWith('foto') ? words.photo : i.name)
+  const noun = (i: Ingredient) => (i.id.startsWith('foto') ? words.photo : plainName(i))
   const main = noun(ranked[0].ingredient)
   const moods = moodOf(brew)
   const mood = moods[pick(random, moods.length)]

@@ -2,7 +2,7 @@ import { Text } from '@react-three/drei'
 import { useFrame, type ThreeEvent } from '@react-three/fiber'
 import { useMemo, useRef } from 'react'
 import type { Group } from 'three'
-import { isSpecial, type Ingredient } from '../../lib/alchemy/ingredients'
+import { isSpecial, plainName, type Ingredient } from '../../lib/alchemy/ingredients'
 import { store, useAlchemy } from '../../lib/store'
 import { jarForm, jarSlots, labelOf, type Vec3 } from '../../lib/world/spec'
 import { useParts } from './assets'
@@ -114,7 +114,7 @@ function Jar({ ingredient, at, turn, label, reducedMotion }: JarProps) {
       <Piece name={`glass-${ingredient.id}`} hung material={glass} castShadow={false} renderOrder={2} />
       <group rotation={[0, turn, 0]}>
         <Text font={FACES.hand} fontSize={0.034} maxWidth={label.width * 0.95} lineHeight={1} textAlign="center" anchorX="center" anchorY="middle" color={LABEL_INK} position={[0, label.y, label.out + 0.004]} renderOrder={3}>
-          {ingredient.name}
+          {plainName(ingredient)}
         </Text>
       </group>
     </group>

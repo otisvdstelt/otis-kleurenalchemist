@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent } fr
 import { strings } from '../../content/strings'
 import { MAX_SIZE, MIN_SIZE } from '../../lib/alchemy/palette'
 import { boilState } from '../../lib/alchemy/mix'
-import { isSpecial } from '../../lib/alchemy/ingredients'
+import { isSpecial, plainName } from '../../lib/alchemy/ingredients'
 import { currentIngredients, store, useAlchemy, useBrew } from '../../lib/store'
 import type { CauldronOnScreen } from '../World'
 import { KetelTekening } from './KetelTekening'
@@ -136,7 +136,7 @@ export function Ketel({ onPoured, onScreen }: KetelProps) {
           <ol className="inhoud-lijst">
             {inside.map((ingredient, i) => (
               <li key={i} className="inhoud-item hand">
-                {ingredient.name}
+                {plainName(ingredient)}
               </li>
             ))}
           </ol>

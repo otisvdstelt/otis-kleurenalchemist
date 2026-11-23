@@ -40,6 +40,9 @@ export interface Ingredient {
 
 export const isSpecial = (ingredient: Ingredient) => ingredient.effect !== undefined
 
+/** De naam zonder zachte afbreekstreepjes, voor in een zin, een flesnaam of een etiket in 3D */
+export const plainName = (ingredient: Ingredient) => ingredient.name.replace(/\u00ad/g, '')
+
 // Hoe het in de JSON staat, met Nederlandse sleutels
 interface RawPigment {
   oklch: [number, number, number]

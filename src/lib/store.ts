@@ -8,7 +8,7 @@ import { bottle as fill, ingredientsOf, type Bottle } from './alchemy/bottle'
 import { cauldron as step, emptyCauldron, type Cauldron, type CauldronAction } from './alchemy/cauldron'
 import { checkPalette } from './alchemy/contrast'
 import type { Hex } from './alchemy/color'
-import { isSpecial, photoIngredient, type Ingredient } from './alchemy/ingredients'
+import { isSpecial, photoIngredient, plainName, type Ingredient } from './alchemy/ingredients'
 import { boilState, brew, type Brew } from './alchemy/mix'
 import { nameBrew } from './alchemy/names'
 import { roleNumber } from './alchemy/palette'
@@ -135,7 +135,7 @@ export const store = {
     const after = { ...state, cauldron }
     const boil = boilState(colourCount(after))
     const warning = boil !== before && boil === 'onrustig' ? ` ${strings.nieuws.onrustig}` : boil !== before && boil === 'overkoken' ? ` ${strings.nieuws.overkookt}` : ''
-    set({ cauldron, ...say(strings.nieuws.erin(capital(ingredient.name), cauldron.items.length) + warning) })
+    set({ cauldron, ...say(strings.nieuws.erin(capital(plainName(ingredient)), cauldron.items.length) + warning) })
   },
 
   /** Afscheppen: het laatste ingrediënt gaat er weer uit */
@@ -143,7 +143,7 @@ export const store = {
     const last = ingredientsIn().at(-1)
     const cauldron = apply({ type: 'skim' })
     if (cauldron === state.cauldron) return
-    set({ cauldron, ...say(strings.nieuws.eruit(capital(last?.name ?? ''))) })
+    set({ cauldron, ...say(strings.nieuws.eruit(capital(last ? plainName(last) : ''))) })
   },
 
   stir(strokes = 1) {
@@ -169,7 +169,7 @@ export const store = {
     }
     let cauldron = step(emptyCauldron(state.cauldron.size), { type: 'load', items: picked.map((i) => i.id), stirs: 2 + Math.floor(Math.random() * 10), size: state.cauldron.size })
     cauldron = { ...cauldron, seed: null, reroll: Math.floor(Math.random() * 1000) }
-    set({ cauldron, stir: { at: now(), strokes: 3 }, ...say(strings.nieuws.verrast(picked.map((i) => i.name))) })
+    set({ cauldron, stir: { at: now(), strokes: 3 }, ...say(strings.nieuws.verrast(picked.map(plainName))) })
   },
 
   /** Roer opnieuw: een nieuwe trekking. Kleuren onder een kurk blijven staan */
@@ -184,7 +184,7 @@ export const store = {
     const ingredient = state.photos[id] ?? state.catalogue?.find((i) => i.id === id)
     const cauldron = apply({ type: 'remove', id })
     if (cauldron === state.cauldron) return
-    set({ cauldron, ...say(strings.nieuws.eruit(capital(ingredient?.name ?? id))) })
+    set({ cauldron, ...say(strings.nieuws.eruit(capital(ingredient ? plainName(ingredient) : id))) })
   },
 
   size(size: number) {
