@@ -146,6 +146,8 @@ describe('modder', () => {
     const calm = brew({ ingredients: take('neon', 'citroen', 'lavendel', 'zeeschuim', 'kersenbloesem'), stirs: 3, size: 5 })!
     const over = brew({ ingredients: take('neon', 'citroen', 'lavendel', 'zeeschuim', 'kersenbloesem', 'diepzee', 'koper', 'mos'), stirs: 3, size: 5 })!
     expect(over.boil).toBe('overkoken')
+    expect(over.overflow).toBe(1)
+    expect(calm.overflow).toBe(0)
     expect(over.mud).toBe(true)
     const chroma = (swatches: { hex: string }[]) => swatches.reduce((sum, s) => sum + fromHex(s.hex).c, 0) / swatches.length
     expect(chroma(over.swatches)).toBeLessThan(chroma(calm.swatches))

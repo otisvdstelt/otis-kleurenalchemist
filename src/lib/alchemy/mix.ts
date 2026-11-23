@@ -51,6 +51,8 @@ export interface Brew {
   seed: number
   homogeneity: number
   boil: Boil
+  /** Hoe hard het overkookt, van 0 tot 1 */
+  overflow: number
   /** Modder: overgekookt, of zo gemengd dat alle kleur eruit is */
   mud: boolean
   /** Licht palet met donkere tekst, of andersom */
@@ -262,6 +264,7 @@ export function brew({ ingredients, stirs, size, corks = [] }: BrewInput): Brew 
     seed,
     homogeneity: h,
     boil,
+    overflow,
     mud,
     dark,
     blend: toHex(blend),
