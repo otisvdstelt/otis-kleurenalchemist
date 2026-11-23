@@ -1,12 +1,126 @@
 // Alle woorden van de werkplaats op één plek, zodat er later Engels naast kan
 
+import type { Level } from '../lib/alchemy/contrast'
+import type { Boil } from '../lib/alchemy/mix'
+import type { Role } from '../lib/alchemy/palette'
+
+const GETALLEN = ['nul', 'één', 'twee', 'drie', 'vier', 'vijf', 'zes', 'zeven', 'acht', 'negen', 'tien', 'elf', 'twaalf']
+/** Een getal in woorden tot twaalf, daarna in cijfers */
+export const inWoorden = (n: number) => GETALLEN[n] ?? String(n)
+
+const ROLNAMEN: Record<Role, string> = {
+  achtergrond: 'achtergrond',
+  oppervlak: 'oppervlak',
+  tekst: 'tekst',
+  accent: 'accent',
+  signaal: 'signaal',
+}
+
 export const strings = {
   titel: 'Kleurenalchemist',
   ondertitel: 'Gooi een paar potjes in de ketel, roer, en kijk wat eruit komt.',
   maker: 'Otis van der Stelt',
+  portfolio: 'otisstelt.vercel.app',
   laden: {
     bezig: 'De ketel wordt opgestookt',
     klaar: 'De ketel staat klaar',
+  },
+  uur: {
+    label: 'Nacht',
+    dag: 'dag',
+    nacht: 'nacht',
+  },
+  kast: {
+    kop: 'Potjes',
+    bijzonder: 'Bijzonder',
+    wachten: 'De potjes worden van de plank gehaald',
+    mislukt: 'De potjes zijn niet van de plank gekomen. Ververs de pagina en probeer het nog eens.',
+    gooi: (naam: string) => `Gooi ${naam} in de ketel`,
+    aantal: (n: number) => `${n}× in de ketel`,
+  },
+  ketel: {
+    kop: 'De ketel',
+    uitleg: 'Ketel. Spatie of pijltjes om te roeren, Enter om te bottelen.',
+    inhoud: 'Erin',
+    leeg: 'De ketel is leeg. Gooi er een paar potjes in.',
+    toestand: {
+      leeg: 'Leeg en koud.',
+      rustig: 'Borrelt rustig.',
+      onrustig: 'Borrelt onrustig. Nog eentje en hij kookt over.',
+      overkoken: 'Kookt over. Alles trekt naar modder.',
+    } satisfies Record<Boil, string>,
+    roer: 'Roer',
+    afscheppen: 'Schep af',
+    legen: 'Gooi leeg',
+    bottelen: 'Bottelen',
+    grootte: 'Hoeveel kleuren',
+    slagen: (n: number) => (n === 0 ? 'nog niet geroerd' : n === 1 ? 'één slag' : `${inWoorden(n)} slagen`),
+    glad: (h: number) => (h < 0.2 ? 'vol strepen' : h < 0.5 ? 'nog streperig' : h < 0.8 ? 'bijna glad' : 'glad'),
+    damp: 'In de damp',
+  },
+  fles: {
+    kop: 'Het flesje',
+    leeg: 'Nog niks gebotteld. Wat je brouwt, komt hier in een flesje.',
+    kurk: 'Kurk erop',
+    kurkEraf: 'Kurk eraf',
+    kurkUitleg: 'Met een kurk erop blijft deze kleur staan als je opnieuw roert.',
+    roerOpnieuw: 'Roer opnieuw',
+    kopieer: (hex: string) => `Kopieer ${hex}`,
+    gekopieerd: 'gekopieerd!',
+    nietGekopieerd: 'kopiëren lukte niet',
+    rol: (role: Role, n: number) => (n > 1 ? `${ROLNAMEN[role]} ${n}` : ROLNAMEN[role]),
+    modder: 'Modder is geen fout. Het is gewoon een heel eerlijk palet.',
+  },
+  proefvel: {
+    kop: 'Proefvel',
+    titel: 'Brief van de alchemist',
+    tekst: 'Dit is hoe je palet eruitziet als er echt iets op staat: een kop, een stukje tekst, een knop en een label.',
+    knop: 'Doe maar',
+    label: 'Nieuw',
+    link: 'nog een kleur',
+  },
+  contrast: {
+    kop: 'Is het leesbaar?',
+    paar: (fg: string, bg: string) => `${fg} op ${bg}`,
+    niveau: {
+      aaa: 'AAA',
+      aa: 'AA',
+      groot: 'alleen groot',
+      nee: 'te zwak',
+    } satisfies Record<Level, string>,
+    tekst: {
+      aaa: 'Heel goed te lezen, ook voor wie slecht ziet.',
+      aa: 'Goed te lezen.',
+      groot: 'Alleen groot genoeg voor koppen. Gewone tekst is slecht te lezen op deze achtergrond.',
+      nee: 'Deze tekst is slecht te lezen op deze achtergrond.',
+    } satisfies Record<Level, string>,
+    onderdeel: {
+      aaa: 'Valt goed op. Er kan zelfs tekst in deze kleur.',
+      aa: 'Valt genoeg op voor een knop of een lijn.',
+      groot: 'Valt genoeg op voor een knop of een lijn.',
+      nee: 'Valt weg tegen de achtergrond. Een knop in deze kleur zie je slecht.',
+    } satisfies Record<Level, string>,
+    nodig: (ratio: string) => `nodig: ${ratio}`,
+    apca: 'APCA',
+    apcaUitleg: 'APCA is een concept voor de volgende versie van WCAG en nog geen standaard. Het staat er als extra informatie bij.',
+    alles: 'Alle teksten zijn goed te lezen.',
+    niet: (n: number) => (n === 1 ? 'Eén combinatie is te zwak.' : `${inWoorden(n)} combinaties zijn te zwak.`.replace(/^./, (c) => c.toUpperCase())),
+    snuifjeTip: 'Een snuifje contrast lost dat op. Het verschuift alleen de lichtheid, en zo weinig mogelijk.',
+    snuifje: 'Gooi er een snuifje contrast in',
+    voor: 'Voor het snuifje',
+    na: 'Na het snuifje',
+    onbereikbaar: 'Twee kleuren zitten allebei onder een kurk, dus het snuifje kan ze niet uit elkaar trekken.',
+  },
+  nieuws: {
+    erin: (naam: string, n: number) => `${naam} in de ketel. ${n === 1 ? 'Eén ingrediënt' : `${inWoorden(n).replace(/^./, (c) => c.toUpperCase())} ingrediënten`}.`,
+    eruit: (naam: string) => `${naam} afgeschept.`,
+    geleegd: 'De ketel is leeg.',
+    geroerd: (slagen: string, glad: string) => `Geroerd: ${slagen}, ${glad}.`,
+    onrustig: 'De ketel borrelt onrustig.',
+    overkookt: 'De ketel kookt over.',
+    gebotteld: (naam: string, n: number, leesbaar: boolean) => `Flesje gevuld: ${naam}, ${inWoorden(n)} kleuren, ${leesbaar ? 'alle teksten leesbaar' : 'niet alles is leesbaar'}.`,
+    kurk: (rol: string, erop: boolean) => (erop ? `Kurk op ${rol}.` : `Kurk van ${rol}.`),
+    grootte: (n: number) => `Het palet krijgt ${inWoorden(n)} kleuren.`,
   },
   /** Woorden voor de naam op het etiket */
   namen: {
