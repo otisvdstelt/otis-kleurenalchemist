@@ -30,7 +30,8 @@ export function KetelTekening({ brew, boil, fast }: KetelTekeningProps) {
   const streaks = brew?.streaks ?? []
   const surface = brew?.blend ?? '#3f4a45'
   const mixedIn = brew?.homogeneity ?? 0
-  const steam = brew ? brew.swatches.map((s) => s.hex) : ['#a3c1ad', '#a3c1ad', '#a3c1ad']
+  // Bij overkoken komt er donkere rook uit, anders damp in de kleuren van het palet
+  const steam = brew?.boil === 'overkoken' ? ['#4a3a2e', '#5c4836', '#3f3127', '#6b5038', '#4a3a2e'] : brew ? brew.swatches.map((s) => s.hex) : ['#a3c1ad', '#a3c1ad', '#a3c1ad']
   const bubbles = boil === 'leeg' ? 0 : boil === 'rustig' ? 4 : boil === 'onrustig' ? 9 : 12
 
   return (

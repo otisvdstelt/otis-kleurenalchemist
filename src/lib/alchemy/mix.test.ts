@@ -148,7 +148,7 @@ describe('modder', () => {
     expect(boilState(6)).toBe('overkoken')
     expect(boilState(9)).toBe('overkoken')
     expect(overflowStrength(5)).toBe(0)
-    expect(overflowStrength(6)).toBeGreaterThan(0)
+    expect(overflowStrength(6)).toBeGreaterThanOrEqual(0.7)
     expect(overflowStrength(8)).toBe(1)
     const withSpecials = brew({ ingredients: take('mos', 'klei', 'neon', 'inkt', 'contrast', 'water', 'houtskool'), stirs: 3, size: 5 })!
     expect(withSpecials.boil).toBe('rustig')
@@ -178,6 +178,16 @@ describe('modder', () => {
     const result = brew({ ingredients: [pure('rood', '#d0302a'), pure('groen', '#20a050')], stirs: 40, size: 5 })!
     expect(result.boil).toBe('rustig')
     expect(result.mud).toBe(true)
+  })
+
+  it('bij zes potjes is het palet al duidelijk bruin', () => {
+    const six = brew({ ingredients: take('neon', 'citroen', 'lavendel', 'zeeschuim', 'kersenbloesem', 'diepzee'), stirs: 3, size: 5 })!
+    const middles = six.swatches.filter((s) => s.role === 'accent' || s.role === 'signaal').map((s) => fromHex(s.hex))
+    for (const c of middles) {
+      expect(c.c).toBeLessThan(0.08)
+      expect(c.h).toBeGreaterThan(20)
+      expect(c.h).toBeLessThan(110)
+    }
   })
 
   it('modder kun je nog steeds bottelen: er komt gewoon een palet uit', () => {

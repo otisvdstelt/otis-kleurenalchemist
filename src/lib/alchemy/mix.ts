@@ -24,9 +24,9 @@ export function boilState(colourCount: number): Boil {
   return 'overkoken'
 }
 
-/** Hoe hard het overkookt, van 0 (niet) tot 1 (helemaal modder) */
+/** Hoe hard het overkookt, van 0 (niet) tot 1 (helemaal modder). Bij zes is het al duidelijk bruin */
 export function overflowStrength(colourCount: number): number {
-  return colourCount < OVERFLOW ? 0 : Math.min(1, (colourCount - UNEASY) / 3)
+  return colourCount < OVERFLOW ? 0 : Math.min(1, 0.7 + (colourCount - OVERFLOW) * 0.2)
 }
 
 /** Waar alles naartoe trekt als het overkookt */
@@ -133,8 +133,8 @@ function dominantOrder(random: Random, parts: readonly Part[], count: number): n
 /** Trek de kleur naar het modderbruin, des te harder naarmate het meer overkookt */
 function muddy(color: Oklch, strength: number, hue: number): Oklch {
   if (strength <= 0) return color
-  const pulled = { l: color.l, c: color.c * (1 - 0.75 * strength), h: lerpHue(color.h, hue, strength) }
-  return lerpOklab(pulled, MUD, 0.6 * strength)
+  const pulled = { l: color.l, c: color.c * (1 - 0.85 * strength), h: lerpHue(color.h, hue, strength) }
+  return lerpOklab(pulled, MUD, 0.75 * strength)
 }
 
 /** Zet de kleuren op een rij met bruikbare lichtheden, en geef elke kleur een rol */

@@ -56,7 +56,13 @@ export function Steam({ reducedMotion }: { reducedMotion: boolean }) {
 
   useEffect(() => {
     const hexes = brew ? brew.swatches.map((s) => s.hex) : []
-    materials.forEach((m, i) => (m.uniforms.uColour.value as Color).set(hexes.length ? hexes[i % hexes.length] : '#e9e3d6'))
+    // Bij overkoken wordt de damp donker en smoezelig
+    const smoke = new Color('#3f3127')
+    materials.forEach((m, i) => {
+      const colour = m.uniforms.uColour.value as Color
+      colour.set(hexes.length ? hexes[i % hexes.length] : '#e9e3d6')
+      if (brew?.overflow) colour.lerp(smoke, 0.65 * brew.overflow)
+    })
   }, [brew, materials])
 
   useFrame(({ camera }, delta) => {
