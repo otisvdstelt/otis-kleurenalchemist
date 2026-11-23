@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Bottle } from './bottle.ts'
-import { cssOklch, tokenName, toCss, toJson, toTailwind } from './exports.ts'
+import { cssOklch, toAse, toDesignTokens, tokenName, toCss, toJson, toSvg, toTailwind } from './exports.ts'
 
 const bottle: Bottle = {
   swatches: [
@@ -47,5 +47,46 @@ describe('exports', () => {
   it('schrijft oklch zoals CSS het leest', () => {
     expect(cssOklch('#ffffff')).toBe('oklch(100% 0 0)')
     expect(cssOklch('#b8623b')).toMatch(/^oklch\(\d+(\.\d)?% 0\.\d+ \d+(\.\d)?\)$/)
+  })
+})
+
+describe('meer exportvormen', () => {
+  it('schrijft een SVG met elke kleur, en zet een naam met < veilig', () => {
+    const svg = toSvg({ ...bottle, name: 'Mos <en> modder' })
+    expect(svg).toMatch(/^<svg xmlns="http:\/\/www.w3.org\/2000\/svg"/)
+    for (const s of bottle.swatches) expect(svg).toContain(`fill="${s.hex}"`)
+    expect(svg).toContain('Mos &lt;en&gt; modder')
+    expect(svg).not.toContain('<en>')
+  })
+
+  it('schrijft design tokens die Figma kan inlezen', () => {
+    const tokens = JSON.parse(toDesignTokens(bottle))
+    expect(tokens.kleur.tekst).toEqual({ $type: 'color', $value: '#2c2823', $description: 'tekst' })
+    expect(Object.keys(tokens.kleur)).toHaveLength(6)
+  })
+
+  it('schrijft een geldig .ase-bestand', () => {
+    const ase = toAse(bottle)
+    const view = new DataView(ase.buffer)
+    expect(String.fromCharCode(...ase.slice(0, 4))).toBe('ASEF')
+    expect(view.getUint16(4)).toBe(1)
+    expect(view.getUint32(8)).toBe(bottle.swatches.length + 2)
+    // Het eerste blok opent een groep
+    expect(view.getUint16(12)).toBe(0xc001)
+    // Loop alle blokken af: elk blok zegt hoe lang het is, en samen vullen ze het bestand precies
+    let at = 12
+    const types: number[] = []
+    for (let i = 0; i < bottle.swatches.length + 2; i++) {
+      types.push(view.getUint16(at))
+      at += 6 + view.getUint32(at + 2)
+    }
+    expect(at).toBe(ase.length)
+    expect(types).toEqual([0xc001, ...bottle.swatches.map(() => 0x0001), 0xc002])
+    // De eerste kleur: naam "achtergrond", dan RGB en drie floats
+    const first = 12 + 6 + view.getUint32(14)
+    const nameLength = view.getUint16(first + 6)
+    const model = first + 6 + 2 + nameLength * 2
+    expect(String.fromCharCode(...ase.slice(model, model + 4))).toBe('RGB ')
+    expect(view.getFloat32(model + 4)).toBeCloseTo(0xf7 / 255, 5)
   })
 })
