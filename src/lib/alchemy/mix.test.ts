@@ -1,10 +1,12 @@
 import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
-import { fromHex } from './color.ts'
+import { deltaEOK, fromHex } from './color.ts'
 import { checkPalette } from './contrast.ts'
 import { parseIngredients, type Ingredient } from './ingredients.ts'
 import { boilState, brew, homogeneity, overflowStrength, seedOf } from './mix.ts'
 import { rolesFor } from './palette.ts'
+import { nameBrew } from './names.ts'
+import { strings } from '../../content/strings'
 
 const shelf = parseIngredients(JSON.parse(readFileSync(new URL('../../../public/data/ingredients.json', import.meta.url), 'utf8')))
 const get = (id: string) => {
@@ -34,16 +36,31 @@ describe('deterministisch', () => {
     expect(a?.swatches).toEqual(b?.swatches)
   })
 
-  it('een slag meer geeft een ander palet', () => {
-    const a = brew({ ingredients: take('mos', 'neon'), stirs: 4, size: 5 })
-    const b = brew({ ingredients: take('mos', 'neon'), stirs: 5, size: 5 })
-    expect(a?.seed).not.toBe(b?.seed)
-    expect(a?.swatches).not.toEqual(b?.swatches)
+  it('roeren trekt geen nieuw palet: de seed blijft, alleen de homogeniteit verandert', () => {
+    const a = brew({ ingredients: take('mos', 'neon'), stirs: 4, size: 5 })!
+    const b = brew({ ingredients: take('mos', 'neon'), stirs: 5, size: 5 })!
+    expect(b.seed).toBe(a.seed)
+    expect(b.homogeneity).toBeGreaterThan(a.homogeneity)
+    // Eén slag verschuift de kleuren hooguit een beetje
+    for (let i = 0; i < a.swatches.length; i++) expect(deltaEOK(fromHex(a.swatches[i].hex), fromHex(b.swatches[i].hex))).toBeLessThan(0.12)
   })
 
-  it('de seed hangt af van recept, slagen en grootte', () => {
-    expect(seedOf(take('mos'), 1, 5)).not.toBe(seedOf(take('mos'), 1, 6))
-    expect(seedOf(take('mos', 'inkt'), 1, 5)).toBe(seedOf(take('inkt', 'mos'), 1, 5))
+  it('opnieuw roeren trekt wel een nieuw palet', () => {
+    const a = brew({ ingredients: take('mos', 'neon'), stirs: 4, size: 5 })!
+    const b = brew({ ingredients: take('mos', 'neon'), stirs: 4, size: 5, reroll: 1 })!
+    expect(b.seed).not.toBe(a.seed)
+    expect(b.swatches).not.toEqual(a.swatches)
+  })
+
+  it('een vaste seed gaat voor alles', () => {
+    expect(brew({ ingredients: take('mos'), stirs: 1, size: 5, reroll: 3, seed: 42 })!.seed).toBe(42)
+  })
+
+  it('de seed hangt af van de kleuren, de grootte en opnieuw roeren, niet van slagen of bijzondere potjes', () => {
+    expect(seedOf(take('mos'), 5)).not.toBe(seedOf(take('mos'), 6))
+    expect(seedOf(take('mos'), 5)).not.toBe(seedOf(take('mos'), 5, 1))
+    expect(seedOf(take('mos', 'inkt'), 5)).toBe(seedOf(take('inkt', 'mos'), 5))
+    expect(seedOf(take('mos', 'contrast', 'water', 'houtskool'), 5)).toBe(seedOf(take('mos'), 5))
   })
 })
 
@@ -115,7 +132,7 @@ describe('mengen', () => {
   it('een kurk houdt zijn kleur, de rest verandert', () => {
     const first = brew({ ingredients: take('mos', 'koper'), stirs: 3, size: 5 })!
     const corks = [null, null, null, first.swatches[3].hex, null]
-    const again = brew({ ingredients: take('mos', 'koper'), stirs: 4, size: 5, corks })!
+    const again = brew({ ingredients: take('mos', 'koper'), stirs: 3, size: 5, corks, reroll: 1 })!
     expect(again.swatches[3].hex).toBe(first.swatches[3].hex)
     expect(again.corked).toEqual([false, false, false, true, false])
     expect(again.swatches.filter((s, i) => i !== 3 && s.hex !== first.swatches[i].hex).length).toBeGreaterThan(0)
@@ -166,6 +183,37 @@ describe('modder', () => {
   it('modder kun je nog steeds bottelen: er komt gewoon een palet uit', () => {
     const over = brew({ ingredients: take('neon', 'citroen', 'lavendel', 'zeeschuim', 'kersenbloesem', 'diepzee'), stirs: 3, size: 5 })!
     expect(over.swatches).toHaveLength(5)
+  })
+})
+
+describe('bijzondere potjes werken op het palet dat er al is', () => {
+  it('het snuifje laat het palet staan dat al leesbaar was, en verandert de naam niet', () => {
+    for (const ids of [['mos'], ['mos', 'koper'], ['zonsondergang', 'diepzee'], ['neon', 'lavendel']]) {
+      const plain = brew({ ingredients: take(...ids), stirs: 5, size: 5 })!
+      const pinched = brew({ ingredients: take(...ids, 'contrast'), stirs: 5, size: 5 })!
+      expect(pinched.seed).toBe(plain.seed)
+      expect(pinched.base).toEqual(plain.swatches)
+      expect(pinched.pinch!.before).toEqual(plain.swatches)
+      // Alleen wat niet leesbaar was, schuift
+      const failing = new Set(checkPalette(plain.swatches).filter((c) => !c.passes).flatMap((c) => [c.fg, c.bg]))
+      pinched.swatches.forEach((s, i) => {
+        if (!failing.has(i)) expect(s.hex).toBe(plain.swatches[i].hex)
+      })
+      expect(nameBrew(pinched, take(...ids, 'contrast'), strings.namen)).toBe(nameBrew(plain, take(...ids), strings.namen))
+    }
+  })
+
+  it('water en houtskool houden de trekking, en schuiven alleen de lichtheid en chroma', () => {
+    const plain = brew({ ingredients: take('herfst'), stirs: 5, size: 5 })!
+    const watered = brew({ ingredients: take('herfst', 'water'), stirs: 5, size: 5 })!
+    expect(watered.seed).toBe(plain.seed)
+    expect(watered.base).toEqual(plain.swatches)
+    watered.swatches.forEach((s, i) => {
+      const before = fromHex(plain.swatches[i].hex)
+      const after = fromHex(s.hex)
+      expect(after.l).toBeGreaterThanOrEqual(before.l - 0.005)
+      if (before.c > 0.06) expect(Math.abs(((after.h - before.h + 540) % 360) - 180)).toBeLessThan(8)
+    })
   })
 })
 

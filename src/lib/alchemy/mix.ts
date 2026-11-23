@@ -43,10 +43,16 @@ export interface BrewInput {
   size: number
   /** Kleuren onder een kurk, per plek in het palet. Die blijven staan, de rest verandert */
   corks?: readonly (Hex | null)[]
+  /** Hoe vaak er opnieuw geroerd is ("Roer opnieuw"). Elke keer een nieuwe trekking */
+  reroll?: number
+  /** Een vaste seed, voor een recept uit een flesje. Gaat voor alles */
+  seed?: number
 }
 
 export interface Brew {
   swatches: Swatch[]
+  /** Het palet zoals het uit de menging kwam, nog zonder water, houtskool of snuifje */
+  base: Swatch[]
   corked: boolean[]
   seed: number
   homogeneity: number
@@ -66,10 +72,17 @@ export interface Brew {
   pinch: { before: Swatch[]; changed: number[]; unreachable: Check[] } | null
 }
 
-/** De seed komt uit het recept en het aantal slagen. De volgorde van de potjes doet er niet toe */
-export function seedOf(ingredients: readonly Ingredient[], stirs: number, size: number): number {
-  const ids = ingredients.map((i) => i.id).sort()
-  return hash(`${ids.join('+')}|${Math.max(0, Math.round(stirs))}|${clampSize(size)}`)
+/**
+ * De seed komt uit de kleuringrediënten, de grootte en hoe vaak er opnieuw geroerd is. Niet uit het aantal slagen:
+ * roeren maakt het palet gladder, maar trekt geen nieuw palet. Water, houtskool en het snuifje tellen ook niet mee,
+ * die werken pas op het palet dat er al is. De volgorde van de potjes doet er niet toe
+ */
+export function seedOf(ingredients: readonly Ingredient[], size: number, reroll = 0): number {
+  const ids = ingredients
+    .filter((i) => !isSpecial(i))
+    .map((i) => i.id)
+    .sort()
+  return hash(`${ids.join('+')}|${clampSize(size)}${reroll > 0 ? `|${Math.round(reroll)}` : ''}`)
 }
 
 interface Part {
@@ -195,7 +208,7 @@ function treat(color: Oklch, water: number, charcoal: number): Oklch {
 }
 
 /** Brouw een palet. Hetzelfde recept met hetzelfde aantal slagen geeft altijd precies hetzelfde */
-export function brew({ ingredients, stirs, size, corks = [] }: BrewInput): Brew | null {
+export function brew({ ingredients, stirs, size, corks = [], reroll = 0, seed: fixed }: BrewInput): Brew | null {
   // Op id gesorteerd, zodat de volgorde van de potjes niet uitmaakt
   const colours = ingredients.filter((i) => !isSpecial(i)).sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0))
   const effects: Record<Effect, number> = { contrast: 0, water: 0, houtskool: 0 }
@@ -204,7 +217,7 @@ export function brew({ ingredients, stirs, size, corks = [] }: BrewInput): Brew 
 
   const n = clampSize(size)
   const roles = rolesFor(n)
-  const seed = seedOf(ingredients, stirs, n)
+  const seed = fixed ?? seedOf(ingredients, n, reroll)
   const random = mulberry32(seed)
   const h = homogeneity(stirs)
   const boil = boilState(colours.length)
@@ -237,19 +250,17 @@ export function brew({ ingredients, stirs, size, corks = [] }: BrewInput): Brew 
     return muddy({ ...color, l: clamp(color.l + jitter) }, overflow, hue)
   })
 
-  // Licht of donker palet: houtskool en een donkere menging maken het donker, water licht
-  const lightness = blend.l + 0.1 * effects.water - 0.14 * effects.houtskool
-  const dark = lightness < 0.42
+  // Licht of donker palet, naar de menging zelf
+  const dark = blend.l < 0.42
   const inputChroma = parts.reduce((sum, p) => sum + p.color.c * p.weight, 0)
   const mixedAway = colours.length >= 2 && inputChroma > 0.08 && blendRaw.c < 0.045 && h >= 0.5
   const mud = boil === 'overkoken' || mixedAway
 
-  // Water en houtskool werken op de strepen, voordat de lichtheden verdeeld worden. Zo blijft de tekst leesbaar
-  const treatedSlots = slots.map((c) => treat(c, effects.water, effects.houtskool))
-  const shift = 0.06 * effects.water - 0.07 * effects.houtskool
-  const treated = spread(random, treatedSlots, roles, dark, !mud, shift)
+  const placed = spread(random, slots, roles, dark, !mud, 0)
   const corked = roles.map((_, i) => Boolean(corks[i]))
-  let swatches: Swatch[] = treated.map((c, i) => ({ hex: corks[i] ?? toHex(c), role: roles[i] }))
+  const base: Swatch[] = placed.map((c, i) => ({ hex: corks[i] ?? toHex(c), role: roles[i] }))
+  // Water en houtskool werken daarna op het palet zoals het al was. Kleuren onder een kurk blijven staan
+  let swatches: Swatch[] = base.map((s, i) => (corked[i] || (effects.water === 0 && effects.houtskool === 0) ? s : { ...s, hex: toHex(treat(fromHex(s.hex), effects.water, effects.houtskool)) }))
 
   let pinched: Brew['pinch'] = null
   if (effects.contrast > 0) {
@@ -260,6 +271,7 @@ export function brew({ ingredients, stirs, size, corks = [] }: BrewInput): Brew 
 
   return {
     swatches,
+    base,
     corked,
     seed,
     homogeneity: h,

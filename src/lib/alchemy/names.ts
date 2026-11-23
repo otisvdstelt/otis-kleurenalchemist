@@ -23,8 +23,9 @@ const capital = (text: string) => text.charAt(0).toUpperCase() + text.slice(1)
 
 /** Waar het palet het meest naar neigt */
 export function moodOf(brew: Brew): Mood[] {
-  const accents = brew.swatches.filter((s) => s.role === 'accent' || s.role === 'signaal').map((s) => fromHex(s.hex))
-  const all = accents.length ? accents : brew.swatches.map((s) => fromHex(s.hex))
+  // Het palet van de menging zelf: water, houtskool en een snuifje veranderen de naam niet
+  const accents = brew.base.filter((s) => s.role === 'accent' || s.role === 'signaal').map((s) => fromHex(s.hex))
+  const all = accents.length ? accents : brew.base.map((s) => fromHex(s.hex))
   const chroma = all.reduce((sum, c) => sum + c.c, 0) / all.length
   const light = all.reduce((sum, c) => sum + c.l, 0) / all.length
   const warmish = all.filter((c) => c.c > 0.03 && (c.h < 100 || c.h > 330)).length
