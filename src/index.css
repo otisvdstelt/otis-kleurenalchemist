@@ -896,7 +896,7 @@
     position: relative;
     display: grid;
     justify-items: center;
-    padding: 0.4rem 0 2.6rem;
+    padding: 0.4rem 0 0;
   }
 
   .flesje-glas {
@@ -920,13 +920,9 @@
   }
 
   .flesje-etiket {
-    position: absolute;
-    top: 86%;
-    left: 50%;
     display: grid;
-    max-width: 12rem;
-    margin: 0;
-    translate: -50% 0;
+    max-width: 13rem;
+    margin: -2.2rem 0 0;
     rotate: -3deg;
   }
 
@@ -1352,6 +1348,15 @@
     scrollbar-width: thin;
     scrollbar-color: var(--color-rule) transparent;
     padding: 1rem 1.3rem 1.4rem;
+  }
+
+  /* Bij de plank horen de kast en de ketel even niet in beeld */
+  .papier[data-uitzicht='plank'] :is(.kast, .haard, .ketel) {
+    visibility: hidden;
+  }
+
+  .kop-uitzicht {
+    rotate: -1deg;
   }
 
   .toonbank-boven {

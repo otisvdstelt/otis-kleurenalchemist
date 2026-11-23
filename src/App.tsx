@@ -6,7 +6,7 @@ import { Kast } from './components/ui/Kast'
 import { Ketel } from './components/ui/Ketel'
 import { Borrelend, Kolfje } from './components/ui/Kolfje'
 import { Nieuws } from './components/ui/Nieuws'
-import type { CauldronOnScreen } from './components/World'
+import type { CauldronOnScreen, View } from './components/World'
 import { strings } from './content/strings'
 import { useIngredients } from './hooks/useIngredients'
 import { canPaint, isModest, useMediaQuery } from './hooks/useLayout'
@@ -36,6 +36,7 @@ export default function App() {
   const [failed, setFailed] = useState(false)
   const [onScreen, setOnScreen] = useState<CauldronOnScreen | null>(null)
   const [flaskOpen, setFlaskOpen] = useState(true)
+  const [view, setView] = useState<View>('werkplaats')
   const reducedMotion = useMediaQuery('(prefers-reduced-motion: reduce)')
   const hasFlask = useAlchemy((s) => s.flask !== null)
   const ingredients = useIngredients()
@@ -49,7 +50,11 @@ export default function App() {
 
   // Na het bottelen gaat de aandacht naar het flesje
   const poured = useCallback(() => {
-    setFlaskOpen(true)
+    // In de werkplaats wacht het vel even tot het flesje vol is gelopen, zodat je het inschenken ziet
+    if (painted && !reducedMotion) {
+      setFlaskOpen(false)
+      window.setTimeout(() => setFlaskOpen(true), 2300)
+    } else setFlaskOpen(true)
     // Wacht tot het flesje getekend is, anders klopt de hoogte nog niet
     requestAnimationFrame(() => {
       const flask = flaskRef.current
@@ -70,18 +75,18 @@ export default function App() {
   }, [])
 
   return (
-    <div className="papier" data-wereld={painted}>
+    <div className="papier" data-wereld={painted} data-uitzicht={painted ? view : undefined}>
       <PaperFilters />
       {painted && (
         <div className="wereld">
           <Unpaintable onFail={fail}>
             <Suspense fallback={<Borrelend />}>
-              <World phase={phase} reducedMotion={reducedMotion} modest={modest} onReady={() => undefined} onCauldron={setOnScreen} />
+              <World phase={phase} view={view} reducedMotion={reducedMotion} modest={modest} onReady={() => undefined} onCauldron={setOnScreen} />
             </Suspense>
           </Unpaintable>
         </div>
       )}
-      <Header phase={phase} onPhase={choosePhase} />
+      <Header phase={phase} onPhase={choosePhase} view={painted ? view : undefined} onView={setView} />
       {failed && <p className="mislukt slip paper hand">{strings.wereld.mislukt}</p>}
       <main className="tafel">
         <Kast ingredients={ingredients.data} failed={ingredients.isError} />
