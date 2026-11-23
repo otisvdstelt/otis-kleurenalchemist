@@ -207,7 +207,7 @@ export const strings = {
   },
   plank: {
     kop: 'De plank',
-    leeg: 'Nog niks op de plank. Een flesje zet je erop vanaf de toonbank.',
+    leeg: 'Nog niks op de plank. Een flesje zet je erop met "Op de plank", onder het flesje.',
     zetErop: 'Op de plank',
     staatErop: 'staat op de plank',
     open: (naam: string) => `Pak ${naam} van de plank`,
