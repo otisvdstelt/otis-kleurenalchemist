@@ -58,7 +58,7 @@ export const Flesje = forwardRef<HTMLElement, FlesjeProps>(function Flesje({ onC
   }
 
   const again = () => {
-    store.stir(1)
+    store.reroll()
     store.pour()
   }
 

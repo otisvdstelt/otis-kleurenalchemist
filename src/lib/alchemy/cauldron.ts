@@ -13,6 +13,10 @@ export interface Cauldron {
   size: number
   /** Kleuren onder een kurk, per plek in het palet */
   corks: (Hex | null)[]
+  /** Hoe vaak er opnieuw geroerd is. Alleen dat trekt een nieuw palet, gewoon roeren maakt het gladder */
+  reroll: number
+  /** De seed van een recept uit een flesje, zolang er niks aan veranderd is */
+  seed: number | null
 }
 
 export type CauldronAction =
@@ -20,29 +24,41 @@ export type CauldronAction =
   /** Afscheppen: het laatste ingrediënt gaat er weer uit */
   | { type: 'skim' }
   | { type: 'stir'; strokes?: number }
+  /** Roer opnieuw: een nieuwe trekking, met de kurken nog op hun plek */
+  | { type: 'reroll' }
   | { type: 'size'; size: number }
   | { type: 'cork'; index: number; hex: Hex | null }
   | { type: 'empty' }
-  | { type: 'load'; items: string[]; stirs: number; size: number }
+  | { type: 'load'; items: string[]; stirs: number; size: number; seed?: number }
+  /** Eén van dit ingrediënt eruit, het laatst toegevoegde */
+  | { type: 'remove'; id: string }
 
-export const emptyCauldron = (size = DEFAULT_SIZE): Cauldron => ({ items: [], stirs: 0, size: clampSize(size), corks: [] })
+export const emptyCauldron = (size = DEFAULT_SIZE): Cauldron => ({ items: [], stirs: 0, size: clampSize(size), corks: [], reroll: 0, seed: null })
 
 export function cauldron(state: Cauldron, action: CauldronAction): Cauldron {
   switch (action.type) {
     case 'add':
       if (state.items.length >= MAX_ITEMS) return state
       // Iets nieuws erin is nog niet doorgeroerd
-      return { ...state, items: [...state.items, action.id], stirs: 0 }
+      return { ...state, items: [...state.items, action.id], stirs: 0, seed: null }
     case 'skim':
       if (state.items.length === 0) return state
-      return { ...state, items: state.items.slice(0, -1) }
+      return { ...state, items: state.items.slice(0, -1), seed: null }
+    case 'remove': {
+      const at = state.items.lastIndexOf(action.id)
+      if (at < 0) return state
+      return { ...state, items: state.items.filter((_, i) => i !== at), seed: null }
+    }
+    case 'reroll':
+      if (state.items.length === 0) return state
+      return { ...state, reroll: state.reroll + 1, stirs: state.stirs + 1, seed: null }
     case 'stir':
       if (state.items.length === 0) return state
       return { ...state, stirs: state.stirs + Math.max(1, Math.round(action.strokes ?? 1)) }
     case 'size': {
       const size = clampSize(action.size)
       // Een andere grootte geeft andere rollen, dus de kurken gaan eraf
-      return size === state.size ? state : { ...state, size, corks: [] }
+      return size === state.size ? state : { ...state, size, corks: [], seed: null }
     }
     case 'cork': {
       if (action.index < 0 || action.index >= state.size) return state
@@ -53,6 +69,6 @@ export function cauldron(state: Cauldron, action: CauldronAction): Cauldron {
     case 'empty':
       return emptyCauldron(state.size)
     case 'load':
-      return { items: action.items.slice(0, MAX_ITEMS), stirs: Math.max(0, Math.round(action.stirs)), size: clampSize(action.size), corks: [] }
+      return { items: action.items.slice(0, MAX_ITEMS), stirs: Math.max(0, Math.round(action.stirs)), size: clampSize(action.size), corks: [], reroll: 0, seed: action.seed ?? null }
   }
 }

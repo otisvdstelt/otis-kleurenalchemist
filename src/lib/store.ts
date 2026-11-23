@@ -94,7 +94,7 @@ let cache: { cauldron: Cauldron; catalogue: State['catalogue']; photos: State['p
 /** Wat er nu in de ketel zit, als palet. Null als er nog geen kleur in zit */
 export function currentBrew(s: State = state): Brew | null {
   if (cache && cache.cauldron === s.cauldron && cache.catalogue === s.catalogue && cache.photos === s.photos) return cache.brew
-  const result = brew({ ingredients: ingredientsIn(s), stirs: s.cauldron.stirs, size: s.cauldron.size, corks: s.cauldron.corks })
+  const result = brew({ ingredients: ingredientsIn(s), stirs: s.cauldron.stirs, size: s.cauldron.size, corks: s.cauldron.corks, reroll: s.cauldron.reroll, seed: s.cauldron.seed ?? undefined })
   cache = { cauldron: s.cauldron, catalogue: s.catalogue, photos: s.photos, brew: result }
   return result
 }
@@ -156,6 +156,21 @@ export const store = {
     })
   },
 
+  /** Roer opnieuw: een nieuwe trekking. Kleuren onder een kurk blijven staan */
+  reroll() {
+    const cauldron = apply({ type: 'reroll' })
+    if (cauldron === state.cauldron) return
+    set({ cauldron, stir: { at: now(), strokes: 2 } })
+  },
+
+  /** Eén van dit ingrediënt eruit */
+  removeOne(id: string) {
+    const ingredient = state.photos[id] ?? state.catalogue?.find((i) => i.id === id)
+    const cauldron = apply({ type: 'remove', id })
+    if (cauldron === state.cauldron) return
+    set({ cauldron, ...say(strings.nieuws.eruit(capital(ingredient?.name ?? id))) })
+  },
+
   size(size: number) {
     const cauldron = apply({ type: 'size', size })
     if (cauldron !== state.cauldron) set({ cauldron, ...say(strings.nieuws.grootte(cauldron.size)) })
@@ -207,7 +222,7 @@ export const store = {
     const items = ingredientsOf(bottle.recipe, state.catalogue ?? [], { name: strings.namen.photo, label: strings.foto.etiket })
       .map((i) => i.id)
       .filter((id) => known.has(id))
-    set({ photos, cauldron: step(state.cauldron, { type: 'load', items, stirs: bottle.recipe.stirs, size: bottle.recipe.size }), ...say(strings.nieuws.verder(bottle.name)) })
+    set({ photos, cauldron: step(state.cauldron, { type: 'load', items, stirs: bottle.recipe.stirs, size: bottle.recipe.size, seed: bottle.recipe.seed }), ...say(strings.nieuws.verder(bottle.name)) })
   },
 
   /** Zet het flesje op de plank. Hetzelfde flesje komt er niet twee keer op */

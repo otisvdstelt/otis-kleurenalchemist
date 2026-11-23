@@ -5,7 +5,7 @@ const run = (...actions: CauldronAction[]): Cauldron => actions.reduce(cauldron,
 
 describe('cauldron', () => {
   it('begint leeg, met vijf kleuren', () => {
-    expect(emptyCauldron()).toEqual({ items: [], stirs: 0, size: 5, corks: [] })
+    expect(emptyCauldron()).toEqual({ items: [], stirs: 0, size: 5, corks: [], reroll: 0, seed: null })
   })
 
   it('iets erin gooien zet het roeren terug op nul', () => {
@@ -46,6 +46,19 @@ describe('cauldron', () => {
 
   it('leegmaken houdt de grootte, laden zet een recept terug', () => {
     expect(run({ type: 'size', size: 6 }, { type: 'add', id: 'mos' }, { type: 'empty' })).toEqual(emptyCauldron(6))
-    expect(run({ type: 'load', items: ['mos', 'klei'], stirs: 7, size: 4 })).toEqual({ items: ['mos', 'klei'], stirs: 7, size: 4, corks: [] })
+    expect(run({ type: 'load', items: ['mos', 'klei'], stirs: 7, size: 4, seed: 99 })).toEqual({ items: ['mos', 'klei'], stirs: 7, size: 4, corks: [], reroll: 0, seed: 99 })
+  })
+
+  it('opnieuw roeren telt op, en een verandering laat de vaste seed los', () => {
+    const loaded = run({ type: 'load', items: ['mos'], stirs: 2, size: 5, seed: 7 })
+    expect(cauldron(loaded, { type: 'stir' }).seed).toBe(7)
+    expect(cauldron(loaded, { type: 'reroll' })).toMatchObject({ reroll: 1, seed: null })
+    expect(cauldron(loaded, { type: 'add', id: 'klei' }).seed).toBeNull()
+  })
+
+  it('haalt één van een ingrediënt eruit, het laatst toegevoegde', () => {
+    const state = run({ type: 'add', id: 'mos' }, { type: 'add', id: 'klei' }, { type: 'add', id: 'mos' })
+    expect(cauldron(state, { type: 'remove', id: 'mos' }).items).toEqual(['mos', 'klei'])
+    expect(cauldron(state, { type: 'remove', id: 'neon' })).toBe(state)
   })
 })
