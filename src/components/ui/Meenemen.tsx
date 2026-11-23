@@ -5,6 +5,7 @@ import { toAse, toCss, toDesignTokens, toJson, toSvg, toTailwind } from '../../l
 import { encodeBottle } from '../../lib/alchemy/share'
 import { store } from '../../lib/store'
 import { bottlePng, download, fileName } from './png'
+import { ZelfKopieren } from './ZelfKopieren'
 
 /** De link naar een flesje: de kleuren zitten er zelf in */
 const bottleLink = (bottle: Bottle) => `${window.location.origin}/fles/${encodeBottle(bottle)}`
@@ -21,6 +22,7 @@ async function copy(text: string): Promise<boolean> {
 /** Het palet mee naar buiten: als link, als CSS of Tailwind, als JSON of als plaatje */
 export function Meenemen({ bottle }: { bottle: Bottle }) {
   const [note, setNote] = useState<{ at: string; text: string } | null>(null)
+  const [fallback, setFallback] = useState<string | null>(null)
   // Een handgeschreven bevestiging, die na een tel weer verdwijnt
   useEffect(() => {
     if (!note) return
@@ -51,7 +53,16 @@ export function Meenemen({ bottle }: { bottle: Bottle }) {
         {strings.delen.kop}
       </h3>
       <div className="meenemen-link">
-        <button type="button" className="inked" onClick={async () => confirm('link', await copy(bottleLink(bottle)), strings.delen.link)}>
+        <button
+          type="button"
+          className="inked"
+          onClick={async () => {
+            const link = bottleLink(bottle)
+            const ok = await copy(link)
+            setFallback(ok ? null : link)
+            confirm('link', ok, strings.delen.link)
+          }}
+        >
           {strings.delen.link}
         </button>
         {canShare && (
@@ -65,6 +76,7 @@ export function Meenemen({ bottle }: { bottle: Bottle }) {
           </span>
         )}
       </div>
+      {fallback && <ZelfKopieren link={fallback} />}
       <p className="meenemen-uitleg">{strings.delen.linkUitleg}</p>
       <p className="meenemen-uitleg">{strings.delen.perKleur}</p>
       <ul className="meenemen-rij">
