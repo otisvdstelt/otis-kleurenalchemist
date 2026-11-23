@@ -211,3 +211,20 @@ export function readRoute(pathname: string, hash = ''): Route {
   const match = (pathname.match(/^\/(fles|plank)\/([A-Za-z0-9_-]+)\/?$/) ?? hash.match(/^#\/?(fles|plank)\/([A-Za-z0-9_-]+)$/)) as [string, 'fles' | 'plank', string] | null
   return match ? { kind: match[1], code: match[2] } : { kind: 'werkplaats' }
 }
+
+/**
+ * Haal de code uit wat iemand plakt: een hele link (van welke site dan ook), een pad, of de code zelf.
+ * Zo leest de Letterzetterij een flesjeslink van hier, en andersom
+ */
+export function codeFromLink(text: string): { kind: 'fles' | 'plank'; code: string } | null {
+  const trimmed = text.trim()
+  const match = trimmed.match(/(?:^|\/|#\/?)(fles|plank)\/([A-Za-z0-9_-]+)\/?(?:[?#].*)?$/)
+  if (match) return { kind: match[1] as 'fles' | 'plank', code: match[2] }
+  return /^[A-Za-z0-9_-]{8,}$/.test(trimmed) ? { kind: 'fles', code: trimmed } : null
+}
+
+/** De rollen van een flesje als inkt en papier, zoals de Letterzetterij ze gebruikt */
+export function inkAndPaper(bottle: Bottle): { inkt: string; papier: string; tweedeInkt: string | null } {
+  const find = (role: string) => bottle.swatches.find((s) => s.role === role)?.hex ?? null
+  return { inkt: find('tekst') ?? '#000000', papier: find('achtergrond') ?? '#ffffff', tweedeInkt: find('accent') }
+}

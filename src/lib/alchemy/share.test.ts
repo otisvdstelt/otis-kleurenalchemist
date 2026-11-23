@@ -4,7 +4,7 @@ import { strings } from '../../content/strings'
 import { bottle, ingredientsOf, type Bottle } from './bottle.ts'
 import { photoIngredient, parseIngredients } from './ingredients.ts'
 import { brew } from './mix.ts'
-import { decodeBottle, decodeShelf, encodeBottle, encodeShelf, fromBase64Url, readRoute, toBase64Url } from './share.ts'
+import { codeFromLink, decodeBottle, decodeShelf, encodeBottle, encodeShelf, fromBase64Url, inkAndPaper, readRoute, toBase64Url } from './share.ts'
 
 const shelf = parseIngredients(JSON.parse(readFileSync(new URL('../../../public/data/ingredients.json', import.meta.url), 'utf8')))
 const take = (...ids: string[]) => ids.map((id) => shelf.find((i) => i.id === id)!)
@@ -110,5 +110,20 @@ describe('readRoute', () => {
     expect(readRoute('/')).toEqual({ kind: 'werkplaats' })
     expect(readRoute('/fles/')).toEqual({ kind: 'werkplaats' })
     expect(readRoute('/fles/a b')).toEqual({ kind: 'werkplaats' })
+  })
+})
+
+describe('samen met de Letterzetterij', () => {
+  it('leest een geplakte link, van welke site ook', () => {
+    expect(codeFromLink('https://kleurenalchemist.vercel.app/fles/AQXv9NoA?x=1')).toEqual({ kind: 'fles', code: 'AQXv9NoA' })
+    expect(codeFromLink('  https://letterzetterij.example/plank/AQ-_x/  ')).toEqual({ kind: 'plank', code: 'AQ-_x' })
+    expect(codeFromLink('/fles/abc123')).toEqual({ kind: 'fles', code: 'abc123' })
+    expect(codeFromLink('AQXv9NoAtuPI')).toEqual({ kind: 'fles', code: 'AQXv9NoAtuPI' })
+    expect(codeFromLink('gewoon wat tekst')).toBeNull()
+  })
+
+  it('maakt van een flesje inkt, papier en een tweede inkt', () => {
+    const v1 = 'AQXv9NoAtuPIAQwmAAKmZi4DTXgaBAxNb3MgbmEgcmVnZW7WEwYF0yKz5AMAA21vcwAFa29wZXIACGNvbnRyYXN0'
+    expect(inkAndPaper(decodeBottle(v1)!)).toEqual({ inkt: '#0c2600', papier: '#eff4da', tweedeInkt: '#a6662e' })
   })
 })
