@@ -61,6 +61,15 @@ export function ingredientsIn(s: State = state): Ingredient[] {
   })
 }
 
+let inCache: { items: Cauldron['items']; catalogue: State['catalogue']; photos: State['photos']; list: Ingredient[] } | null = null
+/** Hetzelfde als ingredientsIn, maar steeds dezelfde lijst zolang er niks verandert. Voor in een hook */
+export function currentIngredients(s: State = state): Ingredient[] {
+  if (inCache && inCache.items === s.cauldron.items && inCache.catalogue === s.catalogue && inCache.photos === s.photos) return inCache.list
+  const list = ingredientsIn(s)
+  inCache = { items: s.cauldron.items, catalogue: s.catalogue, photos: s.photos, list }
+  return list
+}
+
 // Het brouwsel wordt pas opnieuw berekend als de ketel, de kast of de foto's veranderen
 let cache: { cauldron: Cauldron; catalogue: State['catalogue']; photos: State['photos']; brew: Brew | null } | null = null
 /** Wat er nu in de ketel zit, als palet. Null als er nog geen kleur in zit */
@@ -85,6 +94,11 @@ export const store = {
     return () => {
       listeners.delete(listener)
     }
+  },
+
+  /** Zeg iets hardop via de aria-live-regio */
+  say(text: string) {
+    set(say(text))
   },
 
   setCatalogue(catalogue: readonly Ingredient[]) {
