@@ -88,6 +88,19 @@ export default function App() {
     return () => window.removeEventListener('popstate', follow)
   }, [])
 
+  // Ctrl of Cmd met Z maakt de laatste verandering aan de ketel ongedaan, behalve in een veld
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (!(event.ctrlKey || event.metaKey) || event.key.toLowerCase() !== 'z' || event.shiftKey) return
+      const target = event.target as HTMLElement | null
+      if (target?.closest('input, textarea, select, [contenteditable="true"]')) return
+      event.preventDefault()
+      store.undo()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
+
   /** Het flesje wegleggen: terug in de geschiedenis als het daar vandaan kwam, anders het adres terugzetten */
   const putAway = useCallback(() => {
     // Alleen terug als wij het flesje zelf in de geschiedenis zetten. Een gedeelde link is de eerste pagina

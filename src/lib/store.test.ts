@@ -32,6 +32,32 @@ describe('store', () => {
     expect(store.get().news?.text).toBe('Inkt afgeschept.')
   })
 
+  it('maakt ongedaan, en een reeks slagen telt als één stap', () => {
+    store.empty()
+    store.add('mos')
+    store.add('klei')
+    store.stir(1)
+    store.stir(1)
+    store.stir(1)
+    expect(store.get().cauldron.stirs).toBe(3)
+    store.undo()
+    expect(store.get().cauldron).toMatchObject({ items: ['mos', 'klei'], stirs: 0 })
+    store.undo()
+    expect(store.get().cauldron.items).toEqual(['mos'])
+  })
+
+  it('onthoudt de laatste vijf flesjes, nieuwste eerst', () => {
+    store.empty()
+    for (const id of ['mos', 'klei', 'neon', 'inkt', 'as', 'citroen']) {
+      store.empty()
+      store.add(id)
+      store.pour()
+    }
+    const recent = store.get().recent
+    expect(recent).toHaveLength(5)
+    expect(recent[0].recipe.items[0].id).toBe('citroen')
+  })
+
   it('negeert wat niet in de kast staat', () => {
     store.empty()
     store.add('drakenbloed')

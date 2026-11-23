@@ -27,6 +27,7 @@ export function Ketel({ onPoured, onScreen }: KetelProps) {
   const inside = useAlchemy(currentIngredients)
   const boil = boilState(inside.filter((i) => !isSpecial(i)).length)
   const fast = useRecent(stirredAt, 1400)
+  const canUndo = useAlchemy((s) => s.past.length > 0)
   const circling = useRef<{ angle: number; turned: number } | null>(null)
   // De eerste keer dat er iets in de ketel zit, staat erbij hoe je roert. Na de eerste slag nooit meer
   const [hintedBefore] = useState(readHinted)
@@ -158,6 +159,11 @@ export function Ketel({ onPoured, onScreen }: KetelProps) {
         <button type="button" className="quiet" disabled={inside.length === 0} onClick={() => store.empty()}>
           {strings.ketel.legen}
         </button>
+        {canUndo && (
+          <button type="button" className="quiet" aria-keyshortcuts="Control+Z Meta+Z" onClick={() => store.undo()}>
+            {strings.ketel.ongedaan}
+          </button>
+        )}
       </div>
 
       <fieldset className="grootte">

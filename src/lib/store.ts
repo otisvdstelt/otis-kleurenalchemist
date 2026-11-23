@@ -41,6 +41,10 @@ export interface State {
   /** Het laatst gevulde flesje */
   flask: Flask | null
   shelf: readonly Bottle[]
+  /** Hoe de ketel eerder was, voor ongedaan maken. Nieuwste achteraan */
+  past: readonly Cauldron[]
+  /** De laatste vijf flesjes die uit de ketel kwamen, nieuwste eerst */
+  recent: readonly Bottle[]
   /** Een plank uit een gedeelde link, om te bekijken en eventueel over te nemen */
   visiting: readonly Bottle[] | null
   /** Het laatste fotokaartje */
@@ -57,6 +61,8 @@ let state: State = {
   cauldron: emptyCauldron(),
   flask: null,
   shelf: typeof window === 'undefined' ? [] : readShelf(),
+  past: [],
+  recent: [],
   visiting: null,
   photoDrop: null,
   news: null,
@@ -107,6 +113,18 @@ function apply(action: CauldronAction): Cauldron {
   return step(state.cauldron, action)
 }
 
+const PAST = 25
+let lastStirAt = -Infinity
+/** Onthoud hoe de ketel was, vóór een verandering. Een reeks slagen achter elkaar telt als één stap */
+function remember(next: Cauldron, stirring = false): Pick<State, 'past'> | Record<string, never> {
+  if (next === state.cauldron) return {}
+  const t = now()
+  const coalesce = stirring && t - lastStirAt < 1500
+  lastStirAt = stirring ? t : -Infinity
+  if (coalesce) return {}
+  return { past: [...state.past, state.cauldron].slice(-PAST) }
+}
+
 export const store = {
   get: () => state,
   subscribe(listener: () => void) {
@@ -135,7 +153,7 @@ export const store = {
     const after = { ...state, cauldron }
     const boil = boilState(colourCount(after))
     const warning = boil !== before && boil === 'onrustig' ? ` ${strings.nieuws.onrustig}` : boil !== before && boil === 'overkoken' ? ` ${strings.nieuws.overkookt}` : ''
-    set({ cauldron, ...say(strings.nieuws.erin(capital(plainName(ingredient)), cauldron.items.length) + warning) })
+    set({ cauldron, ...remember(cauldron), ...say(strings.nieuws.erin(capital(plainName(ingredient)), cauldron.items.length) + warning) })
   },
 
   /** Afscheppen: het laatste ingrediënt gaat er weer uit */
@@ -143,7 +161,7 @@ export const store = {
     const last = ingredientsIn().at(-1)
     const cauldron = apply({ type: 'skim' })
     if (cauldron === state.cauldron) return
-    set({ cauldron, ...say(strings.nieuws.eruit(capital(last ? plainName(last) : ''))) })
+    set({ cauldron, ...remember(cauldron), ...say(strings.nieuws.eruit(capital(last ? plainName(last) : ''))) })
   },
 
   stir(strokes = 1) {
@@ -152,6 +170,7 @@ export const store = {
     const result = currentBrew({ ...state, cauldron })
     set({
       cauldron,
+      ...remember(cauldron, true),
       stir: { at: now(), strokes },
       ...say(strings.nieuws.geroerd(strings.ketel.slagen(cauldron.stirs), strings.ketel.glad(result?.homogeneity ?? 0))),
     })
@@ -169,14 +188,14 @@ export const store = {
     }
     let cauldron = step(emptyCauldron(state.cauldron.size), { type: 'load', items: picked.map((i) => i.id), stirs: 2 + Math.floor(Math.random() * 10), size: state.cauldron.size })
     cauldron = { ...cauldron, seed: null, reroll: Math.floor(Math.random() * 1000) }
-    set({ cauldron, stir: { at: now(), strokes: 3 }, ...say(strings.nieuws.verrast(picked.map(plainName))) })
+    set({ cauldron, ...remember(cauldron), stir: { at: now(), strokes: 3 }, ...say(strings.nieuws.verrast(picked.map(plainName))) })
   },
 
   /** Roer opnieuw: een nieuwe trekking. Kleuren onder een kurk blijven staan */
   reroll() {
     const cauldron = apply({ type: 'reroll' })
     if (cauldron === state.cauldron) return
-    set({ cauldron, stir: { at: now(), strokes: 2 } })
+    set({ cauldron, ...remember(cauldron), stir: { at: now(), strokes: 2 } })
   },
 
   /** Eén van dit ingrediënt eruit */
@@ -184,12 +203,12 @@ export const store = {
     const ingredient = state.photos[id] ?? state.catalogue?.find((i) => i.id === id)
     const cauldron = apply({ type: 'remove', id })
     if (cauldron === state.cauldron) return
-    set({ cauldron, ...say(strings.nieuws.eruit(capital(ingredient ? plainName(ingredient) : id))) })
+    set({ cauldron, ...remember(cauldron), ...say(strings.nieuws.eruit(capital(ingredient ? plainName(ingredient) : id))) })
   },
 
   size(size: number) {
     const cauldron = apply({ type: 'size', size })
-    if (cauldron !== state.cauldron) set({ cauldron, ...say(strings.nieuws.grootte(cauldron.size)) })
+    if (cauldron !== state.cauldron) set({ cauldron, ...remember(cauldron), ...say(strings.nieuws.grootte(cauldron.size)) })
   },
 
   /** Kurk erop of eraf. Een kleur onder een kurk blijft staan als je opnieuw roert */
@@ -198,11 +217,12 @@ export const store = {
     if (cauldron === state.cauldron) return
     const swatches = state.flask?.bottle.swatches ?? currentBrew()?.swatches ?? []
     const rol = swatches[index] ? strings.fles.rol(swatches[index].role, roleNumber(swatches, index)) : ''
-    set({ cauldron, ...say(strings.nieuws.kurk(rol, hex !== null)) })
+    set({ cauldron, ...remember(cauldron), ...say(strings.nieuws.kurk(rol, hex !== null)) })
   },
 
   empty() {
-    set({ cauldron: apply({ type: 'empty' }), ...say(strings.nieuws.geleegd) })
+    const cauldron = apply({ type: 'empty' })
+    set({ cauldron, ...remember(cauldron), ...say(strings.nieuws.geleegd) })
   },
 
   /** Schenk de ketel in een flesje, met een naam op het etiket */
@@ -214,7 +234,8 @@ export const store = {
     const bottle = fill(result, ingredients, state.cauldron.stirs, state.cauldron.size, name)
     const flask: Flask = { bottle, brew: result, from: 'ketel' }
     const readable = checkPalette(bottle.swatches).every((c) => c.passes)
-    set({ flask, ...say(strings.nieuws.gebotteld(name, bottle.swatches.length, readable)) })
+    const recent = [bottle, ...state.recent.filter((b) => encodeBottle(b) !== encodeBottle(bottle))].slice(0, 5)
+    set({ flask, recent, ...say(strings.nieuws.gebotteld(name, bottle.swatches.length, readable)) })
     return flask
   },
 
@@ -254,6 +275,14 @@ export const store = {
     })
   },
 
+  /** Maak de laatste verandering aan de ketel ongedaan */
+  undo() {
+    const previous = state.past.at(-1)
+    if (!previous) return
+    lastStirAt = -Infinity
+    set({ cauldron: previous, past: state.past.slice(0, -1), ...say(strings.nieuws.ongedaan) })
+  },
+
   /** Leg het flesje weg */
   close() {
     if (state.flask) set({ flask: null })
@@ -267,7 +296,8 @@ export const store = {
     const items = ingredientsOf(bottle.recipe, state.catalogue ?? [], { name: strings.namen.photo, label: strings.foto.etiket })
       .map((i) => i.id)
       .filter((id) => known.has(id))
-    set({ photos, cauldron: step(state.cauldron, { type: 'load', items, stirs: bottle.recipe.stirs, size: bottle.recipe.size, seed: bottle.recipe.seed }), ...say(strings.nieuws.verder(bottle.name)) })
+    const cauldron = step(state.cauldron, { type: 'load', items, stirs: bottle.recipe.stirs, size: bottle.recipe.size, seed: bottle.recipe.seed })
+    set({ photos, cauldron, ...remember(cauldron), ...say(strings.nieuws.verder(bottle.name)) })
   },
 
   /** Zet het flesje op de plank. Hetzelfde flesje komt er niet twee keer op */

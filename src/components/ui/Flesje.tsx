@@ -5,6 +5,7 @@ import { roleNumber } from '../../lib/alchemy/palette'
 import { encodeBottle } from '../../lib/alchemy/share'
 import { store, useAlchemy } from '../../lib/store'
 import { Contrastcheck } from './Contrastcheck'
+import { Eerder } from './Eerder'
 import { Fles } from './Fles'
 import { Meenemen } from './Meenemen'
 import { Monocle } from './Monocle'
@@ -34,6 +35,7 @@ export const Flesje = forwardRef<HTMLElement, FlesjeProps>(function Flesje({ onC
           {strings.fles.kop}
         </h2>
         <p className="toonbank-leeg slip paper hand">{strings.fles.leeg}</p>
+        <Eerder />
       </section>
     )
   }
@@ -195,6 +197,8 @@ export const Flesje = forwardRef<HTMLElement, FlesjeProps>(function Flesje({ onC
       <Monocle swatches={swatches} />
 
       <Meenemen bottle={bottle} />
+
+      <Eerder />
     </section>
   )
 })
