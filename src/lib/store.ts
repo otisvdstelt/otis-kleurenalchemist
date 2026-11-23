@@ -214,6 +214,11 @@ export const store = {
     set({ flask: { bottle, brew: null, from }, ...say(strings.nieuws.geopend(bottle.name, bottle.swatches.length)) })
   },
 
+  /** Leg het flesje weg */
+  close() {
+    if (state.flask) set({ flask: null })
+  },
+
   /** Zet het recept van een flesje terug in de ketel, om ermee verder te brouwen */
   continueFrom(bottle: Bottle) {
     const photos = { ...state.photos }

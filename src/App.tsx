@@ -14,7 +14,7 @@ import { useIngredients } from './hooks/useIngredients'
 import { usePhotoIntake } from './hooks/usePhotoIntake'
 import { canPaint, isModest, useMediaQuery } from './hooks/useLayout'
 import { keepPhase, readPhase, type Phase } from './lib/air'
-import { decodeBottle, decodeShelf, readRoute, type Route } from './lib/alchemy/share'
+import { decodeBottle, decodeShelf, encodeBottle, readRoute, type Route } from './lib/alchemy/share'
 import { store, useAlchemy } from './lib/store'
 
 // three.js en alles wat erbij hoort komt in een eigen chunk, zodat de papieren laag eerst staat
@@ -39,6 +39,7 @@ export default function App() {
   const [painted, setPainted] = useState(canPaint)
   // Een gedeelde link wordt één keer gelezen, bij het openen
   const [route] = useState<Route>(() => readRoute(window.location.pathname, window.location.hash))
+  const flask = useAlchemy((s) => s.flask)
   const [failed, setFailed] = useState(false)
   const [onScreen, setOnScreen] = useState<CauldronOnScreen | null>(null)
   const [flaskOpen, setFlaskOpen] = useState(true)
@@ -53,11 +54,50 @@ export default function App() {
       const bottles = decodeShelf(route.code)
       if (bottles) store.visit(bottles)
     }
-    // Daarna staat het adres weer gewoon op de werkplaats
-    if (route.kind !== 'werkplaats') window.history.replaceState(null, '', `/${window.location.search}`)
+    // Een gedeelde plank laat het adres los. Een flesje houdt het, zolang het open ligt
+    if (route.kind === 'plank') window.history.replaceState(null, '', `/${window.location.search}`)
+    if (route.kind === 'fles') window.history.replaceState({ fles: true }, '', window.location.pathname + window.location.search)
   }, [route])
+
+  // Zolang er een flesje open ligt, staat het in het adres: /fles/<code>. Terug in de browser legt het weer weg
+  const shown = flask !== null && (!painted || flaskOpen)
+  useEffect(() => {
+    if (!shown || !flask) return
+    const target = `/fles/${encodeBottle(flask.bottle)}${window.location.search}`
+    if (window.location.pathname + window.location.search === target) return
+    if (window.location.pathname.startsWith('/fles/')) window.history.replaceState({ fles: true }, '', target)
+    else window.history.pushState({ fles: true, gepusht: true }, '', target)
+  }, [shown, flask])
+
+  useEffect(() => {
+    const follow = () => {
+      const now = readRoute(window.location.pathname, window.location.hash)
+      if (now.kind === 'fles') {
+        const bottle = decodeBottle(now.code)
+        const current = store.get().flask
+        if (bottle && (!current || encodeBottle(current.bottle) !== now.code)) store.open(bottle, 'link')
+        setFlaskOpen(true)
+      } else {
+        setFlaskOpen(false)
+        store.close()
+      }
+    }
+    window.addEventListener('popstate', follow)
+    return () => window.removeEventListener('popstate', follow)
+  }, [])
+
+  /** Het flesje wegleggen: terug in de geschiedenis als het daar vandaan kwam, anders het adres terugzetten */
+  const putAway = useCallback(() => {
+    // Alleen terug als wij het flesje zelf in de geschiedenis zetten. Een gedeelde link is de eerste pagina
+    if ((window.history.state as { gepusht?: boolean } | null)?.gepusht) {
+      window.history.back()
+      return
+    }
+    setFlaskOpen(false)
+    window.history.replaceState(null, '', `/${window.location.search}`)
+  }, [])
   const reducedMotion = useMediaQuery('(prefers-reduced-motion: reduce)')
-  const hasFlask = useAlchemy((s) => s.flask !== null)
+  const hasFlask = flask !== null
   const ingredients = useIngredients()
   const flaskRef = useRef<HTMLElement>(null)
   const [modest] = useState(isModest)
@@ -112,7 +152,7 @@ export default function App() {
         <div className="tafel">
         <Kast ingredients={ingredients.data} failed={ingredients.isError} photo={<FotoKnop busy={intake.busy} onFile={(file) => void intake.take(file)} />} />
         <Ketel onPoured={poured} onScreen={painted ? onScreen : undefined} />
-        {(!painted || (hasFlask && flaskOpen)) && <Flesje ref={flaskRef} onClose={painted ? () => setFlaskOpen(false) : undefined} />}
+        {(!painted || (hasFlask && flaskOpen)) && <Flesje ref={flaskRef} onClose={painted ? putAway : undefined} />}
         {painted && hasFlask && !flaskOpen && (
           <button type="button" className="slip paper hand terug-naar-fles" onClick={() => setFlaskOpen(true)}>
             {strings.fles.terug}
