@@ -1763,6 +1763,14 @@
     border-radius: 50%;
   }
 
+  /* Zolang de werkplaats nog laadt: de getekende ketel, midden op het scherm */
+  .papier[data-wereld='true'] .ketel:not([data-wereld='true']) {
+    left: 50%;
+    top: 46%;
+    width: min(26rem, 62vw);
+    translate: -50% -50%;
+  }
+
   .papier[data-wereld='true'] .haard {
     position: absolute;
     display: flex;

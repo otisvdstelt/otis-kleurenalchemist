@@ -42,6 +42,8 @@ export default function App() {
   const flask = useAlchemy((s) => s.flask)
   const [failed, setFailed] = useState(false)
   const [onScreen, setOnScreen] = useState<CauldronOnScreen | null>(null)
+  // Tot de werkplaats er is, staat de getekende ketel in het midden. Zo is het midden nooit leeg
+  const [worldReady, setWorldReady] = useState(false)
   const [flaskOpen, setFlaskOpen] = useState(true)
   const [view, setView] = useState<View>(() => (route.kind === 'plank' ? 'plank' : 'werkplaats'))
   const intake = usePhotoIntake()
@@ -141,7 +143,7 @@ export default function App() {
         <div className="wereld" aria-hidden="true">
           <Unpaintable onFail={fail}>
             <Suspense fallback={<Borrelend />}>
-              <World phase={phase} view={view} reducedMotion={reducedMotion} modest={modest} onReady={() => undefined} onCauldron={setOnScreen} onOpenBottle={() => setFlaskOpen(true)} />
+              <World phase={phase} view={view} reducedMotion={reducedMotion} modest={modest} onReady={() => setWorldReady(true)} onCauldron={setOnScreen} onOpenBottle={() => setFlaskOpen(true)} />
             </Suspense>
           </Unpaintable>
         </div>
@@ -151,7 +153,7 @@ export default function App() {
       <main>
         <div className="tafel">
         <Kast ingredients={ingredients.data} failed={ingredients.isError} photo={<FotoKnop busy={intake.busy} onFile={(file) => void intake.take(file)} />} />
-        <Ketel onPoured={poured} onScreen={painted ? onScreen : undefined} />
+        <Ketel onPoured={poured} onScreen={painted && worldReady ? onScreen : undefined} />
         {(!painted || (hasFlask && flaskOpen)) && <Flesje ref={flaskRef} onClose={painted ? putAway : undefined} />}
         {painted && hasFlask && !flaskOpen && (
           <button type="button" className="slip paper hand terug-naar-fles" onClick={() => setFlaskOpen(true)}>
