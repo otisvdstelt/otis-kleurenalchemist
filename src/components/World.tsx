@@ -22,6 +22,8 @@ export interface WorldProps {
   modest: boolean
   onReady: () => void
   onCauldron: (where: CauldronOnScreen | null) => void
+  /** Er is een flesje van de plank gepakt */
+  onOpenBottle: () => void
 }
 
 // Wat elk soort apparaat moet tekenen
@@ -31,7 +33,7 @@ const BUDGET = {
 }
 
 /** De werkplaats in 3D. Alleen weergave: hij leest de store en stuurt intenties terug */
-export default function World({ phase, view, reducedMotion, modest, onReady, onCauldron }: WorldProps) {
+export default function World({ phase, view, reducedMotion, modest, onReady, onCauldron, onOpenBottle }: WorldProps) {
   const parts = useWorkshopModel()
   use(lettering)
   const budget = modest ? BUDGET.modest : BUDGET.full
@@ -62,7 +64,7 @@ export default function World({ phase, view, reducedMotion, modest, onReady, onC
         <CameraRig view={view} reducedMotion={reducedMotion} onCauldron={onCauldron} />
         <Atmosphere phase={phase} shadowSize={budget.shadow} />
         <Haze />
-        <Workshop reducedMotion={reducedMotion} />
+        <Workshop reducedMotion={reducedMotion} onOpenBottle={onOpenBottle} />
         <Pulse phase={phase} reducedMotion={reducedMotion} />
         <Reveal reducedMotion={reducedMotion} />
         <EffectComposer multisampling={0} enableNormalPass={false}>

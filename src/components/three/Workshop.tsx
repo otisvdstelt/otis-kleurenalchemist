@@ -11,11 +11,13 @@ import { Flask } from './Flask'
 import { FACES, LABEL_INK } from './look'
 import { glass, glow, shaft, windowGlow } from './materials'
 import { motion } from './motion'
+import { PhotoCard } from './PhotoCard'
 import { Piece } from './Piece'
+import { ShelfBottles } from './ShelfBottles'
 import { Steam } from './Steam'
 
 /** De werkplaats, stuk voor stuk uit het gebakken model */
-export function Workshop({ reducedMotion }: { reducedMotion: boolean }) {
+export function Workshop({ reducedMotion, onOpenBottle }: { reducedMotion: boolean; onOpenBottle: () => void }) {
   const catalogue = useAlchemy((s) => s.catalogue)
 
   return (
@@ -30,6 +32,8 @@ export function Workshop({ reducedMotion }: { reducedMotion: boolean }) {
       {/* Het licht valt door de damp, dus het komt erna */}
       <Piece name="shaft" material={shaft} castShadow={false} receiveShadow={false} renderOrder={5} />
       <Flask reducedMotion={reducedMotion} />
+      <PhotoCard reducedMotion={reducedMotion} />
+      <ShelfBottles onOpen={onOpenBottle} />
       {catalogue && <Jars catalogue={catalogue} reducedMotion={reducedMotion} />}
     </>
   )
