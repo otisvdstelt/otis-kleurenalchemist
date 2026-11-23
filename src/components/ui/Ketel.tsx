@@ -4,17 +4,21 @@ import { MAX_SIZE, MIN_SIZE } from '../../lib/alchemy/palette'
 import { boilState } from '../../lib/alchemy/mix'
 import { isSpecial } from '../../lib/alchemy/ingredients'
 import { currentIngredients, store, useAlchemy, useBrew } from '../../lib/store'
+import type { CauldronOnScreen } from '../World'
 import { KetelTekening } from './KetelTekening'
 
 interface KetelProps {
   /** Er is net een flesje gevuld */
   onPoured: () => void
+  /** Waar de ketel in de werkplaats op het scherm staat. Zonder 3D is er een getekende ketel */
+  onScreen?: CauldronOnScreen | null
 }
 
 const SIZES = Array.from({ length: MAX_SIZE - MIN_SIZE + 1 }, (_, i) => MIN_SIZE + i)
 
 /** De ketel op het vuur, met alles wat je ermee kunt: roeren, afscheppen, leegmaken en bottelen */
-export function Ketel({ onPoured }: KetelProps) {
+export function Ketel({ onPoured, onScreen }: KetelProps) {
+  const drawn = onScreen === undefined
   const brew = useBrew()
   const cauldron = useAlchemy((s) => s.cauldron)
   const stirredAt = useAlchemy((s) => s.stir.at)
@@ -77,9 +81,25 @@ export function Ketel({ onPoured }: KetelProps) {
         )}
       </p>
 
-      <div className="ketel" tabIndex={0} role="group" aria-label={strings.ketel.uitleg} onKeyDown={onKeyDown} onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerCancel={onPointerUp} data-leeg={!brew}>
-        <KetelTekening brew={brew} boil={boil} fast={fast} />
-      </div>
+      {/* Met de werkplaats erbij ligt dit vlak precies over de ketel in 3D: daar roer je, en daar komt het toetsenbord */}
+      {(drawn || onScreen) && (
+        <div
+          className="ketel"
+          data-wereld={!drawn}
+          style={onScreen ? { left: onScreen.x - onScreen.rx * 1.15, top: onScreen.y - onScreen.ry * 2.2, width: onScreen.rx * 2.3, height: onScreen.ry * 4 } : undefined}
+          tabIndex={0}
+          role="group"
+          aria-label={strings.ketel.uitleg}
+          onKeyDown={onKeyDown}
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={onPointerUp}
+          onPointerCancel={onPointerUp}
+          data-leeg={!brew}
+        >
+          {drawn && <KetelTekening brew={brew} boil={boil} fast={fast} />}
+        </div>
+      )}
 
       {brew && (
         <ul className="damp" aria-label={strings.ketel.damp}>
