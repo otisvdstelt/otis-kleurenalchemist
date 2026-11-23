@@ -1239,6 +1239,282 @@
     border-top: 1px dashed var(--color-rule);
   }
 
+  /* ============================================================ met de werkplaats erbij */
+
+  /* De werkplaats vult het scherm. De papieren laag ligt erover, en laat de wijzer door waar niks te drukken is */
+  .wereld {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+  }
+
+  .papier[data-wereld='true'] {
+    height: 100%;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .papier[data-wereld='true'] .kop {
+    position: fixed;
+    inset: 0 0 auto;
+    padding-inline: clamp(1rem, 2.5vw, 2rem);
+    pointer-events: none;
+  }
+
+  .papier[data-wereld='true'] .kop > * {
+    pointer-events: auto;
+  }
+
+  .papier[data-wereld='true'] .tafel {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    display: block;
+    margin: 0;
+    pointer-events: none;
+  }
+
+  .papier[data-wereld='true'] .tafel > * {
+    pointer-events: auto;
+  }
+
+  /* Een vel papier om iets op te leggen, met een rafelrand */
+  .papier[data-wereld='true'] :is(.kast, .haard, .toonbank) {
+    isolation: isolate;
+  }
+
+  .papier[data-wereld='true'] :is(.kast, .haard, .toonbank)::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: 3px 5px 4px 6px;
+    background: var(--color-canvas) var(--tooth);
+    box-shadow: inset 0 0 0 1px rgb(58 42 32 / 0.1);
+    filter: url(#deckle) drop-shadow(0 1px 0.5px rgb(58 42 32 / 0.2)) drop-shadow(0 9px 12px rgb(58 42 32 / 0.26));
+  }
+
+  .papier[data-wereld='true'] .ketel {
+    position: fixed;
+    z-index: 0;
+    width: auto;
+    border-radius: 50%;
+  }
+
+  .papier[data-wereld='true'] .haard {
+    position: absolute;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem 1.1rem;
+    padding: 0.8rem 1.2rem 0.9rem;
+  }
+
+  .papier[data-wereld='true'] .haard-toestand {
+    flex-basis: 100%;
+    min-height: 0;
+    font-size: 1.08rem;
+  }
+
+  .papier[data-wereld='true'] .damp {
+    margin: 0;
+  }
+
+  .papier[data-wereld='true'] .damp-vlek {
+    width: 1.6rem;
+    height: 1.6rem;
+  }
+
+  .papier[data-wereld='true'] .inhoud {
+    flex-basis: 100%;
+    order: 1;
+  }
+
+  .papier[data-wereld='true'] .haard-bottel {
+    margin: 0;
+    font-size: 1.2rem;
+    padding: 0.6rem 1.4rem 0.7rem;
+  }
+
+  .papier[data-wereld='true'] .kast {
+    position: absolute;
+  }
+
+  .papier[data-wereld='true'] .potje-etiket {
+    display: none;
+  }
+
+  .papier[data-wereld='true'] .toonbank {
+    position: absolute;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-rule) transparent;
+    padding: 1rem 1.3rem 1.4rem;
+  }
+
+  .toonbank-boven {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .terug-naar-fles {
+    position: absolute;
+    right: clamp(1rem, 2.5vw, 2rem);
+    top: 4.6rem;
+    font-size: 1.12rem;
+    rotate: 1.5deg;
+  }
+
+  .mislukt {
+    position: relative;
+    z-index: 2;
+    max-width: 30rem;
+    margin: 0.5rem auto;
+  }
+
+  @media (min-width: 1024px) {
+    .papier[data-wereld='true'] .kast {
+      top: 4.8rem;
+      left: clamp(1rem, 2.5vw, 2rem);
+      max-height: calc(100svh - 5.8rem);
+      width: 12.5rem;
+      margin: 0;
+      padding: 0.6rem 0.8rem 0.8rem;
+      max-height: none;
+      overflow-y: auto;
+    }
+
+    /* Over de werkplaats heen is de kast een lijstje: de potjes zelf staan op de planken */
+    .papier[data-wereld='true'] .kast-planken {
+      grid-template-columns: 1fr;
+      gap: 0;
+      padding: 0;
+      background: none;
+    }
+
+    .papier[data-wereld='true'] .kast-kop {
+      margin-bottom: 0.1rem;
+      font-size: 1.15rem;
+    }
+
+    .papier[data-wereld='true'] .kast-sub {
+      margin: 0.5rem 0 0.1rem;
+      font-size: 1rem;
+    }
+
+    .papier[data-wereld='true'] .potje-knop {
+      grid-template-columns: 1.1rem 1fr;
+      align-items: center;
+      height: auto;
+      min-height: 2.2rem;
+      padding: 0.1rem 0.3rem;
+      rotate: 0deg !important;
+    }
+
+    .papier[data-wereld='true'] .potje-knop::before {
+      display: none;
+    }
+
+    .papier[data-wereld='true'] .potje-knop:hover,
+    .papier[data-wereld='true'] .potje-knop:focus-visible {
+      translate: 0.3rem 0;
+    }
+
+    .papier[data-wereld='true'] .potje {
+      grid-row: span 1;
+      width: 1.1rem;
+    }
+
+    .papier[data-wereld='true'] .potje-naam {
+      grid-row: span 2;
+      font-size: 1rem;
+    }
+
+    .papier[data-wereld='true'] .potje-aantal {
+      top: 0.35rem;
+      right: 0;
+      min-width: 1.4rem;
+      height: 1.4rem;
+      font-size: 0.82rem;
+    }
+
+    .papier[data-wereld='true'] .haard {
+      left: 50%;
+      bottom: 1rem;
+      width: min(44rem, calc(100vw - 2 * 18rem));
+      translate: -50% 0;
+    }
+
+    .papier[data-wereld='true'] .toonbank {
+      top: 4.8rem;
+      right: clamp(1rem, 2.5vw, 2rem);
+      bottom: 1rem;
+      width: 25rem;
+      margin: 0;
+      max-height: none;
+    }
+  }
+
+  @media (max-width: 1023px) {
+    .papier[data-wereld='true'] .kast {
+      top: 4.1rem;
+      left: 0;
+      right: 0;
+      margin: 0;
+      padding-top: 0.2rem;
+    }
+
+    .papier[data-wereld='true'] .kast-kop {
+      display: none;
+    }
+
+    .papier[data-wereld='true'] .kast-planken {
+      padding-block: 0.4rem 0.7rem;
+    }
+
+    .papier[data-wereld='true'] .kast-planken[data-bijzonder='true'] {
+      display: none;
+    }
+
+    .papier[data-wereld='true'] .potje-knop {
+      width: 4.6rem;
+      padding: 0.35rem 0.2rem;
+    }
+
+    .papier[data-wereld='true'] .potje {
+      width: 1.8rem;
+    }
+
+    .papier[data-wereld='true'] .potje-naam {
+      font-size: 0.9rem;
+    }
+
+    .papier[data-wereld='true'] .haard {
+      left: 0;
+      right: 0;
+      bottom: 0;
+      gap: 0.3rem 0.8rem;
+      padding: 0.6rem 0.8rem calc(0.7rem + env(safe-area-inset-bottom));
+    }
+
+    .papier[data-wereld='true'] .inhoud {
+      display: none;
+    }
+
+    .papier[data-wereld='true'] .toonbank {
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 3;
+      max-height: 78svh;
+      padding-bottom: calc(1.4rem + env(safe-area-inset-bottom));
+    }
+  }
+
   /* ============================================================ het kolfje (laden) */
 
   /* Een klein kolfje in de hoek dat borrelt zolang er iets onderweg is */
