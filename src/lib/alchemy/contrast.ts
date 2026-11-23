@@ -51,8 +51,8 @@ export function apca(text: Hex, background: Hex): number {
 /** Hoe goed een paar het doet: AAA, AA, alleen groot genoeg, of niet */
 export type Level = 'aaa' | 'aa' | 'groot' | 'nee'
 
-/** Tekst moet lezen, een onderdeel (accent, signaal) moet je kunnen zien */
-export type PairKind = 'tekst' | 'onderdeel'
+/** Tekst moet lezen, een onderdeel (accent, signaal) moet je kunnen zien, en de tekst op een knop in die kleur ook lezen */
+export type PairKind = 'tekst' | 'onderdeel' | 'knop'
 
 export interface Check {
   /** Index van de voorgrond en de achtergrond in het palet */
@@ -69,8 +69,22 @@ export interface Check {
   lc: number
 }
 
-/** De paren die ertoe doen: tekst op achtergrond en op oppervlak, elk accent en het signaal op de achtergrond */
-export function pairsFor(roles: readonly Role[]): { fg: number; bg: number; kind: PairKind }[] {
+/**
+ * Welke kleur de tekst op een knop in deze kleur krijgt: de achtergrond of de tekstkleur, wat het best leest.
+ * Geeft de plek in het palet terug, of -1 als er geen van beide is
+ */
+export function labelFor(swatches: readonly { hex: Hex; role: Role }[], index: number): number {
+  const candidates = [swatches.findIndex((s) => s.role === 'achtergrond'), swatches.findIndex((s) => s.role === 'tekst')].filter((i) => i >= 0)
+  if (candidates.length === 0) return -1
+  return candidates.reduce((best, i) => (contrastRatio(swatches[i].hex, swatches[index].hex) > contrastRatio(swatches[best].hex, swatches[index].hex) ? i : best))
+}
+
+/**
+ * De paren die ertoe doen: tekst op achtergrond en op oppervlak, elk accent en het signaal op de achtergrond,
+ * en de tekst op een knop in elk accent en het signaal
+ */
+export function pairsFor(swatches: readonly { hex: Hex; role: Role }[]): { fg: number; bg: number; kind: PairKind }[] {
+  const roles = swatches.map((s) => s.role)
   const background = roles.indexOf('achtergrond')
   const surface = roles.indexOf('oppervlak')
   const text = roles.indexOf('tekst')
@@ -80,13 +94,18 @@ export function pairsFor(roles: readonly Role[]): { fg: number; bg: number; kind
   roles.forEach((role, index) => {
     if ((role === 'accent' || role === 'signaal') && background >= 0) pairs.push({ fg: index, bg: background, kind: 'onderdeel' })
   })
+  roles.forEach((role, index) => {
+    if (role !== 'accent' && role !== 'signaal') return
+    const label = labelFor(swatches, index)
+    if (label >= 0) pairs.push({ fg: label, bg: index, kind: 'knop' })
+  })
   return pairs
 }
 
-export const requiredFor = (kind: PairKind) => (kind === 'tekst' ? THRESHOLDS.text : THRESHOLDS.large)
+export const requiredFor = (kind: PairKind) => (kind === 'onderdeel' ? THRESHOLDS.large : THRESHOLDS.text)
 
 function levelOf(ratio: number, kind: PairKind): Level {
-  if (kind === 'tekst') return ratio >= THRESHOLDS.enhanced ? 'aaa' : ratio >= THRESHOLDS.text ? 'aa' : ratio >= THRESHOLDS.large ? 'groot' : 'nee'
+  if (kind !== 'onderdeel') return ratio >= THRESHOLDS.enhanced ? 'aaa' : ratio >= THRESHOLDS.text ? 'aa' : ratio >= THRESHOLDS.large ? 'groot' : 'nee'
   // WCAG 1.4.11 kent voor onderdelen alleen AA (3:1). AAA geven we pas bij 7:1, zoals bij tekst
   return ratio >= THRESHOLDS.enhanced ? 'aaa' : ratio >= THRESHOLDS.large ? 'aa' : 'nee'
 }
@@ -94,7 +113,7 @@ function levelOf(ratio: number, kind: PairKind): Level {
 /** Elke relevante combinatie in het palet gemeten */
 export function checkPalette(swatches: readonly { hex: Hex; role: Role }[]): Check[] {
   const roles = swatches.map((s) => s.role)
-  return pairsFor(roles).map(({ fg, bg, kind }) => {
+  return pairsFor(swatches).map(({ fg, bg, kind }) => {
     const ratio = contrastRatio(swatches[fg].hex, swatches[bg].hex)
     const required = requiredFor(kind)
     return {

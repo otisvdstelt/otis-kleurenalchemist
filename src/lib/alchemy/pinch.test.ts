@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { checkPalette } from './contrast.ts'
+import { checkPalette, contrastRatio } from './contrast.ts'
 import { fromHex, toHex } from './color.ts'
 import { rolesFor, type Swatch } from './palette.ts'
 import { pinch } from './pinch.ts'
@@ -39,6 +39,22 @@ describe('pinch', () => {
     // Bij kleuren met genoeg chroma om een tint te hebben, blijft die tint staan
     const hueShifts = moved.filter(([a, b]) => a.c > 0.05 && b.c > 0.05).map(([a, b]) => Math.abs(((a.h - b.h + 540) % 360) - 180))
     expect(Math.max(0, ...hueShifts)).toBeLessThan(6)
+  })
+
+  it('mikt net boven de drempel: 4,6 en 3,1', () => {
+    const after = pinch(palette(['#ffffff', '#777777', '#000000']))
+    const ratio = contrastRatio(after.swatches[1].hex, after.swatches[0].hex)
+    expect(ratio).toBeGreaterThanOrEqual(4.6)
+    expect(ratio).toBeLessThan(4.8)
+  })
+
+  it('maakt ook de tekst op een knop leesbaar, door de knop te verschuiven', () => {
+    const before = palette(['#fcfaf3', '#ebe4d0', '#2c2823', '#9a9a9a', '#c8a020'])
+    const after = pinch(before)
+    expect(checkPalette(after.swatches).filter((c) => c.kind === 'knop' && !c.passes)).toEqual([])
+    // De achtergrond en de tekst bleven staan, de knoppen schoven
+    expect(after.swatches[0].hex).toBe(before[0].hex)
+    expect(after.swatches[2].hex).toBe(before[2].hex)
   })
 
   it('verschuift zo weinig mogelijk: tekst die net te licht is wordt net donker genoeg', () => {

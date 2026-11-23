@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { apca, checkPalette, contrastRatio, formatRatio, luminance } from './contrast.ts'
+import { apca, checkPalette, contrastRatio, formatRatio, labelFor, luminance } from './contrast.ts'
 
 describe('WCAG 2.2', () => {
   it('zwart op wit is 21:1', () => {
@@ -32,6 +32,25 @@ describe('WCAG 2.2', () => {
   it('schrijft een verhouding naar beneden afgerond, met een komma', () => {
     expect(formatRatio(4.4999)).toBe('4,4:1')
     expect(formatRatio(21)).toBe('21,0:1')
+  })
+})
+
+describe('knoptekst', () => {
+  const palette = (accent: string) => [
+    { hex: '#fcfaf3', role: 'achtergrond' as const },
+    { hex: '#2c2823', role: 'tekst' as const },
+    { hex: accent, role: 'accent' as const },
+  ]
+
+  it('kiest de tekstkleur die het best leest op de knop', () => {
+    expect(labelFor(palette('#1d3b7a'), 2)).toBe(0)
+    expect(labelFor(palette('#f2d22e'), 2)).toBe(1)
+  })
+
+  it('meet de knoptekst met de drempel voor gewone tekst', () => {
+    const knop = checkPalette(palette('#8a8a8a')).find((c) => c.kind === 'knop')!
+    expect(knop.required).toBe(4.5)
+    expect(knop.passes).toBe(false)
   })
 })
 
@@ -73,7 +92,10 @@ describe('checkPalette', () => {
       { hex: '#b8623b', role: 'accent' },
       { hex: '#f0e68c', role: 'signaal' },
     ])
-    expect(checks.map((c) => `${c.fgRole}/${c.bgRole}`)).toEqual(['tekst/achtergrond', 'tekst/oppervlak', 'accent/achtergrond', 'signaal/achtergrond'])
+    expect(checks.map((c) => `${c.fgRole}/${c.bgRole}`)).toEqual(['tekst/achtergrond', 'tekst/oppervlak', 'accent/achtergrond', 'signaal/achtergrond', 'achtergrond/accent', 'tekst/signaal'])
+    // Op een donker accent komt lichte tekst, op een licht signaal donkere
+    expect(checks[4].kind).toBe('knop')
+    expect(checks[5].kind).toBe('knop')
     expect(checks[0].passes).toBe(true)
     expect(checks[0].level).toBe('aaa')
     expect(checks[3].passes).toBe(false)

@@ -1,6 +1,6 @@
 // Een snuifje contrast. Schuift alleen de lichtheid, en zo weinig mogelijk, tot elk paar zijn drempel haalt
 
-import { checkPalette, contrastRatio, luminance, pairsFor, requiredFor, THRESHOLDS, type Check } from './contrast.ts'
+import { checkPalette, contrastRatio, labelFor, luminance, pairsFor, requiredFor, THRESHOLDS, type Check } from './contrast.ts'
 import { fromHex, toHex, type Hex } from './color.ts'
 import type { Swatch } from './palette.ts'
 
@@ -11,6 +11,12 @@ export interface Pinched {
   /** Paren die ook na het snuifje niet halen, omdat beide kleuren vastzitten onder een kurk */
   unreachable: Check[]
 }
+
+/**
+ * Het snuifje mikt net boven de drempel: 4,6 in plaats van 4,5 en 3,1 in plaats van 3,0.
+ * Zo haalt het palet de drempel ook na afronden, en in een browser die iets anders rekent
+ */
+const MARGIN = 0.1
 
 /** Zet de lichtheid van een kleur op l, met tint en chroma zoveel mogelijk zoals ze waren */
 function withLightness(hex: Hex, l: number): Hex {
@@ -44,11 +50,17 @@ function nudge(hex: Hex, partner: Hex, required: number): Hex | null {
   return search(hex, own, away, partner, required) ?? search(hex, other, 1 - away, partner, required)
 }
 
-/** Haalt elk paar dat dit swatch-paar raakt nog zijn drempel, voor zover het dat al deed? */
+/** Eerst mikken op net boven de drempel, en lukt dat niet, dan op de drempel zelf */
+function reach(hex: Hex, partner: Hex, required: number): Hex | null {
+  return nudge(hex, partner, required + MARGIN) ?? nudge(hex, partner, required)
+}
+
+/** Breekt deze verschuiving een paar dat zijn drempel al haalde? Vergeleken per paar, want de knoptekst kan van kleur wisselen */
 function keepsOthers(swatches: readonly Swatch[], index: number, candidate: Hex, before: readonly Check[]): boolean {
+  const key = (c: Check) => `${c.fg}>${c.bg}:${c.kind}`
+  const passedBefore = new Set(before.filter((c) => c.passes).map(key))
   const trial = swatches.map((s, i) => (i === index ? { ...s, hex: candidate } : s))
-  const after = checkPalette(trial)
-  return after.every((check, i) => check.passes || !before[i].passes || (check.fg !== index && check.bg !== index))
+  return checkPalette(trial).every((check) => check.passes || !passedBefore.has(key(check)) || (check.fg !== index && check.bg !== index))
 }
 
 /**
@@ -60,6 +72,7 @@ function settleText(swatches: Swatch[], locked: readonly boolean[]) {
   const [bg, surface, text] = (['achtergrond', 'oppervlak', 'tekst'] as const).map((role) => roles.indexOf(role))
   if (bg < 0 || text < 0) return
   const fails = (a: number, b: number) => b >= 0 && contrastRatio(swatches[a].hex, swatches[b].hex) < THRESHOLDS.text
+  const target = THRESHOLDS.text + MARGIN
   if (!fails(text, bg) && !fails(text, surface)) return
   const l = (i: number) => fromHex(swatches[i].hex).l
   // Zwart haalt 4,5:1 op alles met een luminantie vanaf 0,18, en wit op alles daaronder
@@ -68,13 +81,43 @@ function settleText(swatches: Swatch[], locked: readonly boolean[]) {
   const beyond = (a: number, b: number) => (darkText ? Math.min(a, b) : Math.max(a, b))
   const before = (a: number, b: number) => (darkText ? Math.max(a, b) : Math.min(a, b))
   if (fails(text, bg)) {
-    const moved = !locked[text] ? search(swatches[text].hex, beyond(l(text), l(bg)), extreme, swatches[bg].hex, THRESHOLDS.text) : null
+    const moved = !locked[text] ? (search(swatches[text].hex, beyond(l(text), l(bg)), extreme, swatches[bg].hex, target) ?? search(swatches[text].hex, beyond(l(text), l(bg)), extreme, swatches[bg].hex, THRESHOLDS.text)) : null
     if (moved) swatches[text].hex = moved
-    else if (!locked[bg]) swatches[bg].hex = search(swatches[bg].hex, before(l(bg), l(text)), 1 - extreme, swatches[text].hex, THRESHOLDS.text) ?? swatches[bg].hex
+    else if (!locked[bg]) swatches[bg].hex = search(swatches[bg].hex, before(l(bg), l(text)), 1 - extreme, swatches[text].hex, target) ?? search(swatches[bg].hex, before(l(bg), l(text)), 1 - extreme, swatches[text].hex, THRESHOLDS.text) ?? swatches[bg].hex
   }
   if (fails(text, surface) && !locked[surface]) {
-    swatches[surface].hex = search(swatches[surface].hex, before(l(surface), l(text)), 1 - extreme, swatches[text].hex, THRESHOLDS.text) ?? swatches[surface].hex
+    swatches[surface].hex = search(swatches[surface].hex, before(l(surface), l(text)), 1 - extreme, swatches[text].hex, target) ?? search(swatches[surface].hex, before(l(surface), l(text)), 1 - extreme, swatches[text].hex, THRESHOLDS.text) ?? swatches[surface].hex
   }
+}
+
+/**
+ * Een knopkleur (accent of signaal) moet twee dingen tegelijk: opvallen tegen de achtergrond (3:1),
+ * en tekst erop moet leesbaar zijn (4,5:1, in de achtergrond- of tekstkleur, wat het best leest).
+ * Zoek de kleinste verschuiving van de lichtheid waarbij allebei lukt. Ver genoeg van de achtergrond af lukt het altijd
+ */
+function fitButton(swatches: Swatch[], index: number): boolean {
+  const bg = swatches.findIndex((s) => s.role === 'achtergrond')
+  if (bg < 0) return true
+  const fits = (hex: Hex, margin: number) => {
+    const trial = swatches.map((s, i) => (i === index ? { ...s, hex } : s))
+    const label = labelFor(trial, index)
+    return contrastRatio(hex, swatches[bg].hex) >= THRESHOLDS.large + margin && (label < 0 || contrastRatio(hex, trial[label].hex) >= THRESHOLDS.text + margin)
+  }
+  if (fits(swatches[index].hex, 0)) return true
+  const own = fromHex(swatches[index].hex).l
+  for (const margin of [MARGIN, 0]) {
+    for (let d = 0.004; d <= 1; d += 0.004) {
+      for (const l of [own + d, own - d]) {
+        if (l < 0 || l > 1) continue
+        const candidate = withLightness(swatches[index].hex, l)
+        if (fits(candidate, margin)) {
+          swatches[index].hex = candidate
+          return true
+        }
+      }
+    }
+  }
+  return false
 }
 
 /**
@@ -83,21 +126,19 @@ function settleText(swatches: Swatch[], locked: readonly boolean[]) {
  */
 export function pinch(input: readonly Swatch[], locked: readonly boolean[] = []): Pinched {
   const swatches = input.map((s) => ({ ...s }))
-  const pairs = pairsFor(swatches.map((s) => s.role))
 
-  for (let pass = 0; pass < 4; pass++) {
+  for (let pass = 0; pass < 5; pass++) {
     let moved = false
-    for (const { fg, bg, kind } of pairs) {
+    // Opnieuw elke ronde: welke kleur de knoptekst krijgt, kan veranderen als het accent schuift
+    for (const { fg, bg, kind } of pairsFor(swatches)) {
       const required = requiredFor(kind)
       if (contrastRatio(swatches[fg].hex, swatches[bg].hex) >= required) continue
       const before = checkPalette(swatches)
-      // Eerst de voorgrond, dan de achtergrond
-      for (const [mover, partner] of [
-        [fg, bg],
-        [bg, fg],
-      ] as const) {
+      // Eerst de voorgrond, dan de achtergrond. Bij een knop eerst de knop zelf: die is het minst belangrijk
+      const order: (readonly [number, number])[] = kind === 'knop' ? [[bg, fg], [fg, bg]] : [[fg, bg], [bg, fg]]
+      for (const [mover, partner] of order) {
         if (locked[mover]) continue
-        const candidate = nudge(swatches[mover].hex, swatches[partner].hex, required)
+        const candidate = reach(swatches[mover].hex, swatches[partner].hex, required)
         if (candidate && keepsOthers(swatches, mover, candidate, before)) {
           swatches[mover].hex = candidate
           moved = true
@@ -110,14 +151,25 @@ export function pinch(input: readonly Swatch[], locked: readonly boolean[] = [])
 
   settleText(swatches, locked)
 
-  // Laatste redmiddel: lukte het zonder iets te breken niet, schuif dan de voorgrond toch
-  for (const { fg, bg, kind } of pairs) {
-    const required = requiredFor(kind)
-    if (contrastRatio(swatches[fg].hex, swatches[bg].hex) >= required) continue
-    const mover = !locked[fg] ? fg : !locked[bg] ? bg : -1
-    if (mover < 0) continue
-    const candidate = nudge(swatches[mover].hex, swatches[mover === fg ? bg : fg].hex, required)
-    if (candidate) swatches[mover].hex = candidate
+  // Elke knopkleur die nog niet past, op zijn eigen manier passend maken
+  const failing = () => new Set(checkPalette(swatches).filter((c) => !c.passes && c.kind !== 'tekst').flatMap((c) => [c.fg, c.bg]))
+  for (const index of failing()) {
+    if (locked[index] || (swatches[index].role !== 'accent' && swatches[index].role !== 'signaal')) continue
+    fitButton(swatches, index)
+  }
+
+  // Laatste redmiddel: lukte het zonder iets te breken niet, schuif dan toch. Bij een knop de knop, anders de voorgrond
+  for (let pass = 0; pass < 3; pass++) {
+    for (const { fg, bg, kind } of pairsFor(swatches)) {
+      const required = requiredFor(kind)
+      if (contrastRatio(swatches[fg].hex, swatches[bg].hex) >= required) continue
+      const first = kind === 'knop' ? bg : fg
+      const second = first === fg ? bg : fg
+      const mover = !locked[first] ? first : !locked[second] ? second : -1
+      if (mover < 0) continue
+      const candidate = reach(swatches[mover].hex, swatches[mover === fg ? bg : fg].hex, required)
+      if (candidate) swatches[mover].hex = candidate
+    }
   }
 
   const changed = swatches.flatMap((s, i) => (s.hex !== input[i].hex ? [i] : []))
