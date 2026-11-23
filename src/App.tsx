@@ -96,8 +96,9 @@ export default function App() {
   return (
     <div className="papier" data-wereld={painted} data-uitzicht={painted ? view : undefined}>
       <PaperFilters />
+      {/* De werkplaats is alleen weergave: alles wat je ermee kunt, staat ook in de papieren laag */}
       {painted && (
-        <div className="wereld">
+        <div className="wereld" aria-hidden="true">
           <Unpaintable onFail={fail}>
             <Suspense fallback={<Borrelend />}>
               <World phase={phase} view={view} reducedMotion={reducedMotion} modest={modest} onReady={() => undefined} onCauldron={setOnScreen} onOpenBottle={() => setFlaskOpen(true)} />
