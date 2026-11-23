@@ -6,6 +6,7 @@ import { store, useAlchemy } from '../../lib/store'
 import { Contrastcheck } from './Contrastcheck'
 import { Fles } from './Fles'
 import { Meenemen } from './Meenemen'
+import { Monocle } from './Monocle'
 import { Proefvel } from './Proefvel'
 
 interface FlesjeProps {
@@ -137,6 +138,8 @@ export const Flesje = forwardRef<HTMLElement, FlesjeProps>(function Flesje({ onC
       <Proefvel swatches={swatches} />
 
       <Contrastcheck flask={flask} pinched={hasContrast || from !== 'ketel'} onPinch={pinch} />
+
+      <Monocle swatches={swatches} />
 
       <Meenemen bottle={bottle} />
     </section>

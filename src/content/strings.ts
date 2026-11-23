@@ -151,6 +151,20 @@ export const strings = {
     bezig: 'De kleuren worden eruit gehaald',
     loslaten: 'Laat los, dan valt hij in de ketel',
   },
+  monocle: {
+    kop: 'Door de monocle',
+    uitleg: 'Zo ziet je palet eruit voor iemand die kleuren anders ziet.',
+    gewoon: 'gewoon',
+    namen: { deuteranopie: 'deuteranopie', protanopie: 'protanopie', tritanopie: 'tritanopie' },
+    wat: {
+      deuteranopie: 'groen zwak, de meest voorkomende vorm',
+      protanopie: 'rood zwak',
+      tritanopie: 'blauw en geel zwak, zeldzaam',
+    },
+    goed: 'Alle rollen blijven goed uit elkaar te houden.',
+    samen: (a: string, b: string) => `${a} en ${b} lijken door deze monocle bijna hetzelfde.`,
+    tip: 'Zet ze verder uit elkaar in lichtheid, dan helpt het voor iedereen.',
+  },
   plank: {
     kop: 'De plank',
     leeg: 'Nog niks op de plank. Een flesje zet je erop vanaf de toonbank.',
