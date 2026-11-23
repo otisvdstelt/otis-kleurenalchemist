@@ -58,7 +58,8 @@ export const strings = {
     kop: 'De ketel',
     uitleg: 'Ketel. Spatie of pijltjes om te roeren, Enter om te bottelen.',
     inhoud: 'Erin',
-    leeg: 'De ketel is leeg. Gooi er een paar potjes in.',
+    leeg: 'De ketel is leeg. Gooi er een paar potjes in, roer, en bottel wat eruit komt.',
+    verras: 'Verras me',
     toestand: {
       leeg: 'Leeg en koud.',
       rustig: 'Borrelt rustig.',
@@ -150,6 +151,7 @@ export const strings = {
     grootte: (n: number) => `Het palet krijgt ${inWoorden(n)} kleuren.`,
     bijgesteld: (rol: string, hoe: string, hex: string) => `${rol.replace(/^./, (c) => c.toUpperCase())} ${hoe}: ${hex}.`,
     gewisseld: (a: string, b: string) => `${a.replace(/^./, (c) => c.toUpperCase())} en ${b} zijn van rol gewisseld.`,
+    verrast: (namen: string[]) => `Verrassing: ${namen.slice(0, -1).join(', ')} en ${namen.at(-1)} in de ketel.`,
     geopend: (naam: string, n: number) => `Flesje ${naam}, ${inWoorden(n)} kleuren.`,
     verder: (naam: string) => `Het recept van ${naam} staat weer in de ketel.`,
     opPlank: (naam: string, n: number) => `${naam} staat op de plank. ${n === 1 ? 'Het eerste flesje' : `${inWoorden(n).replace(/^./, (c) => c.toUpperCase())} flesjes`}.`,

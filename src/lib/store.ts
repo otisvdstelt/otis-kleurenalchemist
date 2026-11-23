@@ -157,6 +157,21 @@ export const store = {
     })
   },
 
+  /** Verras me: een paar willekeurige potjes, al een beetje geroerd */
+  surprise() {
+    const colours = (state.catalogue ?? []).filter((i) => !isSpecial(i))
+    if (colours.length === 0) return
+    const count = 2 + Math.floor(Math.random() * 2)
+    const picked: Ingredient[] = []
+    while (picked.length < count) {
+      const next = colours[Math.floor(Math.random() * colours.length)]
+      if (!picked.includes(next)) picked.push(next)
+    }
+    let cauldron = step(emptyCauldron(state.cauldron.size), { type: 'load', items: picked.map((i) => i.id), stirs: 2 + Math.floor(Math.random() * 10), size: state.cauldron.size })
+    cauldron = { ...cauldron, seed: null, reroll: Math.floor(Math.random() * 1000) }
+    set({ cauldron, stir: { at: now(), strokes: 3 }, ...say(strings.nieuws.verrast(picked.map((i) => i.name))) })
+  },
+
   /** Roer opnieuw: een nieuwe trekking. Kleuren onder een kurk blijven staan */
   reroll() {
     const cauldron = apply({ type: 'reroll' })

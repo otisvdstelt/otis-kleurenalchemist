@@ -14,6 +14,8 @@ interface KetelProps {
   onScreen?: CauldronOnScreen | null
 }
 
+const capital = (text: string) => text.charAt(0).toUpperCase() + text.slice(1)
+
 const SIZES = Array.from({ length: MAX_SIZE - MIN_SIZE + 1 }, (_, i) => MIN_SIZE + i)
 
 /** De ketel op het vuur, met alles wat je ermee kunt: roeren, afscheppen, leegmaken en bottelen */
@@ -87,7 +89,7 @@ export function Ketel({ onPoured, onScreen }: KetelProps) {
         {inside.length > 0 && (
           <span className="haard-slagen">
             {' '}
-            {strings.ketel.slagen(cauldron.stirs)}, {strings.ketel.glad(brew?.homogeneity ?? 0)}
+            {capital(strings.ketel.slagen(cauldron.stirs))}, {strings.ketel.glad(brew?.homogeneity ?? 0)}.
           </span>
         )}
       </p>
@@ -142,6 +144,11 @@ export function Ketel({ onPoured, onScreen }: KetelProps) {
       )}
 
       <div className="haard-knoppen">
+        {inside.length === 0 && (
+          <button type="button" className="inked" data-tone="rust" onClick={() => store.surprise()}>
+            {strings.ketel.verras}
+          </button>
+        )}
         <button type="button" className="inked" disabled={!brew} onClick={() => store.stir(1)}>
           {strings.ketel.roer}
         </button>
