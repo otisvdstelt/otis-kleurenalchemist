@@ -26,6 +26,8 @@ export const Flesje = forwardRef<HTMLElement, FlesjeProps>(function Flesje({ onC
   const [copied, setCopied] = useState<{ index: number; ok: boolean } | null>(null)
   const [tuning, setTuning] = useState<number | null>(null)
   const [naming, setNaming] = useState(false)
+  // Het vel omlaag slepen aan de greep legt het weg, zoals een vel papier dat je van tafel schuift
+  const [drag, setDrag] = useState<{ from: number; by: number } | null>(null)
   const timer = useRef<number | undefined>(undefined)
   useEffect(() => () => window.clearTimeout(timer.current), [])
 
@@ -73,7 +75,23 @@ export const Flesje = forwardRef<HTMLElement, FlesjeProps>(function Flesje({ onC
   }
 
   return (
-    <section ref={ref} className="toonbank" aria-labelledby="fles-kop" tabIndex={-1}>
+    <section ref={ref} className="toonbank" aria-labelledby="fles-kop" tabIndex={-1} style={drag ? { translate: `0 ${Math.max(0, drag.by)}px`, transition: 'none' } : undefined}>
+      {onClose && (
+        <div
+          className="toonbank-greep"
+          aria-hidden="true"
+          onPointerDown={(event) => {
+            event.currentTarget.setPointerCapture(event.pointerId)
+            setDrag({ from: event.clientY, by: 0 })
+          }}
+          onPointerMove={(event) => drag && setDrag({ ...drag, by: event.clientY - drag.from })}
+          onPointerUp={() => {
+            if (drag && drag.by > 90) onClose()
+            setDrag(null)
+          }}
+          onPointerCancel={() => setDrag(null)}
+        />
+      )}
       <div className="toonbank-boven">
         <h2 id="fles-kop" className="toonbank-kop">
           {strings.fles.kop}
@@ -226,6 +244,12 @@ export const Flesje = forwardRef<HTMLElement, FlesjeProps>(function Flesje({ onC
       <Meenemen bottle={bottle} />
 
       <Eerder />
+
+      {onClose && (
+        <button type="button" className="inked toonbank-terug" onClick={onClose}>
+          {strings.fles.terugNaarKetel}
+        </button>
+      )}
     </section>
   )
 })

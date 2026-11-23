@@ -94,6 +94,7 @@ export const strings = {
     rol: (role: Role, n: number) => (n > 1 ? `${ROLNAMEN[role]} ${n}` : ROLNAMEN[role]),
     modder: 'Modder is geen fout. Het is gewoon een heel eerlijk palet.',
     wegzetten: 'zet weg',
+    terugNaarKetel: 'Terug naar de ketel',
     hernoem: 'Andere naam',
     naamLabel: 'Naam van het flesje',
     bewaar: 'Bewaar',

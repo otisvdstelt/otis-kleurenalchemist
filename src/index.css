@@ -1991,6 +1991,45 @@
     rotate: -1deg;
   }
 
+  .toonbank-greep {
+    display: none;
+  }
+
+  .toonbank-terug {
+    display: none;
+  }
+
+  @media (max-width: 1023px) {
+    /* Op een telefoon is het flesje een vel van onderen: een greep om het weg te schuiven, en een knop onderaan */
+    .papier[data-wereld='true'] .toonbank-greep {
+      position: sticky;
+      top: -1rem;
+      z-index: 2;
+      display: block;
+      height: 1.6rem;
+      margin: -1rem -1.3rem 0;
+      cursor: grab;
+      touch-action: none;
+    }
+
+    .papier[data-wereld='true'] .toonbank-greep::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 0.6rem;
+      width: 3rem;
+      height: 0.3rem;
+      translate: -50% 0;
+      border-radius: 999px;
+      background: var(--color-rule);
+    }
+
+    .papier[data-wereld='true'] .toonbank-terug {
+      display: inline-flex;
+      margin-top: 1.4rem;
+    }
+  }
+
   .toonbank-boven {
     display: flex;
     align-items: baseline;
