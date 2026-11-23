@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { checkPalette } from './contrast'
-import { fromHex, toHex } from './color'
-import { rolesFor, type Swatch } from './palette'
-import { pinch } from './pinch'
-import { mulberry32 } from './prng'
+import { checkPalette } from './contrast.ts'
+import { fromHex, toHex } from './color.ts'
+import { rolesFor, type Swatch } from './palette.ts'
+import { pinch } from './pinch.ts'
+import { mulberry32 } from './prng.ts'
 
 const palette = (hexes: string[]): Swatch[] => {
   const roles = rolesFor(hexes.length)

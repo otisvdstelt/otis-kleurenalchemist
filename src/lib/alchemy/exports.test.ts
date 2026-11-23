@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import type { Bottle } from './bottle'
-import { cssOklch, tokenName, toCss, toJson, toTailwind } from './exports'
+import type { Bottle } from './bottle.ts'
+import { cssOklch, tokenName, toCss, toJson, toTailwind } from './exports.ts'
 
 const bottle: Bottle = {
   swatches: [

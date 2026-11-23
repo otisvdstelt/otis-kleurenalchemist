@@ -1,6 +1,6 @@
 // Wat er in de potjes zit. De lijst staat in public/data/ingredients.json, dit bestand zegt hoe hij eruit hoort te zien
 
-import { isHex, toHex, type Hex, type Oklch } from './color'
+import { isHex, toHex, type Hex, type Oklch } from './color.ts'
 
 export interface Pigment {
   color: Oklch

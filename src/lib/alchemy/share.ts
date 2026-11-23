@@ -1,9 +1,9 @@
 // Een flesje of een hele plank als link. Compact, base64url, met een versienummer voorop.
 // Er is geen backend: alles wat nodig is, zit in de link zelf
 
-import { fromHex, isHex, toHex } from './color'
-import type { Bottle, RecipeItem } from './bottle'
-import type { Role } from './palette'
+import { fromHex, isHex, toHex } from './color.ts'
+import type { Bottle, RecipeItem } from './bottle.ts'
+import type { Role } from './palette.ts'
 
 export const BOTTLE_VERSION = 1
 export const SHELF_VERSION = 1

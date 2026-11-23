@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { hash, mulberry32, pick, weighted } from './prng'
+import { hash, mulberry32, pick, weighted } from './prng.ts'
 
 describe('hash', () => {
   it('is vast en spreidt', () => {

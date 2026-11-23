@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { cauldron, emptyCauldron, MAX_ITEMS, type Cauldron, type CauldronAction } from './cauldron'
+import { cauldron, emptyCauldron, MAX_ITEMS, type Cauldron, type CauldronAction } from './cauldron.ts'
 
 const run = (...actions: CauldronAction[]): Cauldron => actions.reduce(cauldron, emptyCauldron())
 

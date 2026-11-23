@@ -1,9 +1,9 @@
 // Een flesje: de uitkomst, en het recept om verder te brouwen
 
-import { fromHex, toHex } from './color'
-import { isSpecial, photoIngredient, type Ingredient, type Pigment } from './ingredients'
-import type { Brew } from './mix'
-import type { Swatch } from './palette'
+import { fromHex, toHex } from './color.ts'
+import { isSpecial, photoIngredient, type Ingredient, type Pigment } from './ingredients.ts'
+import type { Brew } from './mix.ts'
+import type { Swatch } from './palette.ts'
 
 /** Een potje uit de kast heeft genoeg aan zijn id. Een foto neemt zijn pigmenten mee */
 export interface RecipeItem {

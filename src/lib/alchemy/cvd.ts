@@ -1,7 +1,7 @@
 // Door de monocle: hoe het palet eruitziet voor iemand die kleuren anders ziet
 
-import { deltaEOK, hexToOklab, hexToRgb, linearize, linearRgbToHex, type Hex } from './color'
-import type { Role } from './palette'
+import { deltaEOK, hexToOklab, hexToRgb, linearize, linearRgbToHex, type Hex } from './color.ts'
+import type { Role } from './palette.ts'
 
 export type Vision = 'deuteranopie' | 'protanopie' | 'tritanopie'
 

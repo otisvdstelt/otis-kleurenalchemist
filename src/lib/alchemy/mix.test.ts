@@ -1,10 +1,10 @@
 import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
-import { fromHex } from './color'
-import { checkPalette } from './contrast'
-import { parseIngredients, type Ingredient } from './ingredients'
-import { boilState, brew, homogeneity, overflowStrength, seedOf } from './mix'
-import { rolesFor } from './palette'
+import { fromHex } from './color.ts'
+import { checkPalette } from './contrast.ts'
+import { parseIngredients, type Ingredient } from './ingredients.ts'
+import { boilState, brew, homogeneity, overflowStrength, seedOf } from './mix.ts'
+import { rolesFor } from './palette.ts'
 
 const shelf = parseIngredients(JSON.parse(readFileSync(new URL('../../../public/data/ingredients.json', import.meta.url), 'utf8')))
 const get = (id: string) => {

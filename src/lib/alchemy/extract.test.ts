@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { deltaEOK, fromHex, hexToOklab, hexToRgb } from './color'
-import { kmeans, photoPigments, samplesFromRgba } from './extract'
-import { mulberry32 } from './prng'
+import { deltaEOK, fromHex, hexToOklab, hexToRgb } from './color.ts'
+import { kmeans, photoPigments, samplesFromRgba } from './extract.ts'
+import { mulberry32 } from './prng.ts'
 
 /** Een synthetisch plaatje: vlakken in deze kleuren, met wat ruis, als RGBA-bytes */
 function picture(blocks: { hex: string; pixels: number }[], noise = 6, seed = 1): Uint8ClampedArray {

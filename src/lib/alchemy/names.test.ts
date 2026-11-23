@@ -1,9 +1,9 @@
 import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import { strings } from '../../content/strings'
-import { parseIngredients } from './ingredients'
-import { brew } from './mix'
-import { nameBrew } from './names'
+import { parseIngredients } from './ingredients.ts'
+import { brew } from './mix.ts'
+import { nameBrew } from './names.ts'
 
 const shelf = parseIngredients(JSON.parse(readFileSync(new URL('../../../public/data/ingredients.json', import.meta.url), 'utf8')))
 const take = (...ids: string[]) => ids.map((id) => shelf.find((i) => i.id === id)!)

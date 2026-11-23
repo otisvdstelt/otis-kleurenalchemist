@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
-import { fromHex } from './color'
-import { BadIngredients, isSpecial, jarLayers, parseIngredients } from './ingredients'
+import { fromHex } from './color.ts'
+import { BadIngredients, isSpecial, jarLayers, parseIngredients } from './ingredients.ts'
 
 const shipped = JSON.parse(readFileSync(new URL('../../../public/data/ingredients.json', import.meta.url), 'utf8')) as unknown
 

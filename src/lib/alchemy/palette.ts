@@ -1,6 +1,6 @@
 // Een palet is een rij kleuren, en elke kleur heeft een rol. De rollen sturen de contrastcheck
 
-import type { Hex } from './color'
+import type { Hex } from './color.ts'
 
 export type Role = 'achtergrond' | 'oppervlak' | 'tekst' | 'accent' | 'signaal'
 

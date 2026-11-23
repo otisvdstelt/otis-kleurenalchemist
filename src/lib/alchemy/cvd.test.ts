@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { deltaEOK, fromHex } from './color'
-import { confusions, simulate, VISIONS } from './cvd'
+import { deltaEOK, fromHex } from './color.ts'
+import { confusions, simulate, VISIONS } from './cvd.ts'
 
 describe('simulate', () => {
   it('laat grijs grijs', () => {

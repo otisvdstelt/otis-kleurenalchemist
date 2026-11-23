@@ -1,7 +1,7 @@
 // Wat er in de ketel zit, en wat je ermee kunt doen. Een pure reducer: de store om hem heen houdt hem vast
 
-import type { Hex } from './color'
-import { clampSize, DEFAULT_SIZE } from './palette'
+import type { Hex } from './color.ts'
+import { clampSize, DEFAULT_SIZE } from './palette.ts'
 
 /** Meer dan dit past er echt niet in, ook niet als het al overkookt */
 export const MAX_ITEMS = 12

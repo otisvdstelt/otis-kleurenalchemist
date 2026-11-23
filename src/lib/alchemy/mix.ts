@@ -2,12 +2,12 @@
 // Alles in OKLab en OKLCH, en waar pigmenten echt door elkaar gaan spectraal, zoals verf mengt
 
 import { Color, mix as spectralMix } from 'spectral.js'
-import { clamp, deltaEOK, fromHex, lerpHue, lerpOklab, meanHue, toHex, type Hex, type Oklch } from './color'
-import type { Check } from './contrast'
-import { isSpecial, type Effect, type Ingredient } from './ingredients'
-import { clampSize, rolesFor, type Role, type Swatch } from './palette'
-import { pinch } from './pinch'
-import { hash, mulberry32, weighted, type Random } from './prng'
+import { clamp, deltaEOK, fromHex, lerpHue, lerpOklab, meanHue, toHex, type Hex, type Oklch } from './color.ts'
+import type { Check } from './contrast.ts'
+import { isSpecial, type Effect, type Ingredient } from './ingredients.ts'
+import { clampSize, rolesFor, type Role, type Swatch } from './palette.ts'
+import { pinch } from './pinch.ts'
+import { hash, mulberry32, weighted, type Random } from './prng.ts'
 
 /** Hoe de ketel erbij staat */
 export type Boil = 'leeg' | 'rustig' | 'onrustig' | 'overkoken'

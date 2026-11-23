@@ -1,10 +1,10 @@
 import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import { strings } from '../../content/strings'
-import { bottle, ingredientsOf, type Bottle } from './bottle'
-import { photoIngredient, parseIngredients } from './ingredients'
-import { brew } from './mix'
-import { decodeBottle, decodeShelf, encodeBottle, encodeShelf, fromBase64Url, readRoute, toBase64Url } from './share'
+import { bottle, ingredientsOf, type Bottle } from './bottle.ts'
+import { photoIngredient, parseIngredients } from './ingredients.ts'
+import { brew } from './mix.ts'
+import { decodeBottle, decodeShelf, encodeBottle, encodeShelf, fromBase64Url, readRoute, toBase64Url } from './share.ts'
 
 const shelf = parseIngredients(JSON.parse(readFileSync(new URL('../../../public/data/ingredients.json', import.meta.url), 'utf8')))
 const take = (...ids: string[]) => ids.map((id) => shelf.find((i) => i.id === id)!)

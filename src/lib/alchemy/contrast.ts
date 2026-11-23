@@ -1,7 +1,7 @@
 // Is het leesbaar? Volgens WCAG 2.2, met APCA ernaast als extra informatie
 
-import { hexToRgb, linearize, type Hex } from './color'
-import type { Role } from './palette'
+import { hexToRgb, linearize, type Hex } from './color.ts'
+import type { Role } from './palette.ts'
 
 /** Relatieve luminantie volgens WCAG 2.2 */
 export function luminance(hex: Hex): number {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { deltaEOK, fromHex, hexToOklab, inGamut, isHex, lerpHue, linearRgbToOklab, linearize, meanHue, oklabToLinearRgb, toHex } from './color'
+import { deltaEOK, fromHex, hexToOklab, inGamut, isHex, lerpHue, linearRgbToOklab, linearize, meanHue, oklabToLinearRgb, toHex } from './color.ts'
 
 describe('hex en OKLCH', () => {
   it('gaat heen en terug', () => {

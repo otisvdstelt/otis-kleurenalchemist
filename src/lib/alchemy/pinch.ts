@@ -1,8 +1,8 @@
 // Een snuifje contrast. Schuift alleen de lichtheid, en zo weinig mogelijk, tot elk paar zijn drempel haalt
 
-import { checkPalette, contrastRatio, luminance, pairsFor, requiredFor, THRESHOLDS, type Check } from './contrast'
-import { fromHex, toHex, type Hex } from './color'
-import type { Swatch } from './palette'
+import { checkPalette, contrastRatio, luminance, pairsFor, requiredFor, THRESHOLDS, type Check } from './contrast.ts'
+import { fromHex, toHex, type Hex } from './color.ts'
+import type { Swatch } from './palette.ts'
 
 export interface Pinched {
   swatches: Swatch[]

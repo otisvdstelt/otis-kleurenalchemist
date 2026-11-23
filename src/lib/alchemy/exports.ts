@@ -1,8 +1,8 @@
 // Het palet mee naar je eigen werk: CSS, een Tailwind-thema of JSON. De PNG van het flesje tekent de papieren laag
 
-import { fromHex } from './color'
-import type { Bottle } from './bottle'
-import { roleNumber, type Swatch } from './palette'
+import { fromHex } from './color.ts'
+import type { Bottle } from './bottle.ts'
+import { roleNumber, type Swatch } from './palette.ts'
 
 /** De naam van een kleur in code: achtergrond, accent, accent-2 */
 export function tokenName(swatches: readonly Swatch[], index: number): string {

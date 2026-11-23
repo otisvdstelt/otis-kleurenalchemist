@@ -1,10 +1,10 @@
 // Een naam voor het flesje, zoals iemand hem met de hand op het etiket zou schrijven. "Mos na regen"
 // De woorden zelf staan in src/content/strings.ts. Hier staat alleen hoe ze gekozen worden
 
-import { fromHex } from './color'
-import { isSpecial, type Ingredient } from './ingredients'
-import type { Brew } from './mix'
-import { mulberry32, pick } from './prng'
+import { fromHex } from './color.ts'
+import { isSpecial, type Ingredient } from './ingredients.ts'
+import type { Brew } from './mix.ts'
+import { mulberry32, pick } from './prng.ts'
 
 export type Mood = 'donker' | 'licht' | 'warm' | 'koel' | 'dof' | 'fel' | 'glad' | 'streperig'
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { apca, checkPalette, contrastRatio, formatRatio, luminance } from './contrast'
+import { apca, checkPalette, contrastRatio, formatRatio, luminance } from './contrast.ts'
 
 describe('WCAG 2.2', () => {
   it('zwart op wit is 21:1', () => {

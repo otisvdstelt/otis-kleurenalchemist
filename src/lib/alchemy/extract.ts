@@ -1,8 +1,8 @@
 // Kleuren uit een foto halen: k-means++ in OKLab. Draait in een worker, maar hier staat alleen de rekensom
 
-import { deltaEOK, fromOklab, linearize, linearRgbToOklab, type Oklab } from './color'
-import type { Pigment } from './ingredients'
-import { mulberry32, weighted, type Random } from './prng'
+import { deltaEOK, fromOklab, linearize, linearRgbToOklab, type Oklab } from './color.ts'
+import type { Pigment } from './ingredients.ts'
+import { mulberry32, weighted, type Random } from './prng.ts'
 
 export interface Samples {
   /** l, a, b achter elkaar */
