@@ -153,12 +153,16 @@ export function Ketel({ onPoured, onScreen }: KetelProps) {
         <button type="button" className="inked" disabled={!brew} onClick={() => store.stir(1)}>
           {strings.ketel.roer}
         </button>
-        <button type="button" className="quiet" disabled={inside.length === 0} onClick={() => store.skim()}>
-          {strings.ketel.afscheppen}
-        </button>
-        <button type="button" className="quiet" disabled={inside.length === 0} onClick={() => store.empty()}>
-          {strings.ketel.legen}
-        </button>
+        {inside.length > 0 && (
+          <>
+            <button type="button" className="quiet" onClick={() => store.skim()}>
+              {strings.ketel.afscheppen}
+            </button>
+            <button type="button" className="quiet" onClick={() => store.empty()}>
+              {strings.ketel.legen}
+            </button>
+          </>
+        )}
         {canUndo && (
           <button type="button" className="quiet" aria-keyshortcuts="Control+Z Meta+Z" onClick={() => store.undo()}>
             {strings.ketel.ongedaan}
