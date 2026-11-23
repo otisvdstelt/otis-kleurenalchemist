@@ -67,14 +67,14 @@ export function Contrastcheck({ flask, pinched, onPinch }: ContrastcheckProps) {
           return (
             <li key={`${check.fg}-${check.bg}`} className="check" data-goed={check.passes}>
               <span className="check-monster" style={{ background: bg.hex, color: fg.hex }} aria-hidden="true">
-                {check.kind === 'tekst' ? 'Aa' : <span className="check-blok" style={{ background: fg.hex }} />}
+                {check.kind === 'onderdeel' ? <span className="check-blok" style={{ background: fg.hex }} /> : 'Aa'}
               </span>
               <div className="check-woorden">
                 <p className="check-paar">
-                  <b>{capital(strings.contrast.paar(roleName(swatches, check.fg), roleName(swatches, check.bg)))}</b>{' '}
+                  <b>{check.kind === 'knop' ? capital(strings.contrast.knop(roleName(swatches, check.bg))) : capital(strings.contrast.paar(roleName(swatches, check.fg), roleName(swatches, check.bg)))}</b>{' '}
                   <span className="check-getal">{formatRatio(check.ratio)}</span> <span className="check-niveau">{strings.contrast.niveau[check.level]}</span>
                 </p>
-                <p className="check-zin">{check.kind === 'tekst' ? strings.contrast.tekst[check.level] : strings.contrast.onderdeel[check.level]}</p>
+                <p className="check-zin">{check.kind === 'tekst' ? strings.contrast.tekst[check.level] : check.kind === 'knop' ? strings.contrast.knopZin[check.level] : strings.contrast.onderdeel[check.level]}</p>
                 <p className="check-klein">
                   {strings.contrast.nodig(formatRatio(check.required))} · {strings.contrast.apca} Lc {Math.round(Math.abs(check.lc))}
                   <span aria-hidden="true">*</span>

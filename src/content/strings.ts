@@ -94,7 +94,7 @@ export const strings = {
   proefvel: {
     kop: 'Proefvel',
     titel: 'Brief van de alchemist',
-    tekst: 'Dit is hoe je palet eruitziet als er echt iets op staat: een kop, een stukje tekst, een knop en een label.',
+    tekst: 'Zo ziet je palet eruit als er echt iets op staat: een kop, een stukje tekst, een knop en een label.',
     knop: 'Doe maar',
     label: 'Nieuw',
     link: 'nog een kleur',
@@ -119,6 +119,13 @@ export const strings = {
       aa: 'Valt genoeg op voor een knop of een lijn.',
       groot: 'Valt genoeg op voor een knop of een lijn.',
       nee: 'Valt weg tegen de achtergrond. Een knop in deze kleur zie je slecht.',
+    } satisfies Record<Level, string>,
+    knop: (rol: string) => `tekst op een knop in ${rol}`,
+    knopZin: {
+      aaa: 'De tekst op een knop in deze kleur leest heel goed.',
+      aa: 'De tekst op een knop in deze kleur leest goed.',
+      groot: 'Alleen grote tekst leest op een knop in deze kleur. Gewone knoptekst is te zwak.',
+      nee: 'Tekst op een knop in deze kleur is slecht te lezen.',
     } satisfies Record<Level, string>,
     nodig: (ratio: string) => `nodig: ${ratio}`,
     apca: 'APCA',
