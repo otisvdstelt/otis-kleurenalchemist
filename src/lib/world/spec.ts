@@ -45,8 +45,8 @@ export const VIEWS = {
   wide: { position: [-0.15, 2.3, 3.5] as Vec3, target: [-0.3, 1.3, -1.6] as Vec3, fov: 44 },
   tall: { position: [-0.3, 2.6, 4.6] as Vec3, target: [-0.45, 1.2, -1.5] as Vec3, fov: 62 },
   /** Dicht bij de plank met flesjes */
-  plank: { position: [0.22, 2.8, -0.9] as Vec3, target: [0.22, 2.75, -3.0] as Vec3, fov: 46 },
-  plankTall: { position: [0.22, 2.8, -0.2] as Vec3, target: [0.22, 2.75, -3.0] as Vec3, fov: 62 },
+  plank: { position: [0.22, 2.6, -0.85] as Vec3, target: [0.22, 2.48, -3.0] as Vec3, fov: 50 },
+  plankTall: { position: [0.22, 2.55, -0.2] as Vec3, target: [0.22, 2.42, -3.0] as Vec3, fov: 66 },
 }
 
 // ============================================================ potjes
