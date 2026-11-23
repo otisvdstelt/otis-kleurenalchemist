@@ -196,9 +196,8 @@ describe('bijzondere potjes werken op het palet dat er al is', () => {
       expect(pinched.pinch!.before).toEqual(plain.swatches)
       // Alleen wat niet leesbaar was, schuift
       const failing = new Set(checkPalette(plain.swatches).filter((c) => !c.passes).flatMap((c) => [c.fg, c.bg]))
-      pinched.swatches.forEach((s, i) => {
-        if (!failing.has(i)) expect(s.hex).toBe(plain.swatches[i].hex)
-      })
+      const untouched = pinched.swatches.filter((_, i) => !failing.has(i)).map((s) => s.hex)
+      expect(untouched).toEqual(plain.swatches.filter((_, i) => !failing.has(i)).map((s) => s.hex))
       expect(nameBrew(pinched, take(...ids, 'contrast'), strings.namen)).toBe(nameBrew(plain, take(...ids), strings.namen))
     }
   })
@@ -208,12 +207,10 @@ describe('bijzondere potjes werken op het palet dat er al is', () => {
     const watered = brew({ ingredients: take('herfst', 'water'), stirs: 5, size: 5 })!
     expect(watered.seed).toBe(plain.seed)
     expect(watered.base).toEqual(plain.swatches)
-    watered.swatches.forEach((s, i) => {
-      const before = fromHex(plain.swatches[i].hex)
-      const after = fromHex(s.hex)
-      expect(after.l).toBeGreaterThanOrEqual(before.l - 0.005)
-      if (before.c > 0.06) expect(Math.abs(((after.h - before.h + 540) % 360) - 180)).toBeLessThan(8)
-    })
+    const pairs = watered.swatches.map((s, i) => [fromHex(plain.swatches[i].hex), fromHex(s.hex)] as const)
+    for (const [before, after] of pairs) expect(after.l).toBeGreaterThanOrEqual(before.l - 0.005)
+    const hueShifts = pairs.filter(([before]) => before.c > 0.06).map(([before, after]) => Math.abs(((after.h - before.h + 540) % 360) - 180))
+    expect(Math.max(0, ...hueShifts)).toBeLessThan(8)
   })
 })
 
