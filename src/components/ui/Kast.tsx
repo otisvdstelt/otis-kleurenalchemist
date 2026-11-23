@@ -85,8 +85,8 @@ function Jar({ ingredient, count }: { ingredient: Ingredient; count: number }) {
 function Badge({ ingredient, count }: { ingredient: Ingredient; count: number }) {
   if (count === 0) return null
   return (
-    <button type="button" className="potje-aantal" aria-label={strings.kast.haalEruit(plainName(ingredient), count)} title={strings.kast.haalEruit(plainName(ingredient), count)} onClick={() => store.removeOne(ingredient.id)}>
-      <span aria-hidden="true">{count}×</span>
+    <button type="button" className="potje-aantal" title={strings.kast.haalEruit(plainName(ingredient))} onClick={() => store.removeOne(ingredient.id)}>
+      {count}×<span className="sr-only"> {strings.kast.haalEruitNa(plainName(ingredient))}</span>
     </button>
   )
 }
