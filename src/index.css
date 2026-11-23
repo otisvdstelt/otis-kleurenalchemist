@@ -1235,6 +1235,312 @@
     border-top: 1px dashed var(--color-rule);
   }
 
+  /* ============================================================ een foto erin */
+
+  .foto {
+    display: grid;
+    justify-items: start;
+    gap: 0.2rem;
+    margin-top: 1rem;
+  }
+
+  .foto-knop {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    min-height: 2.75rem;
+    font-size: 1.12rem;
+    cursor: pointer;
+    rotate: -1deg;
+    transition: rotate 300ms var(--ease-out-expo);
+  }
+
+  .foto-knop:hover {
+    rotate: 0.5deg;
+  }
+
+  .foto:has(input:focus-visible) .foto-knop {
+    outline: 2.5px solid var(--color-dusk);
+    outline-offset: 3px;
+  }
+
+  .foto[aria-busy='true'] .foto-knop {
+    animation: waiting 1.6s ease-in-out infinite;
+  }
+
+  /* Een polaroidje, getekend */
+  .foto-polaroid {
+    width: 1.5rem;
+    height: 1.7rem;
+    border: 1.5px solid currentColor;
+    border-bottom-width: 5px;
+    border-radius: 2px;
+    background: linear-gradient(160deg, var(--color-mist), var(--color-terracotta));
+    rotate: -6deg;
+  }
+
+  .foto-camera {
+    min-height: 2.75rem;
+    cursor: pointer;
+  }
+
+  .foto-uitleg {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--color-ink-soft);
+  }
+
+  .foto-belofte {
+    margin: 0;
+    font-size: 0.98rem;
+    color: var(--color-moss);
+  }
+
+  .sleep-hint {
+    position: fixed;
+    left: 50%;
+    top: 45%;
+    z-index: 70;
+    margin: 0;
+    translate: -50% -50%;
+    font-size: 1.5rem;
+    rotate: -2deg;
+    pointer-events: none;
+  }
+
+  /* ============================================================ meenemen */
+
+  .toonbank-acties {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.8rem;
+    margin-top: 0.9rem;
+  }
+
+  .toonbank-opplank,
+  .toonbank-gedeeld {
+    color: var(--color-moss);
+    font-size: 1.08rem;
+  }
+
+  .toonbank-gedeeld {
+    margin: 0.5rem 0 0;
+  }
+
+  .meenemen {
+    margin-top: 1.4rem;
+  }
+
+  .meenemen-link {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .meenemen-uitleg {
+    margin: 0.4rem 0 0;
+    font-size: 0.85rem;
+    color: var(--color-ink-soft);
+  }
+
+  .meenemen-rij {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 0.6rem;
+    margin: 0.4rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .meenemen-rij li {
+    position: relative;
+  }
+
+  .meenemen-bevestiging {
+    position: absolute;
+    left: 50%;
+    top: -1.6rem;
+    z-index: 2;
+    translate: -50% 0;
+    pointer-events: none;
+    animation: plak 300ms var(--ease-out-expo);
+  }
+
+  /* ============================================================ de plank */
+
+  .plank {
+    position: relative;
+    grid-column: 1 / -1;
+    padding-top: 0.5rem;
+  }
+
+  .plank-kop {
+    margin: 0 0 0.3rem;
+    font-family: var(--font-script);
+    font-weight: 400;
+    font-size: 1.35rem;
+    line-height: 1.7;
+  }
+
+  .plank-leeg {
+    margin: 0;
+    color: var(--color-ink-soft);
+  }
+
+  .plank-rij {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1rem;
+    margin: 0;
+    padding: 0 0 0.55rem;
+    list-style: none;
+    background: linear-gradient(transparent calc(100% - 0.45rem), var(--color-wood) calc(100% - 0.45rem));
+  }
+
+  .plank-item {
+    display: grid;
+    justify-items: center;
+    width: 7rem;
+    transition: translate 260ms var(--ease-out-expo);
+  }
+
+  .plank-item[data-vast='true'] {
+    translate: 0 -0.5rem;
+  }
+
+  .plank-fles {
+    display: grid;
+    justify-items: center;
+    gap: 0.1rem;
+    width: 100%;
+    padding: 0.2rem;
+    border: 0;
+    background: none;
+    color: var(--color-ink);
+  }
+
+  .plank-glas {
+    width: 2.6rem;
+    height: auto;
+    overflow: visible;
+    transition: translate 260ms var(--ease-out-expo);
+  }
+
+  .plank-fles:hover .plank-glas {
+    translate: 0 -4px;
+  }
+
+  .plank-naam {
+    font-size: 0.92rem;
+    line-height: 1.2;
+    text-align: center;
+    text-wrap: balance;
+  }
+
+  .plank-handjes {
+    display: flex;
+    align-items: center;
+  }
+
+  .plank-greep {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 0;
+    border-radius: 50%;
+    background: none;
+    color: var(--color-ink-soft);
+    font-size: 1.2rem;
+    cursor: grab;
+    touch-action: none;
+  }
+
+  .plank-greep[aria-pressed='true'] {
+    color: var(--color-ink);
+    background: var(--color-oat);
+  }
+
+  .plank-weg {
+    font-size: 0.92rem;
+    padding: 0 0.2rem;
+    white-space: nowrap;
+  }
+
+  .plank-deel {
+    margin-top: 0.3rem;
+  }
+
+  .plank-bevestiging {
+    margin-left: 0.5rem;
+  }
+
+  .plank-bezoek {
+    display: grid;
+    gap: 0.5rem;
+    margin: 0.2rem 0 1rem;
+    padding: 0.8rem 1rem;
+  }
+
+  .plank-bezoek > p {
+    margin: 0;
+    font-size: 1.12rem;
+  }
+
+  .plank-knoppen {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    align-items: center;
+  }
+
+  /* Op een telefoon is de plank een strook onderaan */
+  @media (max-width: 1023px) {
+    .papier:not([data-wereld='true']) {
+      padding-bottom: 8rem;
+    }
+
+    .papier:not([data-wereld='true']) .plank {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 5;
+      max-height: 60svh;
+      overflow-y: auto;
+      padding: 0.3rem 0.8rem calc(0.4rem + env(safe-area-inset-bottom));
+      background: var(--color-canvas) var(--tooth);
+      box-shadow: 0 -6px 16px -8px rgb(44 40 35 / 0.4);
+    }
+
+    .plank .plank-kop {
+      font-size: 1.05rem;
+      line-height: 1.4;
+    }
+
+    .plank .plank-rij {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .plank-item {
+      flex: 0 0 auto;
+      width: 5rem;
+    }
+
+    .plank-glas {
+      width: 1.8rem;
+    }
+
+    .plank-deel {
+      min-height: 2rem;
+    }
+  }
+
   /* ============================================================ met de werkplaats erbij */
 
   /* De werkplaats vult het scherm. De papieren laag ligt erover, en laat de wijzer door waar niks te drukken is */
@@ -1348,6 +1654,33 @@
     scrollbar-width: thin;
     scrollbar-color: var(--color-rule) transparent;
     padding: 1rem 1.3rem 1.4rem;
+  }
+
+  /* Met de werkplaats erbij komt de plank alleen tevoorschijn bij de plank */
+  .papier[data-wereld='true']:not([data-uitzicht='plank']) .plank {
+    display: none;
+  }
+
+  .papier[data-wereld='true'] .plank {
+    position: absolute;
+    left: 50%;
+    bottom: 1rem;
+    width: min(46rem, calc(100vw - 2rem));
+    max-height: 46svh;
+    overflow-y: auto;
+    translate: -50% 0;
+    padding: 0.6rem 1.2rem 0.9rem;
+    isolation: isolate;
+  }
+
+  .papier[data-wereld='true'] .plank::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: 3px 5px 4px 6px;
+    background: var(--color-canvas) var(--tooth);
+    filter: url(#deckle) drop-shadow(0 9px 12px rgb(58 42 32 / 0.26));
   }
 
   /* Bij de plank horen de kast en de ketel even niet in beeld */
