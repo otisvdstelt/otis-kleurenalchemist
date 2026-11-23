@@ -1,0 +1,72 @@
+import { strings } from '../../content/strings'
+import { isSpecial, type Ingredient } from '../../lib/alchemy/ingredients'
+import { store, useAlchemy } from '../../lib/store'
+import { Potje } from './Potje'
+
+interface KastProps {
+  ingredients: readonly Ingredient[] | undefined
+  failed: boolean
+}
+
+/** De planken vol potjes. Elk potje is een knop: erop drukken gooit het in de ketel */
+export function Kast({ ingredients, failed }: KastProps) {
+  const items = useAlchemy((s) => s.cauldron.items)
+  const count = (id: string) => items.filter((item) => item === id).length
+  const colours = ingredients?.filter((i) => !isSpecial(i)) ?? []
+  const special = ingredients?.filter(isSpecial) ?? []
+
+  return (
+    <section className="kast" aria-labelledby="kast-kop">
+      <h2 id="kast-kop" className="kast-kop">
+        {strings.kast.kop}
+      </h2>
+      {failed && <p className="kast-mislukt hand">{strings.kast.mislukt}</p>}
+      {!ingredients && !failed && (
+        <ul className="kast-planken" aria-busy="true" aria-label={strings.kast.wachten}>
+          {Array.from({ length: 8 }, (_, i) => (
+            <li key={i}>
+              <span className="potje-knop" data-wachten="true" />
+            </li>
+          ))}
+        </ul>
+      )}
+      {ingredients && (
+        <>
+          <ul className="kast-planken">
+            {colours.map((ingredient) => (
+              <li key={ingredient.id}>
+                <Jar ingredient={ingredient} count={count(ingredient.id)} />
+              </li>
+            ))}
+          </ul>
+          <h3 className="kast-sub">{strings.kast.bijzonder}</h3>
+          <ul className="kast-planken" data-bijzonder="true">
+            {special.map((ingredient) => (
+              <li key={ingredient.id}>
+                <Jar ingredient={ingredient} count={count(ingredient.id)} />
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+    </section>
+  )
+}
+
+function Jar({ ingredient, count }: { ingredient: Ingredient; count: number }) {
+  const label = `etiket-${ingredient.id}`
+  return (
+    <button type="button" className="potje-knop" aria-label={`${strings.kast.gooi(ingredient.name)}${count ? `, ${strings.kast.aantal(count)}` : ''}`} aria-describedby={label} onClick={() => store.add(ingredient.id)}>
+      <Potje ingredient={ingredient} className="potje" />
+      <span className="potje-naam">{ingredient.name}</span>
+      <span id={label} className="potje-etiket">
+        {ingredient.label}
+      </span>
+      {count > 0 && (
+        <span className="potje-aantal" aria-hidden="true">
+          {count}×
+        </span>
+      )}
+    </button>
+  )
+}
