@@ -25,6 +25,10 @@ export const strings = {
     bezig: 'De ketel wordt opgestookt',
     klaar: 'De ketel staat klaar',
   },
+  uitzicht: {
+    naarPlank: 'naar de plank',
+    naarKetel: 'terug naar de ketel',
+  },
   wereld: {
     mislukt: 'De werkplaats kon op dit apparaat niet geschilderd worden. Alles werkt nog, op papier.',
   },
