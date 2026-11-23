@@ -6,8 +6,13 @@ import { Contrastcheck } from './Contrastcheck'
 import { Fles } from './Fles'
 import { Proefvel } from './Proefvel'
 
+interface FlesjeProps {
+  /** Met de werkplaats erbij ligt het flesje op een vel dat je weg kunt leggen */
+  onClose?: () => void
+}
+
 /** Het laatst gevulde flesje: het palet, het etiket, het proefvel en de contrastcheck */
-export const Flesje = forwardRef<HTMLElement>(function Flesje(_, ref) {
+export const Flesje = forwardRef<HTMLElement, FlesjeProps>(function Flesje({ onClose }, ref) {
   const flask = useAlchemy((s) => s.flask)
   const corks = useAlchemy((s) => s.cauldron.corks)
   const size = useAlchemy((s) => s.cauldron.size)
@@ -58,9 +63,16 @@ export const Flesje = forwardRef<HTMLElement>(function Flesje(_, ref) {
 
   return (
     <section ref={ref} className="toonbank" aria-labelledby="fles-kop" tabIndex={-1}>
-      <h2 id="fles-kop" className="toonbank-kop">
-        {strings.fles.kop}
-      </h2>
+      <div className="toonbank-boven">
+        <h2 id="fles-kop" className="toonbank-kop">
+          {strings.fles.kop}
+        </h2>
+        {onClose && (
+          <button type="button" className="quiet" onClick={onClose}>
+            {strings.fles.wegzetten}
+          </button>
+        )}
+      </div>
 
       <div className="flesje">
         <Fles swatches={swatches} pourKey={`${bottle.recipe.seed}-${bottle.name}`} className="flesje-glas" />
