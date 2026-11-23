@@ -1,11 +1,12 @@
 // Kleur in OKLab en OKLCH. Hier wordt nooit in RGB gerekend, behalve aan de rand, waar een kleur het scherm op moet
 
-import { converter, formatHex, modeLrgb, modeOklab, modeOklch, modeRgb, parseHex, toGamut, useMode, type Oklch as CuloriOklch } from 'culori/fn'
+import { converter, formatHex, modeLrgb, modeOklab, modeOklch, modeRgb, parseHex, toGamut, useMode as register, type Oklch as CuloriOklch } from 'culori/fn'
 
-useMode(modeRgb)
-useMode(modeLrgb)
-useMode(modeOklab)
-useMode(modeOklch)
+// culori noemt dit useMode, maar het is geen React-hook: het meldt alleen de kleurruimtes aan
+register(modeRgb)
+register(modeLrgb)
+register(modeOklab)
+register(modeOklch)
 
 /** Lichtheid 0 tot 1, chroma 0 tot ongeveer 0,37, tint in graden */
 export interface Oklch {
