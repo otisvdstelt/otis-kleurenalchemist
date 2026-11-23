@@ -14,30 +14,30 @@ export const CAULDRON = { at: [0, 0, -1.15] as Vec3, radius: 0.62, height: 0.72,
 export const LIQUID_Y = CAULDRON.lift + CAULDRON.height - 0.1
 
 /** Drie planken tegen de achterwand, links van de ketel */
-export const SHELVES = { x0: -4.7, x1: -1.05, z: -3.02, depth: 0.36, heights: [1.2, 1.92, 2.64] as const, thickness: 0.05 }
+export const SHELVES = { x0: -3.75, x1: -0.85, z: -3.0, depth: 0.4, heights: [1.15, 1.9, 2.65] as const, thickness: 0.05 }
 
 /** De werkbank rechts, met daarop de bijzondere potjes, de vijzel, boeken, kaarsen en het lege flesje */
-export const BENCH = { x0: 1.25, x1: 3.9, z0: -2.55, z1: -1.55, top: 0.92 }
+export const BENCH = { x0: 1.0, x1: 3.5, z0: -2.55, z1: -1.55, top: 0.92 }
 
 /** Het raam in de achterwand */
-export const WINDOW = { x0: 1.55, x1: 3.35, y0: 1.75, y1: 3.55 }
+export const WINDOW = { x0: 1.3, x1: 3.05, y0: 1.75, y1: 3.55 }
 
 /** Het flesje waar het palet in gaat, op de hoek van de werkbank bij de ketel */
-export const FLASK = { at: [1.62, BENCH.top, -1.78] as Vec3, height: 0.42, radius: 0.13 }
+export const FLASK = { at: [1.32, BENCH.top, -1.8] as Vec3, height: 0.42, radius: 0.13 }
 
 /** De pollepel draait om het midden van de ketel */
 export const LADLE_PIVOT: Vec3 = [CAULDRON.at[0], CAULDRON.lift + CAULDRON.height, CAULDRON.at[2]]
 
 /** Waar de camera staat en waar hij naar kijkt, op een breed scherm en op een telefoon */
 export const VIEWS = {
-  wide: { position: [0.55, 2.35, 3.7] as Vec3, target: [-0.5, 1.25, -1.6] as Vec3, fov: 42 },
-  tall: { position: [-0.4, 2.7, 4.9] as Vec3, target: [-0.6, 1.35, -1.5] as Vec3, fov: 58 },
+  wide: { position: [-0.15, 2.3, 3.5] as Vec3, target: [-0.3, 1.3, -1.6] as Vec3, fov: 44 },
+  tall: { position: [-0.3, 2.6, 4.6] as Vec3, target: [-0.45, 1.2, -1.5] as Vec3, fov: 62 },
 }
 
 // ============================================================ potjes
 
 /** Basishoogte van een potje. De `hoogte` uit de JSON schaalt dit */
-const JAR_HEIGHT = 0.3
+const JAR_HEIGHT = 0.36
 
 export interface JarForm {
   /** De buitenkant van het glas, als [straal, hoogte] van onder naar boven */
@@ -55,6 +55,7 @@ export interface JarForm {
 export function jarForm(shape: JarShape, scale: number): JarForm {
   const h = JAR_HEIGHT * scale
   let outline: [number, number][]
+  const w = 1.25
   switch (shape) {
     case 'pot':
       outline = [[0, 0], [0.1, 0], [0.11, 0.012], [0.11, h * 0.86], [0.099, h * 0.94], [0.09, h]]
@@ -79,6 +80,7 @@ export function jarForm(shape: JarShape, scale: number): JarForm {
       outline = [[0, 0], [0.112, 0], [0.118, 0.014], [0.05, h * 0.62], [0.04, h * 0.7], [0.04, h]]
       break
   }
+  outline = outline.map(([r, y]) => [r * w, y])
   const mouth = outline[outline.length - 1][0]
   const widest = Math.max(...outline.map(([r]) => r))
   // Het poeder komt tot onder de hals

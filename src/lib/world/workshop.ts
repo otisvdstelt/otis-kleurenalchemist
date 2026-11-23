@@ -58,9 +58,8 @@ export function buildRoom(): Part[] {
   const random = seeded(11)
   for (let i = 0; i < 9; i++) {
     const x = left + 0.4 + random() * (right - left - 0.8)
-    const y = 0.4 + random() * (height - 1)
-    if (x > WINDOW.x0 - 0.3 && x < WINDOW.x1 + 0.3 && y > WINDOW.y0 - 0.3 && y < WINDOW.y1 + 0.3) continue
-    pieces.push(blob(0.1 + random() * 0.08, C.stone, { at: [x, y, back + 0.005], scale: [1.3, 0.8, 0.25] }, 0.25, i))
+    const y = 0.3 + random() * 0.9
+    pieces.push(blob(0.09 + random() * 0.06, C.plasterLow, { at: [x, y, back - 0.02], scale: [1.4, 0.7, 0.2] }, 0.25, i))
   }
   return [part('room', pieces)]
 }
@@ -91,9 +90,9 @@ export function buildWindow(): Part[] {
     [0.45, 0.55],
     [1.25, 0.4],
   ] as const) {
-    const beam = box(w, 4.2, 0.5, ['#000000', '#fff0cc'], { at: [x0 + dx, 0, 0] })
-    // Van het raam schuin omlaag de kamer in
-    put(beam, { rot: [0.95, 0, 0.28], at: [-0.25, y1 - 0.1, z + 0.25 - 4.2 * Math.sin(0.95) * 0 - 0.1] })
+    // Een balk die van het raam schuin omlaag de kamer in valt: bovenaan helder, aan de voet niks
+    const beam = box(w, 4.2, 0.5, ['#000000', '#fff0cc'], { at: [0, -4.2, 0] })
+    put(beam, { rot: [-0.85, 0, 0.3], at: [x0 + dx, y1 - 0.15, z + 0.1] })
     shafts.push(beam)
   }
   return [part('window', frame), part('window-light', [pane], 'glow'), part('shaft', shafts, 'light')]
