@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from 'react'
 import { strings } from '../../content/strings'
 import { sound } from '../../lib/sound'
+import { Colofon } from './Colofon'
 import type { Phase } from '../../lib/air'
 
 interface HeaderProps {
@@ -17,7 +18,10 @@ export function Header({ phase, onPhase, view, onView }: HeaderProps) {
   const loud = useSyncExternalStore(sound.subscribe, sound.on)
   return (
     <header className="kop">
-      <h1 className="slip paper woordmerk">{strings.titel}</h1>
+      <div className="kop-links">
+        <h1 className="slip paper woordmerk">{strings.titel}</h1>
+        <Colofon />
+      </div>
       <div className="kop-schakelaars">
         {view && onView && (
           <button type="button" className="slip paper schakelaar kop-uitzicht" aria-label={view === 'plank' ? strings.uitzicht.naarKetelLang : strings.uitzicht.naarPlankLang} onClick={() => onView(view === 'plank' ? 'werkplaats' : 'plank')}>

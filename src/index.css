@@ -1987,6 +1987,88 @@
     visibility: hidden;
   }
 
+  /* ============================================================ het colofon */
+
+  .colofon {
+    margin: auto;
+    width: min(40rem, calc(100vw - 2rem));
+    max-height: calc(100svh - 3rem);
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--color-ink);
+    overflow: visible;
+  }
+
+  .colofon::backdrop {
+    background: rgb(44 40 35 / 0.35);
+    backdrop-filter: blur(2px);
+  }
+
+  .colofon[open] {
+    animation: plak 400ms var(--ease-out-expo);
+  }
+
+  .colofon-vel {
+    position: relative;
+    isolation: isolate;
+    max-height: calc(100svh - 3rem);
+    overflow-y: auto;
+    padding: 1.4rem 1.6rem 1.6rem;
+  }
+
+  .colofon-vel::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: 3px 5px 4px 6px;
+    background: var(--color-canvas) var(--tooth);
+  }
+
+  .colofon-boven {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .colofon-kop {
+    margin: 0;
+    font-family: var(--font-script);
+    font-weight: 400;
+    font-size: 1.4rem;
+    line-height: 1.7;
+  }
+
+  .colofon h3 {
+    margin: 1.1rem 0 0.2rem;
+    font-family: var(--font-hand);
+    font-weight: 400;
+    font-size: 1.12rem;
+    color: var(--color-rust);
+  }
+
+  .colofon p,
+  .colofon ul {
+    margin: 0.2rem 0 0;
+    font-size: 0.98rem;
+  }
+
+  .colofon ul {
+    padding-left: 1.1rem;
+  }
+
+  .kop-links {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .kop-over {
+    rotate: 1.5deg;
+  }
+
   .kop-uitzicht {
     rotate: -1deg;
   }
