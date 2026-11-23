@@ -50,6 +50,8 @@ export const strings = {
     wachten: 'De potjes worden van de plank gehaald',
     mislukt: 'De potjes zijn niet van de plank gekomen. Ververs de pagina en probeer het nog eens.',
     gooi: (naam: string) => `Gooi ${naam} in de ketel`,
+    gooiVoor: 'Gooi',
+    gooiNa: 'in de ketel',
     aantal: (n: number) => `${n}× in de ketel`,
   },
   ketel: {

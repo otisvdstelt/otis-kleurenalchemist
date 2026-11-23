@@ -60,10 +60,19 @@ export function Kast({ ingredients, failed, photo }: KastProps) {
 function Jar({ ingredient, count }: { ingredient: Ingredient; count: number }) {
   const label = `etiket-${ingredient.id}`
   return (
-    <button type="button" className="potje-knop" aria-label={`${strings.kast.gooi(ingredient.name)}${count ? `, ${strings.kast.aantal(count)}` : ''}`} aria-describedby={label} onClick={() => store.add(ingredient.id)}>
+    <button type="button" className="potje-knop" aria-describedby={label} onClick={() => store.add(ingredient.id)}>
       <Potje ingredient={ingredient} className="potje" />
-      <span className="potje-naam">{ingredient.name}</span>
-      <span id={label} className="potje-etiket">
+      {/* De naam is wat je ziet, met ervoor en erachter wat er gebeurt, alleen voor wie het hoort */}
+      <span className="potje-naam">
+        <span className="sr-only">{strings.kast.gooiVoor} </span>
+        {ingredient.name}
+        <span className="sr-only">
+          {' '}
+          {strings.kast.gooiNa}
+          {count ? `, ${strings.kast.aantal(count)}` : ''}
+        </span>
+      </span>
+      <span id={label} className="potje-etiket" aria-hidden="true">
         {ingredient.label}
       </span>
       {count > 0 && (
