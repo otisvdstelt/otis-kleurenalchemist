@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { strings } from '../../content/strings'
-import { isSpecial, type Ingredient } from '../../lib/alchemy/ingredients'
+import { isSpecial, plainName, type Ingredient } from '../../lib/alchemy/ingredients'
 import { store, useAlchemy } from '../../lib/store'
 import { Potje } from './Potje'
 
@@ -37,16 +37,18 @@ export function Kast({ ingredients, failed, photo }: KastProps) {
         <>
           <ul className="kast-planken">
             {colours.map((ingredient) => (
-              <li key={ingredient.id}>
+              <li key={ingredient.id} className="potje-plek">
                 <Jar ingredient={ingredient} count={count(ingredient.id)} />
+                <Badge ingredient={ingredient} count={count(ingredient.id)} />
               </li>
             ))}
           </ul>
           <h3 className="kast-sub">{strings.kast.bijzonder}</h3>
           <ul className="kast-planken" data-bijzonder="true">
             {special.map((ingredient) => (
-              <li key={ingredient.id}>
+              <li key={ingredient.id} className="potje-plek">
                 <Jar ingredient={ingredient} count={count(ingredient.id)} />
+                <Badge ingredient={ingredient} count={count(ingredient.id)} />
               </li>
             ))}
           </ul>
@@ -63,7 +65,7 @@ function Jar({ ingredient, count }: { ingredient: Ingredient; count: number }) {
     <button type="button" className="potje-knop" aria-describedby={label} onClick={() => store.add(ingredient.id)}>
       <Potje ingredient={ingredient} className="potje" />
       {/* De naam is wat je ziet, met ervoor en erachter wat er gebeurt, alleen voor wie het hoort */}
-      <span className="potje-naam">
+      <span className="potje-naam" lang="nl">
         <span className="sr-only">{strings.kast.gooiVoor} </span>
         {ingredient.name}
         <span className="sr-only">
@@ -75,11 +77,16 @@ function Jar({ ingredient, count }: { ingredient: Ingredient; count: number }) {
       <span id={label} className="potje-etiket" aria-hidden="true">
         {ingredient.label}
       </span>
-      {count > 0 && (
-        <span className="potje-aantal" aria-hidden="true">
-          {count}×
-        </span>
-      )}
+    </button>
+  )
+}
+
+/** Het badge met hoe vaak een potje erin zit. Erop tikken haalt er één uit */
+function Badge({ ingredient, count }: { ingredient: Ingredient; count: number }) {
+  if (count === 0) return null
+  return (
+    <button type="button" className="potje-aantal" aria-label={strings.kast.haalEruit(plainName(ingredient), count)} title={strings.kast.haalEruit(plainName(ingredient), count)} onClick={() => store.removeOne(ingredient.id)}>
+      <span aria-hidden="true">{count}×</span>
     </button>
   )
 }

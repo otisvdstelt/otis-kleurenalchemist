@@ -534,21 +534,40 @@
     color: var(--color-ink-soft);
   }
 
+  .potje-plek {
+    position: relative;
+  }
+
+  /* Hoe vaak het erin zit. Het is ook een knop: erop tikken haalt er één uit */
   .potje-aantal {
     position: absolute;
     top: -0.45rem;
     right: -0.3rem;
+    z-index: 1;
     display: grid;
     place-items: center;
     min-width: 1.75rem;
     height: 1.75rem;
     padding: 0 0.3rem;
+    border: 0;
+    transition: scale 200ms var(--ease-out-expo);
     border-radius: 58% 42% 55% 45% / 45% 58% 42% 55%;
     background: var(--color-rust);
     color: #fcfaf3;
     font-family: var(--font-hand);
     font-size: 0.95rem;
     line-height: 1;
+  }
+
+  .potje-aantal:hover {
+    scale: 1.12;
+  }
+
+  /* Een groter vlak om te raken, zonder dat het badge groter wordt */
+  .potje-aantal::after {
+    content: '';
+    position: absolute;
+    inset: -0.5rem;
   }
 
   /* Op een telefoon is de kast één strook om doorheen te vegen */
@@ -604,7 +623,9 @@
     .potje-naam {
       padding-right: 0;
       font-size: 0.9rem;
-      overflow-wrap: anywhere;
+      /* Afbreken waar het hoort: de lange namen hebben een zacht afbreekstreepje (zons-ondergang) */
+      hyphens: manual;
+      overflow-wrap: normal;
     }
 
     .potje-etiket {
@@ -2149,7 +2170,8 @@
     }
 
     .papier[data-wereld='true'] .kast-planken {
-      padding-block: 0.4rem 0.7rem;
+      /* Ruimte boven de potjes, zodat het badge niet half buiten de strook valt */
+      padding-block: 0.75rem 0.7rem;
     }
 
     .papier[data-wereld='true'] .kast-planken[data-bijzonder='true'] {

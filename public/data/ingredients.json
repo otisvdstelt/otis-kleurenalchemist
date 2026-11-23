@@ -1,7 +1,7 @@
 [
   {
     "id": "zonsondergang",
-    "naam": "zonsondergang",
+    "naam": "zons\u00adondergang",
     "etiket": "Het laatste kwartier van een warme dag.",
     "pigmenten": [
       { "oklch": [0.74, 0.16, 55], "gewicht": 3 },
@@ -124,7 +124,7 @@
   },
   {
     "id": "nachtlucht",
-    "naam": "nachtlucht",
+    "naam": "nacht\u00adlucht",
     "etiket": "Met twee sterren erin, als je goed kijkt.",
     "pigmenten": [
       { "oklch": [0.25, 0.07, 275], "gewicht": 3 },
@@ -148,7 +148,7 @@
   },
   {
     "id": "zeeschuim",
-    "naam": "zeeschuim",
+    "naam": "zee\u00adschuim",
     "etiket": "Afgeschept op een winderige dinsdag.",
     "pigmenten": [
       { "oklch": [0.93, 0.04, 175], "gewicht": 3 },
@@ -160,7 +160,7 @@
   },
   {
     "id": "kersenbloesem",
-    "naam": "kersenbloesem",
+    "naam": "kersen\u00adbloesem",
     "etiket": "Twee weken per jaar, en dan weer weg.",
     "pigmenten": [
       { "oklch": [0.89, 0.06, 350], "gewicht": 3 },

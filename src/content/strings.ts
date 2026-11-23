@@ -53,6 +53,7 @@ export const strings = {
     gooiVoor: 'Gooi',
     gooiNa: 'in de ketel',
     aantal: (n: number) => `${n}× in de ketel`,
+    haalEruit: (naam: string, n: number) => `Haal één ${naam} eruit (${n}× in de ketel)`,
   },
   ketel: {
     kop: 'De ketel',
