@@ -1,5 +1,6 @@
 import { forwardRef, useEffect, useRef, useState } from 'react'
 import { strings } from '../../content/strings'
+import { ADJUSTMENTS } from '../../lib/alchemy/adjust'
 import { roleNumber } from '../../lib/alchemy/palette'
 import { encodeBottle } from '../../lib/alchemy/share'
 import { store, useAlchemy } from '../../lib/store'
@@ -22,6 +23,7 @@ export const Flesje = forwardRef<HTMLElement, FlesjeProps>(function Flesje({ onC
   const hasContrast = useAlchemy((s) => s.cauldron.items.includes('contrast'))
   const shelf = useAlchemy((s) => s.shelf)
   const [copied, setCopied] = useState<{ index: number; ok: boolean } | null>(null)
+  const [tuning, setTuning] = useState<number | null>(null)
   const timer = useRef<number | undefined>(undefined)
   useEffect(() => () => window.clearTimeout(timer.current), [])
 
@@ -117,10 +119,43 @@ export const Flesje = forwardRef<HTMLElement, FlesjeProps>(function Flesje({ onC
               <button type="button" className="staal-kleur" style={{ background: s.hex }} aria-label={strings.fles.kopieer(s.hex)} onClick={() => void copy(i)} />
               <span className="staal-rol hand">{strings.fles.rol(s.role, n)}</span>
               <code className="staal-hex">{s.hex}</code>
-              {corkable && (
-                <button type="button" className="staal-kurk" aria-pressed={corked} title={strings.fles.kurkUitleg} onClick={() => store.cork(i, corked ? null : s.hex)}>
-                  {corked ? strings.fles.kurkEraf : strings.fles.kurk}
+              <span className="staal-knoppen">
+                {corkable && (
+                  <button type="button" className="staal-kurk" aria-pressed={corked} title={strings.fles.kurkUitleg} onClick={() => store.cork(i, corked ? null : s.hex)}>
+                    {corked ? strings.fles.kurkEraf : strings.fles.kurk}
+                  </button>
+                )}
+                <button type="button" className="staal-kurk" aria-expanded={tuning === i} aria-controls={`bijstellen-${i}`} onClick={() => setTuning(tuning === i ? null : i)}>
+                  {tuning === i ? strings.bijstellen.dicht : strings.bijstellen.knop}
                 </button>
+              </span>
+              {tuning === i && (
+                <div id={`bijstellen-${i}`} className="bijstellen" role="group" aria-label={`${strings.bijstellen.knop}: ${strings.fles.rol(s.role, n)}`}>
+                  <div className="bijstellen-stappen">
+                    {ADJUSTMENTS.map((how) => (
+                      <button key={how} type="button" className="quiet" onClick={() => store.adjust(i, how)}>
+                        {strings.bijstellen[how]}
+                      </button>
+                    ))}
+                  </div>
+                  <label className="bijstellen-rol">
+                    <span className="hand">{strings.bijstellen.rol}</span>
+                    <select
+                      value={i}
+                      onChange={(event) => {
+                        const to = Number(event.target.value)
+                        store.swap(i, to)
+                        setTuning(to)
+                      }}
+                    >
+                      {swatches.map((other, j) => (
+                        <option key={j} value={j}>
+                          {j === i ? `${strings.fles.rol(other.role, roleNumber(swatches, j))} (${strings.bijstellen.houd})` : strings.bijstellen.wissel(strings.fles.rol(other.role, roleNumber(swatches, j)))}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                </div>
               )}
               {copied?.index === i && (
                 <span className="staal-bevestiging tag" aria-hidden="true">

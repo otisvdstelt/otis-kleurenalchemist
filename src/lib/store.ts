@@ -3,6 +3,7 @@
 
 import { useSyncExternalStore } from 'react'
 import { strings } from '../content/strings'
+import { adjust, swapRoles, type Adjustment } from './alchemy/adjust'
 import { bottle as fill, ingredientsOf, type Bottle } from './alchemy/bottle'
 import { cauldron as step, emptyCauldron, type Cauldron, type CauldronAction } from './alchemy/cauldron'
 import { checkPalette } from './alchemy/contrast'
@@ -212,6 +213,30 @@ export const store = {
   /** Laat een flesje zien: uit een link of van de plank */
   open(bottle: Bottle, from: Flask['from']) {
     set({ flask: { bottle, brew: null, from }, ...say(strings.nieuws.geopend(bottle.name, bottle.swatches.length)) })
+  },
+
+  /** Stel één kleur in het flesje een stapje bij */
+  adjust(index: number, how: Adjustment) {
+    const flask = state.flask
+    if (!flask?.bottle.swatches[index]) return
+    const swatches = flask.bottle.swatches.map((s, i) => (i === index ? { ...s, hex: adjust(s.hex, how) } : s))
+    const swatch = swatches[index]
+    set({
+      // Wat het snuifje deed, klopt niet meer na het bijstellen
+      flask: { ...flask, bottle: { ...flask.bottle, swatches }, brew: flask.brew ? { ...flask.brew, pinch: null } : null },
+      ...say(strings.nieuws.bijgesteld(strings.fles.rol(swatch.role, roleNumber(swatches, index)), strings.bijstellen[how], swatch.hex)),
+    })
+  },
+
+  /** Wissel twee kleuren in het flesje van rol */
+  swap(from: number, to: number) {
+    const flask = state.flask
+    if (!flask || from === to) return
+    const swatches = swapRoles(flask.bottle.swatches, from, to)
+    set({
+      flask: { ...flask, bottle: { ...flask.bottle, swatches }, brew: flask.brew ? { ...flask.brew, pinch: null } : null },
+      ...say(strings.nieuws.gewisseld(strings.fles.rol(swatches[from].role, roleNumber(swatches, from)), strings.fles.rol(swatches[to].role, roleNumber(swatches, to)))),
+    })
   },
 
   /** Leg het flesje weg */
