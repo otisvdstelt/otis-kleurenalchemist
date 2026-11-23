@@ -60,3 +60,15 @@ Wat ik zelf gekozen heb, met de reden erbij. Nieuwste onderaan.
 - **`frameloop="demand"`.** Er wordt alleen getekend als de store verandert of als er iets onderweg is (het uur, de onthulling). De DPR is begrensd: 1 tot 1,75, of 1 tot 1,25 op een telefoon of een zuinig apparaat, en daar is de schaduwkaart ook kleiner.
 - **Met de werkplaats erbij** liggen de papieren panelen eroverheen. Links staat de kast als lijstje (de potjes zelf staan op de planken), onderaan de ketelbalk en rechts het flesje, dat je weg kunt zetten. Over de 3D-ketel ligt een onzichtbaar vlak dat de camera elke keer opmeet. Daar roer je met de muis, en daar komt het toetsenbord terecht.
 - **Zonder WebGL, als het misgaat, of met `?papier`** in het adres krijg je de papieren versie uit fase 3. Een ErrorBoundary om de werkplaats zet hem om.
+
+## Fase 5: leven erin
+
+- **De draaikolk** is een eigen shader op de schijf in de ketel. De pigmenten (de zwaarste twaalf) liggen als strepen over polair gedraaide fbm-ruis, elk zo breed als zijn gewicht. Binnen draait sneller dan buiten. De strepen gaan op in de mengkleur zodra `homogeniteit` stijgt. Alle kleuren komen uit de kern: de shader verdeelt alleen wat hij krijgt.
+- **Roeren** geeft per slag een zet aan de draaikolk, en die zet sterft langzaam weg. De pollepel draait alleen mee op die zetten. Een ketel met iets erin draait ook zonder roeren heel langzaam.
+- **Overkoken** heeft de sterkte uit de kern meegekregen (`brew.overflow`). In de shader kruipt het modderbruin vanaf de rand naar binnen, met schuim erop. Borrelen gaat harder als het onrustig is.
+- **Damp** bestaat uit zeven billboards met fbm-ruis, elk in een kleur van het palet. Ze stijgen op, worden groter en lossen op. De lichtbundels worden erna getekend, zodat het licht door de damp valt.
+- **De kamer neigt naar de damp**: `air.tint` krijgt de mengkleur, en elk geschilderd vlak schuift er een vijfde naartoe.
+- **Inschenken**: het flesje loopt in 1,2 seconde vol, de lagen lopen in elkaar over en trekken in 1,8 seconde weer uit elkaar. Op een breed scherm wacht het papieren vel zolang, zodat je het ziet gebeuren.
+- **De plank** hangt boven de ketel, met plek voor tien flesjes. Ertussen rolt de mist uit het portfolio (InkPaper `uWipe` 1 en 2): 0,85 seconde mist erover, de camera verzet, en 1,1 seconde mist eraf. In het plankbeeld verdwijnen de kast en de ketelbalk.
+- **Wakker blijven.** De werkplaats tekent continu zolang er iets in de ketel zit (damp en bellen bewegen) of zolang `motion.wake()` loopt (een potje, inschenken of mist). Is de ketel leeg en beweegt er niets, dan staat hij stil.
+- **Minder beweging** draait niets, klotst niets en laat geen mist rollen. De damp hangt stil, en het uitzicht wisselt met een snede. De stappen zelf blijven hetzelfde.
