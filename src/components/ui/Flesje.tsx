@@ -1,9 +1,11 @@
 import { forwardRef, useEffect, useRef, useState } from 'react'
 import { strings } from '../../content/strings'
 import { roleNumber } from '../../lib/alchemy/palette'
+import { encodeBottle } from '../../lib/alchemy/share'
 import { store, useAlchemy } from '../../lib/store'
 import { Contrastcheck } from './Contrastcheck'
 import { Fles } from './Fles'
+import { Meenemen } from './Meenemen'
 import { Proefvel } from './Proefvel'
 
 interface FlesjeProps {
@@ -17,6 +19,7 @@ export const Flesje = forwardRef<HTMLElement, FlesjeProps>(function Flesje({ onC
   const corks = useAlchemy((s) => s.cauldron.corks)
   const size = useAlchemy((s) => s.cauldron.size)
   const hasContrast = useAlchemy((s) => s.cauldron.items.includes('contrast'))
+  const shelf = useAlchemy((s) => s.shelf)
   const [copied, setCopied] = useState<{ index: number; ok: boolean } | null>(null)
   const timer = useRef<number | undefined>(undefined)
   useEffect(() => () => window.clearTimeout(timer.current), [])
@@ -32,10 +35,12 @@ export const Flesje = forwardRef<HTMLElement, FlesjeProps>(function Flesje({ onC
     )
   }
 
-  const { bottle, brew } = flask
+  const { bottle, brew, from } = flask
   const swatches = bottle.swatches
-  // Kurken horen bij de ketel. Ze kunnen alleen op een flesje dat even groot is als wat er nu gebrouwen wordt
-  const corkable = swatches.length === size
+  // Kurken horen bij de ketel. Ze kunnen alleen op een flesje dat net uit de ketel komt, en even groot is
+  const corkable = from === 'ketel' && swatches.length === size
+  const code = encodeBottle(bottle)
+  const onShelf = shelf.some((b) => encodeBottle(b) === code)
 
   const copy = async (index: number) => {
     const hex = swatches[index].hex
@@ -112,10 +117,28 @@ export const Flesje = forwardRef<HTMLElement, FlesjeProps>(function Flesje({ onC
         </button>
       )}
 
+      <div className="toonbank-acties">
+        {onShelf ? (
+          <span className="hand toonbank-opplank">{strings.plank.staatErop}</span>
+        ) : (
+          <button type="button" className="inked" data-tone="rust" onClick={() => store.shelve(bottle)}>
+            {strings.plank.zetErop}
+          </button>
+        )}
+        {from !== 'ketel' && (
+          <button type="button" className="inked" onClick={() => store.continueFrom(bottle)}>
+            {strings.delen.verder}
+          </button>
+        )}
+      </div>
+      {from === 'link' && <p className="toonbank-gedeeld hand">{strings.delen.gedeeld}</p>}
+
       <h3 className="toonbank-sub">{strings.proefvel.kop}</h3>
       <Proefvel swatches={swatches} />
 
-      <Contrastcheck flask={flask} pinched={hasContrast} onPinch={pinch} />
+      <Contrastcheck flask={flask} pinched={hasContrast || from !== 'ketel'} onPinch={pinch} />
+
+      <Meenemen bottle={bottle} />
     </section>
   )
 })
