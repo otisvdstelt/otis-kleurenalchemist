@@ -87,8 +87,8 @@ export const requiredFor = (kind: PairKind) => (kind === 'tekst' ? THRESHOLDS.te
 
 function levelOf(ratio: number, kind: PairKind): Level {
   if (kind === 'tekst') return ratio >= THRESHOLDS.enhanced ? 'aaa' : ratio >= THRESHOLDS.text ? 'aa' : ratio >= THRESHOLDS.large ? 'groot' : 'nee'
-  // Een onderdeel heeft geen AAA. Haalt het 4,5, dan kan er ook gewone tekst in die kleur
-  return ratio >= THRESHOLDS.text ? 'aaa' : ratio >= THRESHOLDS.large ? 'aa' : 'nee'
+  // WCAG 1.4.11 kent voor onderdelen alleen AA (3:1). AAA geven we pas bij 7:1, zoals bij tekst
+  return ratio >= THRESHOLDS.enhanced ? 'aaa' : ratio >= THRESHOLDS.large ? 'aa' : 'nee'
 }
 
 /** Elke relevante combinatie in het palet gemeten */

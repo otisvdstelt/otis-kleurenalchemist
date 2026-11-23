@@ -113,7 +113,7 @@ export const strings = {
       nee: 'Deze tekst is slecht te lezen op deze achtergrond.',
     } satisfies Record<Level, string>,
     onderdeel: {
-      aaa: 'Valt goed op. Er kan zelfs tekst in deze kleur.',
+      aaa: 'Valt heel goed op. Er kan zelfs gewone tekst in deze kleur.',
       aa: 'Valt genoeg op voor een knop of een lijn.',
       groot: 'Valt genoeg op voor een knop of een lijn.',
       nee: 'Valt weg tegen de achtergrond. Een knop in deze kleur zie je slecht.',

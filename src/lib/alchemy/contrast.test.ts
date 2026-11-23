@@ -35,6 +35,22 @@ describe('WCAG 2.2', () => {
   })
 })
 
+describe('niveaus voor een onderdeel', () => {
+  const level = (fg: string) => checkPalette([
+    { hex: '#ffffff', role: 'achtergrond' },
+    { hex: '#000000', role: 'tekst' },
+    { hex: fg, role: 'accent' },
+  ])[1]
+
+  it('geeft een onderdeel AAA pas vanaf 7:1, en AA vanaf 3:1', () => {
+    // #767676 haalt 4,54:1: genoeg voor tekst, maar voor een onderdeel nog geen AAA
+    expect(level('#767676').level).toBe('aa')
+    expect(level('#595959').level).toBe('aaa')
+    expect(level('#949494').level).toBe('aa')
+    expect(level('#aaaaaa').level).toBe('nee')
+  })
+})
+
 describe('APCA', () => {
   it('kent de referentiewaarden', () => {
     expect(apca('#000000', '#ffffff')).toBeCloseTo(106.04, 1)
