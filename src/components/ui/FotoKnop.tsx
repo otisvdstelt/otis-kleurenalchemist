@@ -4,11 +4,13 @@ import { useMediaQuery } from '../../hooks/useLayout'
 
 interface FotoKnopProps {
   busy: boolean
+  /** Wat er misging met de laatste foto, of null */
+  trouble?: string | null
   onFile: (file: File) => void
 }
 
 /** Een foto in de ketel. Kiezen, of op een telefoon er een maken. Slepen en plakken kan overal op de pagina */
-export function FotoKnop({ busy, onFile }: FotoKnopProps) {
+export function FotoKnop({ busy, trouble, onFile }: FotoKnopProps) {
   const id = useId()
   const phone = useMediaQuery('(pointer: coarse)')
   const pick = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -22,7 +24,7 @@ export function FotoKnop({ busy, onFile }: FotoKnopProps) {
         <span className="foto-polaroid" aria-hidden="true" />
         <span className="hand">{busy ? strings.foto.bezig : strings.foto.knop}</span>
       </label>
-      <input id={`${id}-kies`} className="sr-only" type="file" accept="image/*" onChange={pick} disabled={busy} aria-describedby={`${id}-belofte`} />
+      <input id={`${id}-kies`} className="sr-only" type="file" accept="image/*,.heic,.heif" onChange={pick} disabled={busy} aria-describedby={`${id}-belofte`} />
       {phone && (
         <>
           <label className="quiet foto-camera" htmlFor={`${id}-maak`}>
@@ -32,6 +34,7 @@ export function FotoKnop({ busy, onFile }: FotoKnopProps) {
         </>
       )}
       <p className="foto-uitleg">{strings.foto.uitleg}</p>
+      {trouble && <p className="foto-fout">{trouble}</p>}
       <p id={`${id}-belofte`} className="foto-belofte hand">
         {strings.foto.belofte}
       </p>

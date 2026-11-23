@@ -209,6 +209,7 @@ export const strings = {
     etiket: 'Uit je eigen foto. Die is hier gebleven.',
     bezig: 'De kleuren worden eruit gehaald',
     loslaten: 'Laat los, dan valt hij in de ketel',
+    heic: 'Dit is een HEIC-foto, van een iPhone. Deze browser kan die niet lezen. Bewaar hem als JPG, of maak er een schermafbeelding van.',
   },
   bijstellen: {
     lichter: 'lichter',

@@ -13,7 +13,10 @@ export interface Photo {
   url: string
 }
 
-export const isImage = (file: File | null | undefined): file is File => Boolean(file && file.type.startsWith('image/'))
+/** HEIC en HEIF, het standaardformaat van een iPhone. Alleen Safari kan ze lezen */
+export const isHeic = (file: File) => /image\/hei[cf]/.test(file.type) || /\.hei[cf]$/i.test(file.name)
+
+export const isImage = (file: File | null | undefined): file is File => Boolean(file && (file.type.startsWith('image/') || isHeic(file)))
 
 /** Lees de foto en geef zijn pigmenten terug */
 export async function readPhoto(file: Blob): Promise<Photo> {

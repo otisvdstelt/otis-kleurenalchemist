@@ -64,6 +64,12 @@ describe('photoPigments', () => {
     expect(Math.min(...pigments.map((p) => deltaEOK(p.color, red)))).toBeLessThan(0.05)
   })
 
+  it('geeft bij een helemaal grijze foto grijze pigmenten, zonder te struikelen', () => {
+    const grey = photoPigments(samplesFromRgba(picture([{ hex: '#808080', pixels: 1200 }], 0)), 5)
+    expect(grey.length).toBeGreaterThanOrEqual(2)
+    for (const p of grey) expect(p.color.c).toBeLessThan(0.01)
+  })
+
   it('geeft 2 tot 4 pigmenten, ook bij een effen plaatje', () => {
     const flat = photoPigments(samplesFromRgba(picture([{ hex: '#3b533e', pixels: 500 }], 0)), 1)
     expect(flat.length).toBeGreaterThanOrEqual(2)

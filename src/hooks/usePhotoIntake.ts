@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { strings } from '../content/strings'
-import { isImage, readPhoto } from '../lib/photo'
+import { isHeic, isImage, readPhoto } from '../lib/photo'
 import { progress } from '../lib/progress'
 import { store } from '../lib/store'
 
@@ -8,6 +8,7 @@ import { store } from '../lib/store'
 export function usePhotoIntake() {
   const [busy, setBusy] = useState(false)
   const [dragging, setDragging] = useState(false)
+  const [trouble, setTrouble] = useState<string | null>(null)
   const working = useRef(false)
   const depth = useRef(0)
 
@@ -15,12 +16,16 @@ export function usePhotoIntake() {
     if (!isImage(file) || working.current) return
     working.current = true
     setBusy(true)
+    setTrouble(null)
     const release = progress.hold()
     try {
       const photo = await readPhoto(file)
       store.addPhoto(photo.id, photo.pigments, photo.url)
     } catch {
-      store.say(strings.nieuws.fotoMislukt)
+      // Zeg het hardop, en zet het ook bij de knop
+      const why = isHeic(file) ? strings.foto.heic : strings.nieuws.fotoMislukt
+      setTrouble(why)
+      store.say(why)
     } finally {
       release()
       working.current = false
@@ -70,5 +75,5 @@ export function usePhotoIntake() {
     }
   }, [take])
 
-  return { busy, dragging, take }
+  return { busy, dragging, trouble, take }
 }

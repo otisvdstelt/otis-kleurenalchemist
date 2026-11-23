@@ -165,7 +165,7 @@ export default function App() {
       {failed && <p className="mislukt slip paper hand">{strings.wereld.mislukt}</p>}
       <main>
         <div className="tafel">
-        <Kast ingredients={ingredients.data} failed={ingredients.isError} photo={<FotoKnop busy={intake.busy} onFile={(file) => void intake.take(file)} />} />
+        <Kast ingredients={ingredients.data} failed={ingredients.isError} photo={<FotoKnop busy={intake.busy} trouble={intake.trouble} onFile={(file) => void intake.take(file)} />} />
         <Ketel onPoured={poured} onScreen={painted && worldReady ? onScreen : undefined} />
         {(!painted || (hasFlask && flaskOpen)) && <Flesje ref={flaskRef} onClose={painted ? putAway : undefined} />}
         {painted && hasFlask && !flaskOpen && (
