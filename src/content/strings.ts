@@ -25,6 +25,9 @@ export const strings = {
     bezig: 'De ketel wordt opgestookt',
     klaar: 'De ketel staat klaar',
   },
+  wereld: {
+    mislukt: 'De werkplaats kon op dit apparaat niet geschilderd worden. Alles werkt nog, op papier.',
+  },
   uur: {
     label: 'Nacht',
     dag: 'dag',
@@ -70,6 +73,8 @@ export const strings = {
     nietGekopieerd: 'kopiëren lukte niet',
     rol: (role: Role, n: number) => (n > 1 ? `${ROLNAMEN[role]} ${n}` : ROLNAMEN[role]),
     modder: 'Modder is geen fout. Het is gewoon een heel eerlijk palet.',
+    wegzetten: 'zet weg',
+    terug: 'Het flesje',
   },
   proefvel: {
     kop: 'Proefvel',
