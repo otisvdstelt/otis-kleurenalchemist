@@ -92,9 +92,21 @@ export function Plank({ onOpen }: { onOpen: () => void }) {
 
   return (
     <section className="plank" aria-labelledby="plank-kop">
-      <h2 id="plank-kop" className="plank-kop">
-        {strings.plank.kop}
-      </h2>
+      <div className="plank-boven">
+        <h2 id="plank-kop" className="plank-kop">
+          {strings.plank.kop}
+        </h2>
+        {shelf.length > 0 && (
+          <button type="button" className="quiet plank-deel" onClick={() => void share()}>
+            {strings.plank.deel}
+          </button>
+        )}
+        {copied && (
+          <span className="tag plank-bevestiging" aria-hidden="true">
+            {strings.fles.gekopieerd}
+          </span>
+        )}
+      </div>
 
       {visiting && (
         <div className="plank-bezoek slip paper">
@@ -158,14 +170,6 @@ export function Plank({ onOpen }: { onOpen: () => void }) {
           <p id="plank-uitleg" className="sr-only">
             {strings.plank.verplaatsUitleg}
           </p>
-          <button type="button" className="quiet plank-deel" onClick={() => void share()}>
-            {strings.plank.deel}
-          </button>
-          {copied && (
-            <span className="tag plank-bevestiging" aria-hidden="true">
-              {strings.fles.gekopieerd}
-            </span>
-          )}
         </>
       )}
     </section>
