@@ -5,21 +5,23 @@ import type { Phase } from '../lib/air'
 import { VIEWS } from '../lib/world/spec'
 import { lettering, PartsContext, useWorkshopModel } from './three/assets'
 import { Atmosphere } from './three/Atmosphere'
-import { CameraRig, type CauldronOnScreen } from './three/CameraRig'
+import { CameraRig, type CauldronOnScreen, type View } from './three/CameraRig'
 import { InkPaper } from './three/InkPaper'
 import { look } from './three/look'
 import { Haze, Pulse, Reveal } from './three/Pulse'
 import { Workshop } from './three/Workshop'
 
-export type { CauldronOnScreen }
+export type { CauldronOnScreen, View }
 
 export interface WorldProps {
   phase: Phase
+  /** Bij de ketel, of bij de plank met flesjes */
+  view: View
   reducedMotion: boolean
   /** Een telefoon of een zuinig apparaat krijgt minder pixels en kleinere schaduwen */
   modest: boolean
   onReady: () => void
-  onCauldron: (where: CauldronOnScreen) => void
+  onCauldron: (where: CauldronOnScreen | null) => void
 }
 
 // Wat elk soort apparaat moet tekenen
@@ -29,7 +31,7 @@ const BUDGET = {
 }
 
 /** De werkplaats in 3D. Alleen weergave: hij leest de store en stuurt intenties terug */
-export default function World({ phase, reducedMotion, modest, onReady, onCauldron }: WorldProps) {
+export default function World({ phase, view, reducedMotion, modest, onReady, onCauldron }: WorldProps) {
   const parts = useWorkshopModel()
   use(lettering)
   const budget = modest ? BUDGET.modest : BUDGET.full
@@ -57,11 +59,11 @@ export default function World({ phase, reducedMotion, modest, onReady, onCauldro
       }}
     >
       <PartsContext value={parts}>
-        <CameraRig onCauldron={onCauldron} />
+        <CameraRig view={view} reducedMotion={reducedMotion} onCauldron={onCauldron} />
         <Atmosphere phase={phase} shadowSize={budget.shadow} />
         <Haze />
-        <Workshop />
-        <Pulse phase={phase} />
+        <Workshop reducedMotion={reducedMotion} />
+        <Pulse phase={phase} reducedMotion={reducedMotion} />
         <Reveal reducedMotion={reducedMotion} />
         <EffectComposer multisampling={0} enableNormalPass={false}>
           <InkPaper />
