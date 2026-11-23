@@ -34,12 +34,11 @@ describe('pinch', () => {
     const before = palette(['#f2e8dc', '#e8d8c4', '#a38f7c', '#d98f5a', '#7fb0d0'])
     const after = pinch(before)
     expect(after.changed.length).toBeGreaterThan(0)
-    for (const i of after.changed) {
-      const a = fromHex(before[i].hex)
-      const b = fromHex(after.swatches[i].hex)
-      expect(Math.abs(a.l - b.l)).toBeGreaterThan(0.01)
-      if (a.c > 0.05 && b.c > 0.05) expect(Math.abs(((a.h - b.h + 540) % 360) - 180)).toBeLessThan(6)
-    }
+    const moved = after.changed.map((i) => [fromHex(before[i].hex), fromHex(after.swatches[i].hex)] as const)
+    for (const [a, b] of moved) expect(Math.abs(a.l - b.l)).toBeGreaterThan(0.01)
+    // Bij kleuren met genoeg chroma om een tint te hebben, blijft die tint staan
+    const hueShifts = moved.filter(([a, b]) => a.c > 0.05 && b.c > 0.05).map(([a, b]) => Math.abs(((a.h - b.h + 540) % 360) - 180))
+    expect(Math.max(0, ...hueShifts)).toBeLessThan(6)
   })
 
   it('verschuift zo weinig mogelijk: tekst die net te licht is wordt net donker genoeg', () => {
