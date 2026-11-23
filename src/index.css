@@ -1827,8 +1827,10 @@
       width: 12.5rem;
       margin: 0;
       padding: 0.6rem 0.8rem 0.8rem;
-      max-height: none;
       overflow-y: auto;
+      overscroll-behavior: contain;
+      scrollbar-width: thin;
+      scrollbar-color: var(--color-rule) transparent;
     }
 
     /* Over de werkplaats heen is de kast een lijstje: de potjes zelf staan op de planken */
