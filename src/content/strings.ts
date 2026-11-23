@@ -25,9 +25,16 @@ export const strings = {
     bezig: 'De ketel wordt opgestookt',
     klaar: 'De ketel staat klaar',
   },
+  geluid: {
+    label: 'Geluid',
+    uit: 'stil',
+    aan: 'geluid',
+  },
   uitzicht: {
-    naarPlank: 'naar de plank',
-    naarKetel: 'terug naar de ketel',
+    naarPlank: 'plank',
+    naarKetel: 'ketel',
+    naarPlankLang: 'Naar de plank met flesjes',
+    naarKetelLang: 'Terug naar de ketel',
   },
   wereld: {
     mislukt: 'De werkplaats kon op dit apparaat niet geschilderd worden. Alles werkt nog, op papier.',
