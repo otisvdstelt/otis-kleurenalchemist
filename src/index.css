@@ -1887,11 +1887,38 @@
       font-size: 0.82rem;
     }
 
+    /* De ketelbalk staat tussen de kast en de rechterkant, en wijkt voor het flesje als dat open ligt */
+    .papier[data-wereld='true'] {
+      --links: calc(clamp(1rem, 2.5vw, 2rem) + 13.5rem);
+      --rechts: clamp(1rem, 2.5vw, 2rem);
+    }
+
+    .papier[data-wereld='true'][data-fles='true'] {
+      --rechts: calc(clamp(1rem, 2.5vw, 2rem) + 26rem);
+    }
+
     .papier[data-wereld='true'] .haard {
-      left: 50%;
+      left: var(--links);
+      right: var(--rechts);
       bottom: 1rem;
-      width: min(44rem, calc(100vw - 2 * 18rem));
-      translate: -50% 0;
+      width: fit-content;
+      max-width: min(46rem, calc(100vw - var(--links) - var(--rechts)));
+      margin-inline: auto;
+      gap: 0.35rem 0.9rem;
+      padding: 0.6rem 1.1rem 0.7rem;
+    }
+
+    .papier[data-wereld='true'] .inhoud {
+      display: none;
+    }
+
+    /* Zolang het flesje open ligt, klapt de balk in tot roeren en bottelen */
+    .papier[data-wereld='true'][data-fles='true'] :is(.damp, .grootte, .haard-knoppen .quiet) {
+      display: none;
+    }
+
+    .papier[data-wereld='true'][data-fles='true'] .haard-slagen {
+      display: none;
     }
 
     /* Bij de plank is de kast weg, dus de plank schuift naar links, uit de buurt van het flesje */

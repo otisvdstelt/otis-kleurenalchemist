@@ -42,7 +42,7 @@ export const LADLE_PIVOT: Vec3 = [CAULDRON.at[0], CAULDRON.lift + CAULDRON.heigh
 
 /** Waar de camera staat en waar hij naar kijkt, op een breed scherm en op een telefoon */
 export const VIEWS = {
-  wide: { position: [-0.15, 2.3, 3.5] as Vec3, target: [-0.3, 1.3, -1.6] as Vec3, fov: 44 },
+  wide: { position: [-0.15, 2.45, 3.6] as Vec3, target: [-0.3, 1.0, -1.6] as Vec3, fov: 44 },
   tall: { position: [-0.3, 2.6, 4.6] as Vec3, target: [-0.45, 1.2, -1.5] as Vec3, fov: 62 },
   /** Dicht bij de plank met flesjes */
   plank: { position: [0.22, 2.6, -0.85] as Vec3, target: [0.22, 2.48, -3.0] as Vec3, fov: 50 },

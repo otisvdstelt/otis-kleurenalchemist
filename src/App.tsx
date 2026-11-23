@@ -94,7 +94,7 @@ export default function App() {
   }, [])
 
   return (
-    <div className="papier" data-wereld={painted} data-uitzicht={painted ? view : undefined}>
+    <div className="papier" data-wereld={painted} data-uitzicht={painted ? view : undefined} data-fles={painted && hasFlask && flaskOpen}>
       <PaperFilters />
       {/* De werkplaats is alleen weergave: alles wat je ermee kunt, staat ook in de papieren laag */}
       {painted && (
