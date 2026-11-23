@@ -25,6 +25,18 @@ export const WINDOW = { x0: 1.3, x1: 3.05, y0: 1.75, y1: 3.55 }
 /** Het flesje waar het palet in gaat, op de hoek van de werkbank bij de ketel */
 export const FLASK = { at: [1.32, BENCH.top, -1.8] as Vec3, height: 0.42, radius: 0.13 }
 
+/** De plank voor de flesjes, boven de ketel, tussen de potjes en het raam */
+export const BOTTLE_SHELF = { x0: -0.6, x1: 1.05, z: -3.0, depth: 0.3, heights: [2.45, 3.1] as const, thickness: 0.05, perShelf: 5 }
+
+/** Waar flesje nummer `i` op de plank staat, of null als de plank vol is */
+export function bottleSlot(i: number): Vec3 | null {
+  const shelf = Math.floor(i / BOTTLE_SHELF.perShelf)
+  if (shelf >= BOTTLE_SHELF.heights.length) return null
+  const k = i % BOTTLE_SHELF.perShelf
+  const span = BOTTLE_SHELF.x1 - BOTTLE_SHELF.x0 - 0.2
+  return [BOTTLE_SHELF.x0 + 0.1 + (span * (k + 0.5)) / BOTTLE_SHELF.perShelf, BOTTLE_SHELF.heights[shelf] + BOTTLE_SHELF.thickness, BOTTLE_SHELF.z + 0.02]
+}
+
 /** De pollepel draait om het midden van de ketel */
 export const LADLE_PIVOT: Vec3 = [CAULDRON.at[0], CAULDRON.lift + CAULDRON.height, CAULDRON.at[2]]
 
@@ -32,6 +44,9 @@ export const LADLE_PIVOT: Vec3 = [CAULDRON.at[0], CAULDRON.lift + CAULDRON.heigh
 export const VIEWS = {
   wide: { position: [-0.15, 2.3, 3.5] as Vec3, target: [-0.3, 1.3, -1.6] as Vec3, fov: 44 },
   tall: { position: [-0.3, 2.6, 4.6] as Vec3, target: [-0.45, 1.2, -1.5] as Vec3, fov: 62 },
+  /** Dicht bij de plank met flesjes */
+  plank: { position: [0.22, 2.8, -0.9] as Vec3, target: [0.22, 2.75, -3.0] as Vec3, fov: 46 },
+  plankTall: { position: [0.22, 2.8, -0.2] as Vec3, target: [0.22, 2.75, -3.0] as Vec3, fov: 62 },
 }
 
 // ============================================================ potjes

@@ -5,7 +5,7 @@ import type { BufferGeometry } from 'three'
 import { isSpecial, jarLayers, type Ingredient } from '../alchemy/ingredients.ts'
 import { bands, blob, box, cone, cyl, extrude, lathe, limb, part, put, ring, roughen, slab, type Part, type Tint } from './kit.ts'
 import { seeded } from './noise.ts'
-import { BENCH, CAULDRON, FLASK, FLASK_LIQUID, flaskOutline, jarForm, jarSlots, LADLE_PIVOT, labelOf, LIQUID_Y, radiusAt, ROOM, SHELVES, tilt, WINDOW, type Vec3 } from './spec.ts'
+import { BENCH, BOTTLE_SHELF, CAULDRON, FLASK, FLASK_LIQUID, flaskOutline, jarForm, jarSlots, LADLE_PIVOT, labelOf, LIQUID_Y, radiusAt, ROOM, SHELVES, tilt, WINDOW, type Vec3 } from './spec.ts'
 
 // De kleuren van de werkplaats zelf: perkament, inkt, mos, mist, terracotta, en het hout en ijzer dat ertussen ligt
 const C = {
@@ -124,6 +124,18 @@ export function buildShelves(): Part[] {
     }
   })
   return [part('shelves', pieces)]
+}
+
+/** De plank voor de flesjes boven de ketel, met een rand ervoor zodat er niks af rolt */
+export function buildBottleShelf(): Part[] {
+  const pieces: BufferGeometry[] = []
+  const { x0, x1, z, depth, thickness } = BOTTLE_SHELF
+  BOTTLE_SHELF.heights.forEach((y, i) => {
+    pieces.push(roughen(slab(x0, x1, y, y + thickness, z - depth / 2, z + depth / 2, C.wood), 0.005, 40 + i))
+    pieces.push(slab(x0, x1, y + thickness, y + thickness + 0.03, z + depth / 2 - 0.02, z + depth / 2, C.woodDark))
+    for (const x of [x0 + 0.2, x1 - 0.2]) pieces.push(extrude([[0, 0], [0.2, 0], [0, -0.2]], 0.03, C.woodDark, { at: [x, y, ROOM.back + 0.01], rot: [0, -Math.PI / 2, 0] }))
+  })
+  return [part('bottle-shelf', pieces)]
 }
 
 /** De pigmenten in een potje, van onder naar boven, of wat een bijzonder potje erin heeft */
@@ -400,5 +412,5 @@ export function buildFlask(): Part[] {
 
 /** Alles samen, in de volgorde waarin het gebakken wordt */
 export function buildWorkshop(ingredients: readonly Ingredient[]): Part[] {
-  return [...buildRoom(), ...buildWindow(), ...buildShelves(), ...buildJars(ingredients), ...buildCauldron(), ...buildFire(), ...buildLadle(), ...buildBench(), ...buildCandles(), ...buildOwl(), ...buildHerbs(), ...buildFlask()]
+  return [...buildRoom(), ...buildWindow(), ...buildShelves(), ...buildBottleShelf(), ...buildJars(ingredients), ...buildCauldron(), ...buildFire(), ...buildLadle(), ...buildBench(), ...buildCandles(), ...buildOwl(), ...buildHerbs(), ...buildFlask()]
 }
