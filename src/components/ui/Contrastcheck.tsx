@@ -18,7 +18,7 @@ export function Contrastcheck({ flask, pinched, onPinch }: ContrastcheckProps) {
   const swatches = flask.bottle.swatches
   const checks = checkPalette(swatches)
   const weak = checks.filter((c) => !c.passes)
-  const pinch = flask.brew.pinch
+  const pinch = flask.brew?.pinch
 
   return (
     <section className="contrast" aria-labelledby="contrast-kop">

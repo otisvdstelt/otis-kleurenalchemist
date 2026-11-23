@@ -81,7 +81,7 @@ export const Flesje = forwardRef<HTMLElement, FlesjeProps>(function Flesje({ onC
           <span className="tag-note">{new Date(`${bottle.date}T12:00:00`).toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
         </p>
       </div>
-      {brew.mud && <p className="toonbank-modder hand">{strings.fles.modder}</p>}
+      {brew?.mud && <p className="toonbank-modder hand">{strings.fles.modder}</p>}
 
       <ul className="stalen">
         {swatches.map((s, i) => {

@@ -3,19 +3,32 @@
 
 import { useSyncExternalStore } from 'react'
 import { strings } from '../content/strings'
-import { bottle as fill, type Bottle } from './alchemy/bottle'
+import { bottle as fill, ingredientsOf, type Bottle } from './alchemy/bottle'
 import { cauldron as step, emptyCauldron, type Cauldron, type CauldronAction } from './alchemy/cauldron'
 import { checkPalette } from './alchemy/contrast'
 import type { Hex } from './alchemy/color'
-import { isSpecial, type Ingredient } from './alchemy/ingredients'
+import { isSpecial, photoIngredient, type Ingredient } from './alchemy/ingredients'
 import { boilState, brew, type Brew } from './alchemy/mix'
 import { nameBrew } from './alchemy/names'
 import { roleNumber } from './alchemy/palette'
+import { encodeBottle } from './alchemy/share'
+import { keepShelf, readShelf } from './keep'
 
-/** Een gevuld flesje, met wat er bij het brouwen gebeurde (modder, het snuifje) erbij */
+/** Een gevuld flesje, met wat er bij het brouwen gebeurde (modder, het snuifje) erbij als het hier gebrouwen is */
 export interface Flask {
   bottle: Bottle
-  brew: Brew
+  /** Null bij een flesje uit een link of van de plank: dan weten we alleen wat erin zit */
+  brew: Brew | null
+  /** Net uit de ketel, uit een gedeelde link, of van de plank gepakt */
+  from: 'ketel' | 'link' | 'plank'
+}
+
+/** Een foto die net in de ketel gegooid is, voor het kaartje dat in 3D naar beneden dwarrelt */
+export interface PhotoDrop {
+  id: string
+  /** Een klein plaatje, als blob-URL. Het blijft op dit apparaat */
+  url: string
+  at: number
 }
 
 export interface State {
@@ -27,6 +40,10 @@ export interface State {
   /** Het laatst gevulde flesje */
   flask: Flask | null
   shelf: readonly Bottle[]
+  /** Een plank uit een gedeelde link, om te bekijken en eventueel over te nemen */
+  visiting: readonly Bottle[] | null
+  /** Het laatste fotokaartje */
+  photoDrop: PhotoDrop | null
   /** Wat er net gebeurde, in woorden, voor de aria-live-regio */
   news: { text: string; at: number } | null
   /** Wanneer er voor het laatst geroerd werd, en hoe hard, voor de draaikolk */
@@ -38,7 +55,9 @@ let state: State = {
   photos: {},
   cauldron: emptyCauldron(),
   flask: null,
-  shelf: [],
+  shelf: typeof window === 'undefined' ? [] : readShelf(),
+  visiting: null,
+  photoDrop: null,
   news: null,
   stir: { at: 0, strokes: 0 },
 }
@@ -162,10 +181,83 @@ export const store = {
     const ingredients = ingredientsIn()
     const name = nameBrew(result, ingredients, strings.namen)
     const bottle = fill(result, ingredients, state.cauldron.stirs, state.cauldron.size, name)
-    const flask = { bottle, brew: result }
+    const flask: Flask = { bottle, brew: result, from: 'ketel' }
     const readable = checkPalette(bottle.swatches).every((c) => c.passes)
     set({ flask, ...say(strings.nieuws.gebotteld(name, bottle.swatches.length, readable)) })
     return flask
+  },
+
+  /** Een foto als ingrediënt: hij komt bij de foto's, en gaat meteen de ketel in */
+  addPhoto(id: string, pigments: Ingredient['pigments'], url: string) {
+    const ingredient = photoIngredient(id, pigments, { name: strings.namen.photo, label: strings.foto.etiket })
+    set({ photos: { ...state.photos, [id]: ingredient }, photoDrop: { id, url, at: now() } })
+    this.add(id)
+  },
+
+  /** Laat een flesje zien: uit een link of van de plank */
+  open(bottle: Bottle, from: Flask['from']) {
+    set({ flask: { bottle, brew: null, from }, ...say(strings.nieuws.geopend(bottle.name, bottle.swatches.length)) })
+  },
+
+  /** Zet het recept van een flesje terug in de ketel, om ermee verder te brouwen */
+  continueFrom(bottle: Bottle) {
+    const photos = { ...state.photos }
+    for (const item of bottle.recipe.items) if (item.pigments) photos[item.id] = photoIngredient(item.id, item.pigments, { name: strings.namen.photo, label: strings.foto.etiket })
+    const known = new Set([...(state.catalogue ?? []).map((i) => i.id), ...Object.keys(photos)])
+    const items = ingredientsOf(bottle.recipe, state.catalogue ?? [], { name: strings.namen.photo, label: strings.foto.etiket })
+      .map((i) => i.id)
+      .filter((id) => known.has(id))
+    set({ photos, cauldron: step(state.cauldron, { type: 'load', items, stirs: bottle.recipe.stirs, size: bottle.recipe.size }), ...say(strings.nieuws.verder(bottle.name)) })
+  },
+
+  /** Zet het flesje op de plank. Hetzelfde flesje komt er niet twee keer op */
+  shelve(bottle: Bottle) {
+    const code = encodeBottle(bottle)
+    if (state.shelf.some((b) => encodeBottle(b) === code)) {
+      set(say(strings.nieuws.alOpPlank(bottle.name)))
+      return
+    }
+    const shelf = [...state.shelf, bottle]
+    const kept = keepShelf(shelf)
+    set({ shelf, ...say(strings.nieuws.opPlank(bottle.name, shelf.length) + (kept ? '' : ` ${strings.plank.nietBewaard}`)) })
+  },
+
+  /** Haal een flesje van de plank af */
+  unshelve(index: number) {
+    const bottle = state.shelf[index]
+    if (!bottle) return
+    const shelf = state.shelf.filter((_, i) => i !== index)
+    keepShelf(shelf)
+    set({ shelf, ...say(strings.nieuws.vanPlank(bottle.name)) })
+  },
+
+  /** Verplaats een flesje op de plank */
+  move(from: number, to: number) {
+    if (from === to || from < 0 || from >= state.shelf.length) return
+    const target = Math.max(0, Math.min(state.shelf.length - 1, to))
+    const shelf = [...state.shelf]
+    const [bottle] = shelf.splice(from, 1)
+    shelf.splice(target, 0, bottle)
+    keepShelf(shelf)
+    set({ shelf, ...say(strings.nieuws.verplaatst(bottle.name, target + 1, shelf.length)) })
+  },
+
+  /** Een plank uit een link: eerst bekijken */
+  visit(bottles: readonly Bottle[]) {
+    set({ visiting: bottles, ...say(strings.nieuws.bezoek(bottles.length)) })
+  },
+
+  /** Zet de flesjes van de bezochte plank op je eigen plank, of laat ze staan */
+  leaveVisit(take: boolean) {
+    if (!state.visiting) return
+    if (!take) {
+      set({ visiting: null })
+      return
+    }
+    const known = new Set(state.shelf.map(encodeBottle))
+    const shelf = [...state.shelf, ...state.visiting.filter((b) => !known.has(encodeBottle(b)))]
+    keepShelf(shelf)
+    set({ shelf, visiting: null, ...say(strings.nieuws.overgenomen(shelf.length)) })
   },
 }
 
