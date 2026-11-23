@@ -961,16 +961,16 @@
   }
 
   .fles-lagen {
-    animation: inschenken 1.8s var(--ease-out-expo);
+    animation: inschenken 0.9s var(--ease-out-expo);
   }
 
   @keyframes inschenken {
     from {
-      filter: blur(14px);
+      filter: blur(10px);
       translate: 0 40px;
     }
-    45% {
-      filter: blur(9px);
+    35% {
+      filter: blur(4px);
     }
   }
 

@@ -127,7 +127,7 @@ export default function App() {
     // In de werkplaats wacht het vel even tot het flesje vol is gelopen, zodat je het inschenken ziet
     if (painted && !reducedMotion) {
       setFlaskOpen(false)
-      window.setTimeout(() => setFlaskOpen(true), 2300)
+      window.setTimeout(() => setFlaskOpen(true), 1700)
     } else setFlaskOpen(true)
     // Wacht tot het flesje getekend is, anders klopt de hoogte nog niet
     requestAnimationFrame(() => {

@@ -32,8 +32,8 @@ export function Flask({ reducedMotion }: { reducedMotion: boolean }) {
     if (pour.current.started < 0) return
     const t = (performance.now() - pour.current.started) / 1000
     material.uniforms.uFill.value = Math.min(1, t / 1.2) ** 0.7
-    material.uniforms.uStir.value = Math.max(0, 1 - Math.max(0, t - 0.6) / 1.8)
-    if (t > 2.6) pour.current.started = -1
+    material.uniforms.uStir.value = Math.max(0, 1 - Math.max(0, t - 0.5) / 1.1)
+    if (t > 1.8) pour.current.started = -1
   })
 
   return (
