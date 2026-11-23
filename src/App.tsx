@@ -107,7 +107,8 @@ export default function App() {
       )}
       <Header phase={phase} onPhase={choosePhase} view={painted ? view : undefined} onView={setView} />
       {failed && <p className="mislukt slip paper hand">{strings.wereld.mislukt}</p>}
-      <main className="tafel">
+      <main>
+        <div className="tafel">
         <Kast ingredients={ingredients.data} failed={ingredients.isError} photo={<FotoKnop busy={intake.busy} onFile={(file) => void intake.take(file)} />} />
         <Ketel onPoured={poured} onScreen={painted ? onScreen : undefined} />
         {(!painted || (hasFlask && flaskOpen)) && <Flesje ref={flaskRef} onClose={painted ? () => setFlaskOpen(false) : undefined} />}
@@ -116,6 +117,7 @@ export default function App() {
             {strings.fles.terug}
           </button>
         )}
+        </div>
         <Plank onOpen={() => setFlaskOpen(true)} />
       </main>
       {intake.dragging && (

@@ -1237,6 +1237,82 @@
     border-top: 1px dashed var(--color-rule);
   }
 
+  /* ============================================================ de monocle */
+
+  .monocle {
+    margin-top: 1.4rem;
+  }
+
+  .monocle-uitleg,
+  .monocle-tip {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--color-ink-soft);
+  }
+
+  .monocle-keuze {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 0.4rem;
+    margin: 0.4rem 0 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .monocle-optie {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding: 0 0.35rem;
+    font-family: var(--font-hand);
+    font-size: 1rem;
+    color: var(--color-ink-soft);
+    cursor: pointer;
+    background: var(--squiggle) no-repeat 50% calc(100% - 0.4rem) / 0% 0.42rem;
+    transition: background-size 380ms var(--ease-out-expo);
+  }
+
+  .monocle-optie input {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .monocle-optie:has(input:checked) {
+    color: var(--color-ink);
+    background-size: 80% 0.42rem;
+  }
+
+  .monocle-optie:has(input:focus-visible) {
+    outline: 2.5px solid var(--color-dusk);
+    outline-offset: 2px;
+  }
+
+  .monocle-blik {
+    display: grid;
+    gap: 0.6rem;
+    margin-top: 0.4rem;
+  }
+
+  .monocle-wat,
+  .monocle-goed {
+    margin: 0;
+  }
+
+  .monocle-goed {
+    color: var(--color-moss);
+  }
+
+  .monocle-samen {
+    margin: 0;
+    padding-left: 1.1rem;
+    color: var(--color-rust);
+    font-size: 0.95rem;
+  }
+
   /* ============================================================ een foto erin */
 
   .foto {
@@ -1375,7 +1451,8 @@
 
   .plank {
     position: relative;
-    grid-column: 1 / -1;
+    z-index: 2;
+    margin-top: 2.5rem;
     padding-top: 0.5rem;
   }
 
