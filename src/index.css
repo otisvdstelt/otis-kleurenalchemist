@@ -1412,6 +1412,37 @@
 
   /* ============================================================ meenemen */
 
+  /* Voor wie een link kreeg: een briefje bovenaan */
+  .welkom {
+    display: grid;
+    gap: 0.4rem;
+    margin: 0.3rem 0 0.8rem;
+    padding: 0.8rem 1rem 0.9rem;
+    rotate: -0.6deg;
+  }
+
+  .welkom p {
+    margin: 0;
+  }
+
+  .welkom-kop {
+    font-size: 1.2rem;
+    line-height: 1.3;
+  }
+
+  .welkom-uitleg {
+    font-size: 0.9rem;
+    color: var(--color-ink-soft);
+  }
+
+  .welkom-knoppen {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 0.8rem;
+    align-items: center;
+    margin-top: 0.2rem;
+  }
+
   .toonbank-acties {
     display: flex;
     flex-wrap: wrap;

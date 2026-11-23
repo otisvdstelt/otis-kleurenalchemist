@@ -80,6 +80,25 @@ export const Flesje = forwardRef<HTMLElement, FlesjeProps>(function Flesje({ onC
         )}
       </div>
 
+      {from === 'link' && (
+        <div className="welkom slip paper">
+          <p className="welkom-kop hand">{strings.delen.welkom}</p>
+          <p className="welkom-uitleg">{strings.delen.welkomUitleg}</p>
+          <div className="welkom-knoppen">
+            {onShelf ? (
+              <span className="hand toonbank-opplank">{strings.plank.staatErop}</span>
+            ) : (
+              <button type="button" className="inked" data-tone="rust" onClick={() => store.shelve(bottle)}>
+                {strings.delen.welkomPlank}
+              </button>
+            )}
+            <button type="button" className="inked" onClick={() => store.continueFrom(bottle)}>
+              {strings.delen.welkomVerder}
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="flesje">
         <Fles swatches={swatches} pourKey={`${bottle.recipe.seed}-${bottle.name}`} className="flesje-glas" />
         <p className="flesje-etiket tag">
@@ -118,7 +137,7 @@ export const Flesje = forwardRef<HTMLElement, FlesjeProps>(function Flesje({ onC
         </button>
       )}
 
-      <div className="toonbank-acties">
+      {from !== 'link' && <div className="toonbank-acties">
         {onShelf ? (
           <span className="hand toonbank-opplank">{strings.plank.staatErop}</span>
         ) : (
@@ -131,8 +150,7 @@ export const Flesje = forwardRef<HTMLElement, FlesjeProps>(function Flesje({ onC
             {strings.delen.verder}
           </button>
         )}
-      </div>
-      {from === 'link' && <p className="toonbank-gedeeld hand">{strings.delen.gedeeld}</p>}
+      </div>}
 
       <h3 className="toonbank-sub">{strings.proefvel.kop}</h3>
       <Proefvel swatches={swatches} />

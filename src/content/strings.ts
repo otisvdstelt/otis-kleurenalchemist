@@ -205,6 +205,10 @@ export const strings = {
     kopieer: (wat: string) => `Kopieer als ${wat}`,
     download: (wat: string) => `Download als ${wat}`,
     gedeeld: 'Een gedeeld flesje',
+    welkom: 'Iemand heeft dit flesje voor je gebrouwen.',
+    welkomUitleg: 'De kleuren zitten in de link zelf, dus je ziet precies wat zij zagen.',
+    welkomPlank: 'Zet op je plank',
+    welkomVerder: 'Brouw verder',
     verder: 'Brouw ermee verder',
   },
   /** Woorden voor de naam op het etiket */
