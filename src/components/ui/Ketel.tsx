@@ -26,6 +26,17 @@ export function Ketel({ onPoured, onScreen }: KetelProps) {
   const boil = boilState(inside.filter((i) => !isSpecial(i)).length)
   const fast = useRecent(stirredAt, 1400)
   const circling = useRef<{ angle: number; turned: number } | null>(null)
+  // De eerste keer dat er iets in de ketel zit, staat erbij hoe je roert. Na de eerste slag nooit meer
+  const [hintedBefore] = useState(readHinted)
+  const showHint = !hintedBefore && stirredAt === 0 && brew !== null
+  useEffect(() => {
+    if (!stirredAt || hintedBefore) return
+    try {
+      window.localStorage.setItem(HINT_KEY, '1')
+    } catch {
+      // Dan komt de hint de volgende keer nog een keer
+    }
+  }, [stirredAt, hintedBefore])
 
   const pour = () => {
     if (store.pour()) onPoured()
@@ -98,6 +109,12 @@ export function Ketel({ onPoured, onScreen }: KetelProps) {
           data-leeg={!brew}
         >
           {drawn && <KetelTekening brew={brew} boil={boil} fast={fast} />}
+          {showHint && (
+            <p className="roer-hint tag" aria-hidden="true">
+              {strings.ketel.roerHint}
+              <span className="tag-note">{strings.ketel.roerHintToetsen}</span>
+            </p>
+          )}
         </div>
       )}
 
@@ -153,6 +170,15 @@ export function Ketel({ onPoured, onScreen }: KetelProps) {
       </button>
     </section>
   )
+}
+
+const HINT_KEY = 'kleurenalchemist-geroerd'
+function readHinted(): boolean {
+  try {
+    return window.localStorage.getItem(HINT_KEY) === '1'
+  } catch {
+    return false
+  }
 }
 
 function angleOf(event: PointerEvent<HTMLElement>) {

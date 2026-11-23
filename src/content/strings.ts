@@ -66,6 +66,8 @@ export const strings = {
       overkoken: 'Kookt over. Alles trekt naar modder.',
     } satisfies Record<Boil, string>,
     roer: 'Roer',
+    roerHint: 'Sleep rondjes boven de ketel om te roeren',
+    roerHintToetsen: 'of druk op de spatie',
     afscheppen: 'Schep af',
     legen: 'Gooi leeg',
     bottelen: 'Bottelen',
