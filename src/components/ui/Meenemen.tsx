@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { strings } from '../../content/strings'
 import type { Bottle } from '../../lib/alchemy/bottle'
-import { toCss, toJson, toTailwind } from '../../lib/alchemy/exports'
+import { toAse, toCss, toDesignTokens, toJson, toSvg, toTailwind } from '../../lib/alchemy/exports'
 import { encodeBottle } from '../../lib/alchemy/share'
 import { store } from '../../lib/store'
 import { bottlePng, download, fileName } from './png'
@@ -40,6 +40,9 @@ export function Meenemen({ bottle }: { bottle: Bottle }) {
     { id: 'tailwind', label: strings.delen.kopieer(strings.delen.tailwind), run: async () => confirm('tailwind', await copy(toTailwind(bottle)), strings.delen.tailwind) },
     { id: 'json', label: strings.delen.download(strings.delen.json), run: async () => download(new Blob([toJson(bottle)], { type: 'application/json' }), fileName(bottle, 'json')) },
     { id: 'png', label: strings.delen.download(strings.delen.png), run: async () => download(await bottlePng(bottle), fileName(bottle, 'png')) },
+    { id: 'svg', label: strings.delen.download(strings.delen.svg), run: async () => download(new Blob([toSvg(bottle)], { type: 'image/svg+xml' }), fileName(bottle, 'svg')) },
+    { id: 'ase', label: strings.delen.download(strings.delen.ase), run: async () => download(new Blob([toAse(bottle) as BlobPart], { type: 'application/octet-stream' }), fileName(bottle, 'ase')) },
+    { id: 'figma', label: strings.delen.download(strings.delen.figma), run: async () => download(new Blob([toDesignTokens(bottle)], { type: 'application/json' }), fileName(bottle, 'tokens.json')) },
   ]
 
   return (
@@ -63,6 +66,7 @@ export function Meenemen({ bottle }: { bottle: Bottle }) {
         )}
       </div>
       <p className="meenemen-uitleg">{strings.delen.linkUitleg}</p>
+      <p className="meenemen-uitleg">{strings.delen.perKleur}</p>
       <ul className="meenemen-rij">
         {actions.map(({ id, label, run }) => (
           <li key={id}>
