@@ -1,6 +1,7 @@
 import { Canvas } from '@react-three/fiber'
 import { EffectComposer } from '@react-three/postprocessing'
-import { use, useEffect } from 'react'
+import { PerformanceMonitor } from '@react-three/drei'
+import { use, useEffect, useState } from 'react'
 import type { Phase } from '../lib/air'
 import { VIEWS } from '../lib/world/spec'
 import { lettering, PartsContext, useWorkshopModel } from './three/assets'
@@ -37,6 +38,8 @@ export default function World({ phase, view, reducedMotion, modest, onReady, onC
   const parts = useWorkshopModel()
   use(lettering)
   const budget = modest ? BUDGET.modest : BUDGET.full
+  // Haalt het apparaat de 60 beelden per seconde niet, dan gaan er pixels af. Gaat het weer goed, dan komen ze terug
+  const [dpr, setDpr] = useState(budget.dpr[1])
 
   useEffect(() => {
     onReady()
@@ -52,7 +55,7 @@ export default function World({ phase, view, reducedMotion, modest, onReady, onC
       shadows="percentage"
       flat
       frameloop="demand"
-      dpr={budget.dpr}
+      dpr={[1, dpr]}
       gl={{ antialias: false, powerPreference: 'high-performance' }}
       camera={{ fov: VIEWS.wide.fov, near: 0.1, far: 40, position: VIEWS.wide.position as [number, number, number] }}
       onCreated={(state) => {
@@ -60,6 +63,7 @@ export default function World({ phase, view, reducedMotion, modest, onReady, onC
         if (import.meta.env.DEV) (window as unknown as { __werkplaats?: unknown }).__werkplaats = state
       }}
     >
+      <PerformanceMonitor bounds={() => [50, 62]} flipflops={3} onDecline={() => setDpr((d) => Math.max(0.75, d - 0.25))} onIncline={() => setDpr((d) => Math.min(budget.dpr[1], d + 0.25))} onFallback={() => setDpr(0.75)} />
       <PartsContext value={parts}>
         <CameraRig view={view} reducedMotion={reducedMotion} onCauldron={onCauldron} />
         <Atmosphere phase={phase} shadowSize={budget.shadow} />
