@@ -602,7 +602,9 @@
     }
 
     .potje-naam {
-      font-size: 1rem;
+      padding-right: 0;
+      font-size: 0.9rem;
+      overflow-wrap: anywhere;
     }
 
     .potje-etiket {
@@ -1377,6 +1379,13 @@
     padding-top: 0.5rem;
   }
 
+  .plank-boven {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0 1rem;
+  }
+
   .plank-kop {
     margin: 0 0 0.3rem;
     font-family: var(--font-script);
@@ -1529,15 +1538,34 @@
 
     .plank-item {
       flex: 0 0 auto;
-      width: 5rem;
+      width: 5.2rem;
     }
 
     .plank-glas {
-      width: 1.8rem;
+      width: 1.6rem;
+    }
+
+    .plank-naam {
+      font-size: 0.8rem;
+    }
+
+    .plank-greep {
+      width: 2.2rem;
+      height: 2.2rem;
+    }
+
+    .plank-weg {
+      min-height: 2.2rem;
+      font-size: 0.8rem;
     }
 
     .plank-deel {
-      min-height: 2rem;
+      min-height: 2.2rem;
+      font-size: 0.95rem;
+    }
+
+    .papier:not([data-wereld='true']) .foto {
+      padding-inline: clamp(1rem, 3vw, 2.5rem);
     }
   }
 
