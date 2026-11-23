@@ -44,3 +44,19 @@ Wat ik zelf gekozen heb, met de reden erbij. Nieuwste onderaan.
 - **"Gooi er een snuifje contrast in"** staat bij een palet dat niet leesbaar is. Het gooit het snuifje in de ketel en bottelt meteen opnieuw, zodat je voor en na direct naast elkaar ziet.
 - **De volgorde in de DOM is kast, ketel, toonbank.** Op een breed scherm staan ze in drie kolommen, en de zijkanten blijven staan terwijl je scrollt. Op een telefoon is de kast een strook om doorheen te vegen, met de ketel eronder in het midden. Zo komt de tabvolgorde overal overeen met wat je ziet. De strook met flesjes onderaan komt in fase 6.
 - **Inktlijnen volgen het thema.** Het glas van potjes en flesjes is getekend met `currentColor`, zodat het 's nachts als krijt op donker papier staat in plaats van te verdwijnen.
+
+## Fase 4: werkplaats bouwen en bakken
+
+- **De kleurkern importeert met `.ts`.** Daardoor kan Node hem draaien, en haalt het bakscript de pigmentkleuren van de potjes uit `jarLayers` in de kern. Er staat dus geen tweede kleuromrekening in de wereldcode.
+- **De modelleerkit** komt uit het portfolio (`tint`, `put`, `box`, `slab`, `extrude`, `cyl`, `blob`, `limb`, `part`). Hij heeft er `lathe` bij voor alles wat rond is (potjes, het flesje, de ketel, de vijzel, de pollepel) en `bands` voor de lagen poeder in de potjes. `join` maakt eerst alles geïndexeerd, zodat extrusies en lathes samen kunnen.
+- **Elk potje is twee stukken**, `glass-<id>` en `jar-<id>` (poeder, kurk en etiket), met het draaipunt op de voet. Dan kan een potje in fase 5 opgetild worden. De namen op de etiketten zijn drei `Text` in Yomogi, en niet gebakken, zodat ze scherp blijven.
+- **De ketel en het flesje hebben een `liquid`-stuk**, gebakken als witte vorm. In fase 5 krijgen ze hun eigen shader: de draaikolk en de gelaagde vloeistof.
+- **`spec.ts` is de afspraak** tussen bakken en app: waar de planken hangen (een beetje scheef), welk potje waar staat, het profiel per vorm, waar het flesje staat en hoe de camera kijkt.
+- **De bijzondere potjes staan op de werkbank** en niet op de planken. Dan zie je meteen dat ze iets anders doen.
+- **Gebakken: 56 stukken, ongeveer 18.000 driehoeken, 131 KB met Draco.** Het bakscript stopt met een fout als het boven de 400 KB komt.
+- **Glas** is `paintedToon` met transparantie, dubbelzijdig, en een rand die licht vangt waar je er schuin door kijkt (fresnel). De opaciteit is laag (0,16), anders wast het glas de pigmenten uit.
+- **InkPaper** is uit het portfolio overgenomen. Alleen de afstandsweging is anders: in het portfolio kregen alleen verre dingen een lijn uit de diepte, hier staat alles dichtbij.
+- **De kamer neigt naar de damp** via een gedeelde uniform op het geschilderde materiaal (`tintUniform`, gevoed door `air.tint`). Nu staat hij nog op nul, in fase 5 gaat hij aan.
+- **`frameloop="demand"`.** Er wordt alleen getekend als de store verandert of als er iets onderweg is (het uur, de onthulling). De DPR is begrensd: 1 tot 1,75, of 1 tot 1,25 op een telefoon of een zuinig apparaat, en daar is de schaduwkaart ook kleiner.
+- **Met de werkplaats erbij** liggen de papieren panelen eroverheen. Links staat de kast als lijstje (de potjes zelf staan op de planken), onderaan de ketelbalk en rechts het flesje, dat je weg kunt zetten. Over de 3D-ketel ligt een onzichtbaar vlak dat de camera elke keer opmeet. Daar roer je met de muis, en daar komt het toetsenbord terecht.
+- **Zonder WebGL, als het misgaat, of met `?papier`** in het adres krijg je de papieren versie uit fase 3. Een ErrorBoundary om de werkplaats zet hem om.
