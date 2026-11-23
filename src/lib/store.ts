@@ -43,6 +43,8 @@ export interface State {
   shelf: readonly Bottle[]
   /** Hoe de ketel eerder was, voor ongedaan maken. Nieuwste achteraan */
   past: readonly Cauldron[]
+  /** Het flesje dat net van de plank gehaald is, om terug te zetten */
+  removed: { bottle: Bottle; index: number } | null
   /** De laatste vijf flesjes die uit de ketel kwamen, nieuwste eerst */
   recent: readonly Bottle[]
   /** Een plank uit een gedeelde link, om te bekijken en eventueel over te nemen */
@@ -63,6 +65,7 @@ let state: State = {
   shelf: typeof window === 'undefined' ? [] : readShelf(),
   past: [],
   recent: [],
+  removed: null,
   visiting: null,
   photoDrop: null,
   news: null,
@@ -318,7 +321,35 @@ export const store = {
     if (!bottle) return
     const shelf = state.shelf.filter((_, i) => i !== index)
     keepShelf(shelf)
-    set({ shelf, ...say(strings.nieuws.vanPlank(bottle.name)) })
+    set({ shelf, removed: { bottle, index }, ...say(strings.nieuws.vanPlank(bottle.name)) })
+  },
+
+  /** Zet het flesje dat net van de plank ging, terug op zijn plek */
+  restore() {
+    const removed = state.removed
+    if (!removed) return
+    const shelf = [...state.shelf]
+    shelf.splice(Math.min(removed.index, shelf.length), 0, removed.bottle)
+    keepShelf(shelf)
+    set({ shelf, removed: null, ...say(strings.nieuws.teruggezet(removed.bottle.name)) })
+  },
+
+  /** Vergeet het weggehaalde flesje: terugzetten kan niet meer */
+  forgetRemoved() {
+    if (state.removed) set({ removed: null })
+  },
+
+  /** Geef het flesje een andere naam. Staat het op de plank, of bij eerder gebrouwen, dan daar ook */
+  rename(name: string) {
+    const flask = state.flask
+    const clean = name.replace(/\s+/g, ' ').trim().slice(0, 60)
+    if (!flask || !clean || clean === flask.bottle.name) return
+    const before = encodeBottle(flask.bottle)
+    const bottle = { ...flask.bottle, name: clean }
+    const swap = (list: readonly Bottle[]) => list.map((b) => (encodeBottle(b) === before ? bottle : b))
+    const shelf = swap(state.shelf)
+    if (shelf.some((b) => b === bottle)) keepShelf(shelf)
+    set({ flask: { ...flask, bottle }, shelf, recent: swap(state.recent), ...say(strings.nieuws.hernoemd(clean)) })
   },
 
   /** Verplaats een flesje op de plank */

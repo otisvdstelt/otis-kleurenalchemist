@@ -25,6 +25,7 @@ export const Flesje = forwardRef<HTMLElement, FlesjeProps>(function Flesje({ onC
   const shelf = useAlchemy((s) => s.shelf)
   const [copied, setCopied] = useState<{ index: number; ok: boolean } | null>(null)
   const [tuning, setTuning] = useState<number | null>(null)
+  const [naming, setNaming] = useState(false)
   const timer = useRef<number | undefined>(undefined)
   useEffect(() => () => window.clearTimeout(timer.current), [])
 
@@ -109,6 +110,32 @@ export const Flesje = forwardRef<HTMLElement, FlesjeProps>(function Flesje({ onC
           <span className="flesje-naam">{bottle.name}</span>
           <span className="tag-note">{new Date(`${bottle.date}T12:00:00`).toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
         </p>
+        {naming ? (
+          <form
+            className="flesje-hernoem field"
+            onSubmit={(event) => {
+              event.preventDefault()
+              const name = new FormData(event.currentTarget).get('naam')
+              if (typeof name === 'string') store.rename(name)
+              setNaming(false)
+            }}
+          >
+            <label htmlFor="flesje-naam-veld">{strings.fles.naamLabel}</label>
+            <input id="flesje-naam-veld" name="naam" defaultValue={bottle.name} maxLength={60} autoFocus onKeyDown={(event) => event.key === 'Escape' && setNaming(false)} />
+            <span className="flesje-hernoem-knoppen">
+              <button type="submit" className="inked">
+                {strings.fles.bewaar}
+              </button>
+              <button type="button" className="quiet" onClick={() => setNaming(false)}>
+                {strings.fles.laat}
+              </button>
+            </span>
+          </form>
+        ) : (
+          <button type="button" className="quiet flesje-hernoem-knop" onClick={() => setNaming(true)}>
+            {strings.fles.hernoem}
+          </button>
+        )}
       </div>
       {brew?.mud && <p className="toonbank-modder hand">{strings.fles.modder}</p>}
 

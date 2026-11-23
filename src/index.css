@@ -987,6 +987,40 @@
     text-wrap: balance;
   }
 
+  .flesje-hernoem-knop {
+    margin-top: 0.2rem;
+  }
+
+  .flesje-hernoem {
+    width: min(100%, 18rem);
+    margin-top: 0.6rem;
+  }
+
+  .flesje-hernoem-knoppen {
+    display: flex;
+    gap: 0.6rem;
+    align-items: center;
+    margin-top: 0.4rem;
+  }
+
+  .zelf-kopieren {
+    margin-top: 0.6rem;
+  }
+
+  .zelf-kopieren input {
+    font-size: 0.85rem;
+  }
+
+  .plank-weggehaald {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.3rem 0.8rem;
+    width: fit-content;
+    margin: 0 0 0.8rem;
+    padding: 0.4rem 0.8rem;
+  }
+
   .toonbank-modder {
     margin: 0.6rem 0 0;
     text-align: center;

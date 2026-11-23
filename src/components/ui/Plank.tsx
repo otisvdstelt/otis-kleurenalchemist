@@ -4,11 +4,21 @@ import type { Bottle } from '../../lib/alchemy/bottle'
 import { encodeShelf } from '../../lib/alchemy/share'
 import { store, useAlchemy } from '../../lib/store'
 import { Fles } from './Fles'
+import { ZelfKopieren } from './ZelfKopieren'
 
 /** De plank met flesjes. Je pakt er een af om te bekijken, je verplaatst ze met de muis of het toetsenbord, en je deelt de hele plank */
 export function Plank({ onOpen }: { onOpen: () => void }) {
   const shelf = useAlchemy((s) => s.shelf)
   const visiting = useAlchemy((s) => s.visiting)
+  const removed = useAlchemy((s) => s.removed)
+  const [fallback, setFallback] = useState<string | null>(null)
+
+  // Terugzetten kan even, daarna is het weg
+  useEffect(() => {
+    if (!removed) return
+    const timer = window.setTimeout(() => store.forgetRemoved(), 10_000)
+    return () => window.clearTimeout(timer)
+  }, [removed])
   const [moving, setMoving] = useState<number | null>(null)
   const [copied, setCopied] = useState(false)
   const grips = useRef<(HTMLButtonElement | null)[]>([])
@@ -80,13 +90,17 @@ export function Plank({ onOpen }: { onOpen: () => void }) {
   }
 
   const share = async () => {
+    const link = `${window.location.origin}/plank/${encodeShelf(shelf)}`
     try {
-      await navigator.clipboard.writeText(`${window.location.origin}/plank/${encodeShelf(shelf)}`)
+      await navigator.clipboard.writeText(link)
       setCopied(true)
+      setFallback(null)
       store.say(strings.nieuws.gekopieerd(strings.plank.deel))
       window.setTimeout(() => setCopied(false), 1600)
     } catch {
-      store.say(strings.fles.nietGekopieerd)
+      // Mag het klembord niet, dan staat de link er om zelf te kopiëren
+      setFallback(link)
+      store.say(strings.delen.zelfKopieren)
     }
   }
 
@@ -107,6 +121,17 @@ export function Plank({ onOpen }: { onOpen: () => void }) {
           </span>
         )}
       </div>
+
+      {fallback && <ZelfKopieren link={fallback} />}
+
+      {removed && (
+        <p className="plank-weggehaald slip paper" role="status">
+          <span className="hand">{strings.plank.weggehaald(removed.bottle.name)}</span>{' '}
+          <button type="button" className="inked" onClick={() => store.restore()}>
+            {strings.plank.terugzetten}
+          </button>
+        </p>
+      )}
 
       {visiting && (
         <div className="plank-bezoek slip paper">
