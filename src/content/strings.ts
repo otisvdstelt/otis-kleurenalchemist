@@ -144,6 +144,7 @@ export const strings = {
   },
   foto: {
     knop: 'Een foto erin',
+    maak: 'of maak er een',
     uitleg: 'Sleep, plak of kies een foto. Hij wordt een ingrediënt.',
     belofte: 'Je foto blijft op dit apparaat. Hij gaat nergens heen.',
     etiket: 'Uit je eigen foto. Die is hier gebleven.',

@@ -1,17 +1,21 @@
-import { Component, lazy, Suspense, useCallback, useRef, useState, type ReactNode } from 'react'
+import { Component, lazy, Suspense, useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { PaperFilters } from './components/ui/Chrome'
 import { Flesje } from './components/ui/Flesje'
+import { FotoKnop } from './components/ui/FotoKnop'
 import { Header } from './components/ui/Header'
 import { Kast } from './components/ui/Kast'
 import { Ketel } from './components/ui/Ketel'
 import { Borrelend, Kolfje } from './components/ui/Kolfje'
 import { Nieuws } from './components/ui/Nieuws'
+import { Plank } from './components/ui/Plank'
 import type { CauldronOnScreen, View } from './components/World'
 import { strings } from './content/strings'
 import { useIngredients } from './hooks/useIngredients'
+import { usePhotoIntake } from './hooks/usePhotoIntake'
 import { canPaint, isModest, useMediaQuery } from './hooks/useLayout'
 import { keepPhase, readPhase, type Phase } from './lib/air'
-import { useAlchemy } from './lib/store'
+import { decodeBottle, decodeShelf, readRoute, type Route } from './lib/alchemy/share'
+import { store, useAlchemy } from './lib/store'
 
 // three.js en alles wat erbij hoort komt in een eigen chunk, zodat de papieren laag eerst staat
 const World = lazy(() => import('./components/World'))
@@ -33,10 +37,25 @@ class Unpaintable extends Component<{ onFail: () => void; children: ReactNode },
 export default function App() {
   const [phase, setPhase] = useState<Phase>(readPhase)
   const [painted, setPainted] = useState(canPaint)
+  // Een gedeelde link wordt één keer gelezen, bij het openen
+  const [route] = useState<Route>(() => readRoute(window.location.pathname, window.location.hash))
   const [failed, setFailed] = useState(false)
   const [onScreen, setOnScreen] = useState<CauldronOnScreen | null>(null)
   const [flaskOpen, setFlaskOpen] = useState(true)
-  const [view, setView] = useState<View>('werkplaats')
+  const [view, setView] = useState<View>(() => (route.kind === 'plank' ? 'plank' : 'werkplaats'))
+  const intake = usePhotoIntake()
+
+  useEffect(() => {
+    if (route.kind === 'fles') {
+      const bottle = decodeBottle(route.code)
+      if (bottle) store.open(bottle, 'link')
+    } else if (route.kind === 'plank') {
+      const bottles = decodeShelf(route.code)
+      if (bottles) store.visit(bottles)
+    }
+    // Daarna staat het adres weer gewoon op de werkplaats
+    if (route.kind !== 'werkplaats') window.history.replaceState(null, '', `/${window.location.search}`)
+  }, [route])
   const reducedMotion = useMediaQuery('(prefers-reduced-motion: reduce)')
   const hasFlask = useAlchemy((s) => s.flask !== null)
   const ingredients = useIngredients()
@@ -81,7 +100,7 @@ export default function App() {
         <div className="wereld">
           <Unpaintable onFail={fail}>
             <Suspense fallback={<Borrelend />}>
-              <World phase={phase} view={view} reducedMotion={reducedMotion} modest={modest} onReady={() => undefined} onCauldron={setOnScreen} />
+              <World phase={phase} view={view} reducedMotion={reducedMotion} modest={modest} onReady={() => undefined} onCauldron={setOnScreen} onOpenBottle={() => setFlaskOpen(true)} />
             </Suspense>
           </Unpaintable>
         </div>
@@ -89,7 +108,7 @@ export default function App() {
       <Header phase={phase} onPhase={choosePhase} view={painted ? view : undefined} onView={setView} />
       {failed && <p className="mislukt slip paper hand">{strings.wereld.mislukt}</p>}
       <main className="tafel">
-        <Kast ingredients={ingredients.data} failed={ingredients.isError} />
+        <Kast ingredients={ingredients.data} failed={ingredients.isError} photo={<FotoKnop busy={intake.busy} onFile={(file) => void intake.take(file)} />} />
         <Ketel onPoured={poured} onScreen={painted ? onScreen : undefined} />
         {(!painted || (hasFlask && flaskOpen)) && <Flesje ref={flaskRef} onClose={painted ? () => setFlaskOpen(false) : undefined} />}
         {painted && hasFlask && !flaskOpen && (
@@ -97,7 +116,13 @@ export default function App() {
             {strings.fles.terug}
           </button>
         )}
+        <Plank onOpen={() => setFlaskOpen(true)} />
       </main>
+      {intake.dragging && (
+        <p className="sleep-hint slip paper hand" aria-hidden="true">
+          {strings.foto.loslaten}
+        </p>
+      )}
       <Nieuws />
       <Kolfje />
     </div>
