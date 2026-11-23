@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
-import { BadIngredients, isSpecial, parseIngredients } from './ingredients'
+import { fromHex } from './color'
+import { BadIngredients, isSpecial, jarLayers, parseIngredients } from './ingredients'
 
 const shipped = JSON.parse(readFileSync(new URL('../../../public/data/ingredients.json', import.meta.url), 'utf8')) as unknown
 
@@ -35,5 +36,16 @@ describe('parseIngredients', () => {
     const [mos] = parseIngredients([good])
     expect(mos.pigments[0]).toEqual({ color: { l: 0.5, c: 0.1, h: 130 }, weight: 1 })
     expect(mos.jar.shape).toBe('bol')
+  })
+})
+
+describe('jarLayers', () => {
+  it('zet het donkerste pigment onderop, en de aandelen tellen op tot één', () => {
+    const [mos] = parseIngredients(shipped).filter((i) => i.id === 'mos')
+    const layers = jarLayers(mos)
+    expect(layers).toHaveLength(3)
+    expect(layers.reduce((sum, l) => sum + l.share, 0)).toBeCloseTo(1, 9)
+    const lightness = layers.map((l) => fromHex(l.hex).l)
+    expect([...lightness].sort((a, b) => a - b)).toEqual(lightness)
   })
 })

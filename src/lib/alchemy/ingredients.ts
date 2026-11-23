@@ -1,6 +1,6 @@
 // Wat er in de potjes zit. De lijst staat in public/data/ingredients.json, dit bestand zegt hoe hij eruit hoort te zien
 
-import { isHex, type Hex, type Oklch } from './color'
+import { isHex, toHex, type Hex, type Oklch } from './color'
 
 export interface Pigment {
   color: Oklch
@@ -118,4 +118,10 @@ export function photoIngredient(id: string, pigments: Pigment[], words: { name: 
     pigments,
     jar: { shape: 'pot', height: 0.9, cork: '#c9b48a' },
   }
+}
+
+/** De lagen in het potje, van onder naar boven: elk pigment als hexwaarde, met zijn aandeel van 0 tot 1 */
+export function jarLayers(ingredient: Ingredient): { hex: Hex; share: number }[] {
+  const total = ingredient.pigments.reduce((sum, p) => sum + p.weight, 0)
+  return [...ingredient.pigments].sort((a, b) => a.color.l - b.color.l).map((p) => ({ hex: toHex(p.color), share: p.weight / total }))
 }
