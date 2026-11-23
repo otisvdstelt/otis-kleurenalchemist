@@ -1892,6 +1892,13 @@
       translate: -50% 0;
     }
 
+    /* Bij de plank is de kast weg, dus de plank schuift naar links, uit de buurt van het flesje */
+    .papier[data-wereld='true'] .plank {
+      left: clamp(1rem, 2.5vw, 2rem);
+      width: min(40rem, calc(100vw - 29rem));
+      translate: none;
+    }
+
     .papier[data-wereld='true'] .toonbank {
       top: 4.8rem;
       right: clamp(1rem, 2.5vw, 2rem);
