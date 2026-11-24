@@ -7,6 +7,7 @@ import { adjust, swapRoles, type Adjustment } from './alchemy/adjust'
 import { bottle as fill, ingredientsOf, type Bottle } from './alchemy/bottle'
 import { cauldron as step, emptyCauldron, type Cauldron, type CauldronAction } from './alchemy/cauldron'
 import { checkPalette } from './alchemy/contrast'
+import { pinch } from './alchemy/pinch'
 import type { Hex } from './alchemy/color'
 import { isSpecial, photoIngredient, plainName, type Ingredient } from './alchemy/ingredients'
 import { boilState, brew, type Brew } from './alchemy/mix'
@@ -22,6 +23,8 @@ export interface Flask {
   brew: Brew | null
   /** Net uit de ketel, uit een gedeelde link, of van de plank gepakt */
   from: 'ketel' | 'link' | 'plank'
+  /** Wat het laatste snuifje contrast deed, voor en na. Weg zodra je iets bijstelt */
+  pinch?: Brew['pinch']
 }
 
 /** Een foto die net in de ketel gegooid is, voor het kaartje dat in 3D naar beneden dwarrelt */
@@ -235,7 +238,7 @@ export const store = {
     const ingredients = ingredientsIn()
     const name = nameBrew(result, ingredients, strings.namen)
     const bottle = fill(result, ingredients, state.cauldron.stirs, state.cauldron.size, name)
-    const flask: Flask = { bottle, brew: result, from: 'ketel' }
+    const flask: Flask = { bottle, brew: result, from: 'ketel', pinch: result.pinch }
     const readable = checkPalette(bottle.swatches).every((c) => c.passes)
     const recent = [bottle, ...state.recent.filter((b) => encodeBottle(b) !== encodeBottle(bottle))].slice(0, 5)
     set({ flask, recent, ...say(strings.nieuws.gebotteld(name, bottle.swatches.length, readable)) })
@@ -262,7 +265,7 @@ export const store = {
     const swatch = swatches[index]
     set({
       // Wat het snuifje deed, klopt niet meer na het bijstellen
-      flask: { ...flask, bottle: { ...flask.bottle, swatches }, brew: flask.brew ? { ...flask.brew, pinch: null } : null },
+      flask: { ...flask, bottle: { ...flask.bottle, swatches }, pinch: null },
       ...say(strings.nieuws.bijgesteld(strings.fles.rol(swatch.role, roleNumber(swatches, index)), strings.bijstellen[how], swatch.hex)),
     })
   },
@@ -273,7 +276,7 @@ export const store = {
     if (!flask || from === to) return
     const swatches = swapRoles(flask.bottle.swatches, from, to)
     set({
-      flask: { ...flask, bottle: { ...flask.bottle, swatches }, brew: flask.brew ? { ...flask.brew, pinch: null } : null },
+      flask: { ...flask, bottle: { ...flask.bottle, swatches }, pinch: null },
       ...say(strings.nieuws.gewisseld(strings.fles.rol(swatches[from].role, roleNumber(swatches, from)), strings.fles.rol(swatches[to].role, roleNumber(swatches, to)))),
     })
   },
@@ -284,6 +287,21 @@ export const store = {
     if (!previous) return
     lastStirAt = -Infinity
     set({ cauldron: previous, past: state.past.slice(0, -1), ...say(strings.nieuws.ongedaan) })
+  },
+
+  /**
+   * Een snuifje contrast op het flesje zoals het nu is, ook na bijstellen of uit een link.
+   * Het schuift alleen de lichtheid, zo weinig mogelijk, tot elk paar zijn drempel haalt
+   */
+  pinchFlask() {
+    const flask = state.flask
+    if (!flask) return
+    const before = flask.bottle.swatches
+    const result = pinch(before)
+    if (result.changed.length === 0) return
+    const bottle = { ...flask.bottle, swatches: result.swatches }
+    const readable = checkPalette(result.swatches).every((c) => c.passes)
+    set({ flask: { ...flask, bottle, pinch: { before, changed: result.changed, unreachable: result.unreachable } }, ...say(strings.nieuws.gesnuifd(result.changed.length, readable)) })
   },
 
   /** Leg het flesje weg */

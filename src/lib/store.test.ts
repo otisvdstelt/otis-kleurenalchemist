@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import { parseIngredients } from './alchemy/ingredients'
+import { checkPalette } from './alchemy/contrast'
 import { currentBrew, store } from './store'
 
 store.setCatalogue(parseIngredients(JSON.parse(readFileSync(new URL('../../public/data/ingredients.json', import.meta.url), 'utf8'))))
@@ -56,6 +57,22 @@ describe('store', () => {
     const recent = store.get().recent
     expect(recent).toHaveLength(5)
     expect(recent[0].recipe.items[0].id).toBe('citroen')
+  })
+
+  it('het snuifje werkt opnieuw na bijstellen, op het palet zoals het dan is', () => {
+    store.empty()
+    store.add('zonsondergang')
+    store.pour()
+    store.pinchFlask()
+    expect(checkPalette(store.get().flask!.bottle.swatches).every((c) => c.passes)).toBe(true)
+    // Duw de tekst richting de achtergrond tot hij te zwak is
+    const text = store.get().flask!.bottle.swatches.findIndex((s) => s.role === 'tekst')
+    for (let i = 0; i < 14; i++) store.adjust(text, 'lichter')
+    expect(checkPalette(store.get().flask!.bottle.swatches).some((c) => !c.passes)).toBe(true)
+    expect(store.get().flask!.pinch).toBeNull()
+    store.pinchFlask()
+    expect(checkPalette(store.get().flask!.bottle.swatches).every((c) => c.passes)).toBe(true)
+    expect(store.get().flask!.pinch!.changed).toContain(text)
   })
 
   it('negeert wat niet in de kast staat', () => {

@@ -5,8 +5,6 @@ import type { Flask } from '../../lib/store'
 
 interface ContrastcheckProps {
   flask: Flask
-  /** Of er al contrast in de ketel zit */
-  pinched: boolean
   onPinch: () => void
 }
 
@@ -14,11 +12,11 @@ const capital = (text: string) => text.charAt(0).toUpperCase() + text.slice(1)
 const roleName = (swatches: readonly Swatch[], index: number) => strings.fles.rol(swatches[index].role, roleNumber(swatches, index))
 
 /** Is het leesbaar? Elk paar dat ertoe doet, in een getal én in gewone woorden */
-export function Contrastcheck({ flask, pinched, onPinch }: ContrastcheckProps) {
+export function Contrastcheck({ flask, onPinch }: ContrastcheckProps) {
   const swatches = flask.bottle.swatches
   const checks = checkPalette(swatches)
   const weak = checks.filter((c) => !c.passes)
-  const pinch = flask.brew?.pinch
+  const pinch = flask.pinch
 
   return (
     <section className="contrast" aria-labelledby="contrast-kop">
@@ -28,7 +26,8 @@ export function Contrastcheck({ flask, pinched, onPinch }: ContrastcheckProps) {
       <p className="contrast-samen hand" data-goed={weak.length === 0}>
         {weak.length === 0 ? strings.contrast.alles : strings.contrast.niet(weak.length)}
       </p>
-      {weak.length > 0 && !pinched && (
+      {/* Zolang er iets te zwak is, kan het snuifje opnieuw: op het palet zoals het nu is */}
+      {weak.length > 0 && (
         <div className="contrast-tip">
           <p>{strings.contrast.snuifjeTip}</p>
           <button type="button" className="inked" onClick={onPinch}>
