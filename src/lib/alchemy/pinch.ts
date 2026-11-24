@@ -1,6 +1,6 @@
 // Een snuifje contrast. Schuift alleen de lichtheid, en zo weinig mogelijk, tot elk paar zijn drempel haalt
 
-import { checkPalette, contrastRatio, luminance, pairsFor, requiredFor, THRESHOLDS, type Check } from './contrast.ts'
+import { checkPalette, contrastRatio, luminance, pairsFor, requiredFor, THRESHOLDS, type Check, type PairKind } from './contrast.ts'
 import { fromHex, toHex, type Hex } from './color.ts'
 import type { Swatch } from './palette.ts'
 
@@ -95,12 +95,12 @@ function settleText(swatches: Swatch[], locked: readonly boolean[]) {
  * en tekst erop moet leesbaar zijn (4,5:1, in de achtergrond- of tekstkleur, wat het best leest).
  * Zoek de kleinste verschuiving van de lichtheid waarbij allebei lukt. Ver genoeg van de achtergrond af lukt het altijd
  */
-function fitButton(swatches: Swatch[], index: number): boolean {
+function fitButton(swatches: Swatch[], index: number, standOut = true): boolean {
   const bg = swatches.findIndex((s) => s.role === 'achtergrond')
   if (bg < 0) return true
   const labels = [bg, swatches.findIndex((s) => s.role === 'tekst')].filter((i) => i >= 0)
   // Genoeg als hij opvalt tegen de achtergrond en er óf lichte óf donkere tekst op leest
-  const fits = (hex: Hex, margin: number) => contrastRatio(hex, swatches[bg].hex) >= THRESHOLDS.large + margin && labels.some((l) => contrastRatio(hex, swatches[l].hex) >= THRESHOLDS.text + margin)
+  const fits = (hex: Hex, margin: number) => (!standOut || contrastRatio(hex, swatches[bg].hex) >= THRESHOLDS.large + margin) && labels.some((l) => contrastRatio(hex, swatches[l].hex) >= THRESHOLDS.text + margin)
   if (fits(swatches[index].hex, 0)) return true
   const own = fromHex(swatches[index].hex).l
   for (const margin of [MARGIN, 0]) {
@@ -122,16 +122,18 @@ function fitButton(swatches: Swatch[], index: number): boolean {
  * Voeg een snuifje contrast toe. Kleuren onder een kurk (`locked`) blijven staan.
  * Elk paar wordt eerst opgelost door de voorgrond te verschuiven, en als dat een ander paar breekt, door de achtergrond
  */
-export function pinch(input: readonly Swatch[], locked: readonly boolean[] = []): Pinched {
+export function pinch(input: readonly Swatch[], locked: readonly boolean[] = [], only: readonly PairKind[] = ['tekst', 'onderdeel', 'knop']): Pinched {
   const swatches = input.map((s) => ({ ...s }))
+  const wanted = (kind: PairKind) => only.includes(kind)
+  const pairs = () => pairsFor(swatches).filter((p) => wanted(p.kind))
 
   for (let pass = 0; pass < 5; pass++) {
     let moved = false
     // Opnieuw elke ronde: welke kleur de knoptekst krijgt, kan veranderen als het accent schuift
-    for (const { fg, bg, kind } of pairsFor(swatches)) {
+    for (const { fg, bg, kind } of pairs()) {
       const required = requiredFor(kind)
       if (contrastRatio(swatches[fg].hex, swatches[bg].hex) >= required) continue
-      const before = checkPalette(swatches)
+      const before = checkPalette(swatches).filter((c) => wanted(c.kind))
       // Eerst de voorgrond, dan de achtergrond. Bij een knop eerst de knop zelf: die is het minst belangrijk
       // Bij tekst op de hoofdkleur eerst die tekst: de hoofdkleur zelf is het belangrijkst
       const textFirst = kind !== 'knop' || swatches[fg].role === 'op-hoofd'
@@ -149,20 +151,20 @@ export function pinch(input: readonly Swatch[], locked: readonly boolean[] = [])
     if (!moved) break
   }
 
-  settleText(swatches, locked)
+  if (wanted('tekst')) settleText(swatches, locked)
 
   // Elke knopkleur die nog niet past, op zijn eigen manier passend maken
-  const failing = () => new Set(checkPalette(swatches).filter((c) => !c.passes && c.kind !== 'tekst').flatMap((c) => [c.fg, c.bg]))
-  for (const index of failing()) {
+  const failing = () => new Set(checkPalette(swatches).filter((c) => !c.passes && c.kind !== 'tekst' && wanted(c.kind)).flatMap((c) => [c.fg, c.bg]))
+  for (const index of wanted('knop') ? failing() : []) {
     const role = swatches[index].role
     const ownLabel = role === 'hoofd' && swatches.some((s) => s.role === 'op-hoofd')
     if (locked[index] || !(role === 'accent' || role === 'signaal' || (role === 'hoofd' && !ownLabel))) continue
-    fitButton(swatches, index)
+    fitButton(swatches, index, wanted('onderdeel'))
   }
 
   // Laatste redmiddel: lukte het zonder iets te breken niet, schuif dan toch. Bij een knop de knop, anders de voorgrond
   for (let pass = 0; pass < 3; pass++) {
-    for (const { fg, bg, kind } of pairsFor(swatches)) {
+    for (const { fg, bg, kind } of pairs()) {
       const required = requiredFor(kind)
       if (contrastRatio(swatches[fg].hex, swatches[bg].hex) >= required) continue
       const first = kind === 'knop' && swatches[fg].role !== 'op-hoofd' ? bg : fg
@@ -175,5 +177,5 @@ export function pinch(input: readonly Swatch[], locked: readonly boolean[] = [])
   }
 
   const changed = swatches.flatMap((s, i) => (s.hex !== input[i].hex ? [i] : []))
-  return { swatches, changed, unreachable: checkPalette(swatches).filter((c) => !c.passes) }
+  return { swatches, changed, unreachable: checkPalette(swatches).filter((c) => !c.passes && wanted(c.kind)) }
 }

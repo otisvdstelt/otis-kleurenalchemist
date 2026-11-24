@@ -1242,6 +1242,82 @@
     padding: 0.4rem 0.8rem;
   }
 
+  .flesje-zin {
+    margin: 0.7rem 0 0;
+    font-family: var(--font-hand);
+    font-size: 1.05rem;
+    text-align: center;
+    color: var(--color-ink-soft);
+    text-wrap: balance;
+  }
+
+  /* De reeksen als stroken van 50 tot 950 */
+  .reeksen {
+    margin-top: 1.2rem;
+  }
+
+  .reeks + .reeks {
+    margin-top: 0.7rem;
+  }
+
+  .reeks-naam {
+    margin: 0 0 0.15rem;
+    font-size: 0.98rem;
+  }
+
+  .reeks-strook {
+    display: grid;
+    grid-template-columns: repeat(11, 1fr);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .reeks-strook li {
+    display: grid;
+    justify-items: center;
+  }
+
+  .reeks-stap {
+    position: relative;
+    width: 100%;
+    height: 2.5rem;
+    border: 0;
+    cursor: copy;
+  }
+
+  .reeks-strook li:first-child .reeks-stap {
+    border-radius: 4px 0 0 4px;
+  }
+
+  .reeks-strook li:last-child .reeks-stap {
+    border-radius: 0 4px 4px 0;
+  }
+
+  .reeks-stapnaam {
+    font-size: 0.62rem;
+    color: var(--color-ink-soft);
+  }
+
+  .reeks-gekopieerd {
+    position: absolute;
+    left: 50%;
+    bottom: 110%;
+    z-index: 2;
+    translate: -50% 0;
+    pointer-events: none;
+  }
+
+  .reeks-bijstellen {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .reeks-bijstellen .quiet {
+    min-height: 2.4rem;
+    font-size: 0.95rem;
+  }
+
   .toonbank-modder {
     margin: 0.6rem 0 0;
     text-align: center;
@@ -1454,6 +1530,154 @@
     text-decoration: underline 3px;
     text-underline-offset: 0.25em;
     font-size: 0.95rem;
+  }
+
+  /* Proefvellen per doel */
+  .proefvel-zacht {
+    margin: 0.4rem 0 0;
+    font-size: 0.85rem;
+  }
+
+  .proefvel-meldingen {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem 1rem;
+    margin: 0.8rem 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: 0.88rem;
+  }
+
+  .proefvel-meldingen li {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .proefvel-affiche {
+    position: relative;
+    display: grid;
+    align-content: end;
+    min-height: 19rem;
+    overflow: hidden;
+    padding: 1.4rem;
+  }
+
+  .affiche-zon {
+    position: absolute;
+    right: -2.5rem;
+    top: -2.5rem;
+    width: 11rem;
+    height: 11rem;
+    border-radius: 50%;
+  }
+
+  .affiche-streep {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 46%;
+    height: 1.1rem;
+    rotate: -6deg;
+  }
+
+  .affiche-titel {
+    position: relative;
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 2.2rem;
+    line-height: 1.05;
+    max-width: 12ch;
+  }
+
+  .affiche-tekst {
+    position: relative;
+    margin: 0.5rem 0 0.9rem;
+    font-size: 0.92rem;
+    max-width: 26ch;
+  }
+
+  .affiche-knop {
+    position: relative;
+    justify-self: start;
+  }
+
+  .proefvel-kaartje {
+    display: grid;
+    gap: 0.15rem;
+    max-width: 22rem;
+    aspect-ratio: 85 / 55;
+    align-content: center;
+    padding: 1.2rem 1.4rem;
+  }
+
+  .kaartje-logo {
+    display: flex;
+    margin-bottom: 0.5rem;
+  }
+
+  .kaartje-logo span {
+    width: 2.2rem;
+    height: 2.2rem;
+    border-radius: 50%;
+  }
+
+  .kaartje-logo span + span {
+    width: 1.3rem;
+    height: 1.3rem;
+    margin: 0.9rem 0 0 -0.6rem;
+  }
+
+  .kaartje-naam {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+  }
+
+  .kaartje-wat {
+    margin: 0;
+    font-family: var(--font-hand);
+    font-size: 1.05rem;
+  }
+
+  .kaartje-adres {
+    margin: 0.5rem 0 0;
+    font-size: 0.78rem;
+  }
+
+  .proefvel-dia {
+    aspect-ratio: 16 / 10;
+    display: grid;
+    grid-template-rows: auto auto 1fr auto;
+    padding: 1.1rem 1.3rem 1rem;
+  }
+
+  .dia-titel {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+  }
+
+  .dia-sub {
+    margin: 0.1rem 0 0;
+    font-size: 0.82rem;
+  }
+
+  .dia-grafiek {
+    display: flex;
+    align-items: end;
+    gap: 0.6rem;
+    padding: 0.8rem 0.4rem 0;
+  }
+
+  .dia-staaf {
+    flex: 1;
+    height: var(--h);
+    border-radius: 3px 3px 0 0;
+  }
+
+  .dia-as {
+    border-top: 1.5px solid;
   }
 
   /* ============================================================ de contrastcheck */

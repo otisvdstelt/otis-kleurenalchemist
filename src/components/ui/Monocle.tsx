@@ -1,17 +1,18 @@
 import { useMemo, useState } from 'react'
 import { strings } from '../../content/strings'
 import { confusions, simulate, VISIONS, type Vision } from '../../lib/alchemy/cvd'
+import type { GoalId } from '../../lib/alchemy/ingredients'
 import { roleNumber, type Swatch } from '../../lib/alchemy/palette'
 import { Proefvel } from './Proefvel'
 
 const capital = (text: string) => text.charAt(0).toUpperCase() + text.slice(1)
 
 /** Door de monocle: hoe het palet eruitziet bij kleurenblindheid, en welke rollen dan samenvallen */
-export function Monocle({ swatches }: { swatches: readonly Swatch[] }) {
+export function Monocle({ swatches, goal }: { swatches: readonly Swatch[]; goal?: GoalId }) {
   const [vision, setVision] = useState<Vision | null>(null)
   const seen = useMemo(() => (vision ? swatches.map((s) => ({ ...s, hex: simulate(s.hex, vision) })) : null), [swatches, vision])
   const found = useMemo(() => (vision ? confusions(swatches, vision) : []), [swatches, vision])
-  const name = (i: number) => strings.fles.rol(swatches[i].role, roleNumber(swatches, i))
+  const name = (i: number) => strings.fles.rol(swatches[i].role, roleNumber(swatches, i), goal)
 
   return (
     <section className="monocle" aria-labelledby="monocle-kop">
@@ -40,7 +41,7 @@ export function Monocle({ swatches }: { swatches: readonly Swatch[] }) {
               </li>
             ))}
           </ul>
-          <Proefvel swatches={seen} />
+          <Proefvel swatches={seen} goal={goal} />
           {found.length === 0 ? (
             <p className="monocle-goed hand">{strings.monocle.goed}</p>
           ) : (

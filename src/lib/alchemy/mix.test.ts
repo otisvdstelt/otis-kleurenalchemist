@@ -177,12 +177,14 @@ describe('contrast per doel', () => {
     }
   })
 
-  it('zonder snuifje halen tekst en achtergrond al AA, voor elke smaak en elk doel', () => {
+  it('zonder snuifje halen alle tekst en alle knoptekst al AA, voor elke smaak, elk doel en elke basis', () => {
     for (const goal of GOAL_IDS) {
       for (const t of TASTES) {
-        const result = brew({ ingredients: [t], goal, stirs: 5 })!
-        const text = checkPalette(result.swatches).filter((c) => c.kind === 'tekst' && c.fgRole === 'tekst' && c.bgRole === 'achtergrond')
-        expect(text.every((c) => c.passes), `${goal} ${t.id}`).toBe(true)
+        for (const bases of [[], ['#3b533e'], ['#f2d22e'], ['#1d3b7a', '#e85f6b']]) {
+          const result = brew({ ingredients: [t], goal, bases, stirs: 5 })!
+          const weak = checkPalette(result.swatches).filter((c) => c.kind !== 'onderdeel' && !c.passes)
+          expect(weak, `${goal} ${t.id} ${bases.join(',')}`).toEqual([])
+        }
       }
     }
   })

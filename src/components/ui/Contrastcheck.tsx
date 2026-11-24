@@ -1,6 +1,7 @@
 import { strings } from '../../content/strings'
 import { checkPalette, formatRatio } from '../../lib/alchemy/contrast'
 import { roleNumber, type Swatch } from '../../lib/alchemy/palette'
+import type { GoalId } from '../../lib/alchemy/ingredients'
 import type { Flask } from '../../lib/store'
 
 interface ContrastcheckProps {
@@ -9,11 +10,12 @@ interface ContrastcheckProps {
 }
 
 const capital = (text: string) => text.charAt(0).toUpperCase() + text.slice(1)
-const roleName = (swatches: readonly Swatch[], index: number) => strings.fles.rol(swatches[index].role, roleNumber(swatches, index))
+const roleName = (swatches: readonly Swatch[], index: number, goal?: GoalId) => strings.fles.rol(swatches[index].role, roleNumber(swatches, index), goal)
 
 /** Is het leesbaar? Elk paar dat ertoe doet, in een getal én in gewone woorden */
 export function Contrastcheck({ flask, onPinch }: ContrastcheckProps) {
   const swatches = flask.bottle.swatches
+  const goal = flask.bottle.recipe.goal
   const checks = checkPalette(swatches)
   const weak = checks.filter((c) => !c.passes)
   const pinch = flask.pinch
@@ -49,7 +51,7 @@ export function Contrastcheck({ flask, onPinch }: ContrastcheckProps) {
                 {(row as readonly Swatch[]).map((s, i) => (
                   <li key={i} style={{ background: s.hex }} data-veranderd={pinch.changed.includes(i)}>
                     <span className="sr-only">
-                      {roleName(swatches, i)} {s.hex}
+                      {roleName(swatches, i, goal)} {s.hex}
                     </span>
                   </li>
                 ))}
@@ -70,7 +72,7 @@ export function Contrastcheck({ flask, onPinch }: ContrastcheckProps) {
               </span>
               <div className="check-woorden">
                 <p className="check-paar">
-                  <b>{check.kind === 'knop' ? capital(strings.contrast.knop(roleName(swatches, check.bg))) : capital(strings.contrast.paar(roleName(swatches, check.fg), roleName(swatches, check.bg)))}</b>{' '}
+                  <b>{check.kind === 'knop' ? capital(strings.contrast.knop(roleName(swatches, check.bg, goal))) : capital(strings.contrast.paar(roleName(swatches, check.fg, goal), roleName(swatches, check.bg, goal)))}</b>{' '}
                   <span className="check-getal">{formatRatio(check.ratio)}</span> <span className="check-niveau">{strings.contrast.niveau[check.level]}</span>
                 </p>
                 <p className="check-zin">{check.kind === 'tekst' ? strings.contrast.tekst[check.level] : check.kind === 'knop' ? strings.contrast.knopZin[check.level] : strings.contrast.onderdeel[check.level]}</p>

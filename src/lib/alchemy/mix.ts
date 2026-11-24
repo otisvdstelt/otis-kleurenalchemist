@@ -220,8 +220,9 @@ export function brew({ ingredients, goal: goalId = DEFAULT_GOAL, bases = [], sti
   const accentHex = (k: number) => {
     if (k === 0 && bases[1]) return bases[1]
     const a = accentList[k] ?? accentList[0] ?? main
-    if (k === 0 && goal.ramps.includes('accent')) return at(rampOf('accent'), step(dark ? 400 : 500))
-    return toHex(inGamut(dark ? { ...a, c: a.c * 0.85 } : a))
+    if (k === 0 && goal.ramps.includes('accent')) return at(rampOf('accent'), step(dark ? 400 : 600))
+    // Op een licht scherm iets donkerder, zodat een accent opvalt. Een affiche mag fel en licht blijven
+    return toHex(inGamut(dark ? { ...a, c: a.c * 0.85 } : goal.id === 'affiche' ? a : { ...a, l: Math.min(a.l, 0.52) }))
   }
   const chart = goal.id === 'presentatie' ? chartColours(fromHex(mainHex), at(n, 50)) : []
   let accentIndex = 0
@@ -240,7 +241,7 @@ export function brew({ ingredients, goal: goalId = DEFAULT_GOAL, bases = [], sti
         if (goal.id === 'affiche') return toHex(inGamut({ l: strong ? 0.16 : 0.2, c: 0.04, h: main.h }))
         return dark ? at(n, 50) : at(n, strong ? 950 : 900)
       case 'zachte-tekst':
-        return dark ? at(n, strong ? 300 : 400) : at(n, strong ? 700 : 600)
+        return dark ? at(n, strong ? 200 : 300) : at(n, strong ? 800 : 700)
       case 'hoofd':
         if (goal.id === 'affiche' && !bases[0]) return toHex(inGamut({ ...main, c: Math.max(main.c, 0.2) * chromaLevel }))
         return mainHex
@@ -281,6 +282,10 @@ export function brew({ ingredients, goal: goalId = DEFAULT_GOAL, bases = [], sti
   const corked = swatches.map((_, i) => Boolean(corks[i]))
   swatches = swatches.map((s, i) => (corks[i] ? { ...s, hex: corks[i]! } : s))
   const fixed_ = swatches.map((_, i) => locked[i] || corked[i])
+
+  // Leesbaar vanaf het begin: tekst en de tekst op knoppen halen altijd hun drempel. Alleen lichtheid, zo weinig mogelijk.
+  // Of onderdelen (accenten, meldingen) genoeg opvallen, laat het palet zien. Daar is het snuifje voor
+  swatches = pinch(swatches, fixed_, ['tekst', 'knop']).swatches
 
   const base = swatches.map((s) => ({ ...s }))
   // Water en houtskool werken op het palet zoals het al was

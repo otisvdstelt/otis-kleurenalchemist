@@ -7,6 +7,8 @@ import { adjust, swapRoles, type Adjustment } from './alchemy/adjust'
 import { bottle as fill, ingredientsOf, type Bottle } from './alchemy/bottle'
 import { cauldron as step, emptyCauldron, type Cauldron, type CauldronAction } from './alchemy/cauldron'
 import { checkPalette } from './alchemy/contrast'
+import { recipeSentence } from './alchemy/describe'
+import { combineTastes } from './alchemy/taste'
 import { pinch } from './alchemy/pinch'
 import type { Hex } from './alchemy/color'
 import { isSpecial, photoIngredient, plainName, type GoalId, type Ingredient } from './alchemy/ingredients'
@@ -297,6 +299,39 @@ export const store = {
       flask: { ...flask, bottle: { ...flask.bottle, swatches }, pinch: null },
       ...say(strings.nieuws.bijgesteld(strings.fles.rol(swatch.role, roleNumber(swatches, index)), strings.bijstellen[how], swatch.hex)),
     })
+  },
+
+  /**
+   * Stel een hele reeks bij: warmer, koeler, feller of doffer. De lichtheid van de stappen blijft staan.
+   * Rollen die precies op een stap van die reeks lagen, schuiven mee. Een basis blijft wat hij is
+   */
+  adjustRamp(index: number, how: Adjustment) {
+    const flask = state.flask
+    const ramp = flask?.bottle.ramps?.[index]
+    if (!flask || !ramp) return
+    const bases = new Set(flask.bottle.recipe.bases ?? [])
+    const moved = new Map<string, string>()
+    const steps = ramp.steps.map((hex) => {
+      if (bases.has(hex)) return hex
+      const next = adjust(hex, how)
+      moved.set(hex, next)
+      return next
+    })
+    const ramps = flask.bottle.ramps!.map((r, i) => (i === index ? { ...r, steps } : r))
+    const swatches = flask.bottle.swatches.map((s) => (moved.has(s.hex) ? { ...s, hex: moved.get(s.hex)! } : s))
+    set({ flask: { ...flask, bottle: { ...flask.bottle, ramps, swatches }, pinch: null }, ...say(strings.nieuws.reeksBijgesteld(strings.reeksen.namen[ramp.name], strings.bijstellen[how])) })
+  },
+
+  /** Het recept van een flesje in één zin: "Jouw groen, voor een website, fris en koel, analoog" */
+  sentence(bottle: Bottle): string | null {
+    const goal = bottle.recipe.goal
+    if (!goal) return null
+    const ingredients = bottle.recipe.items.flatMap((item) => state.catalogue?.find((i) => i.id === item.id) ?? [])
+    const tastes = ingredients.filter((i) => i.kind === 'smaak')
+    return recipeSentence(
+      { bases: bottle.recipe.bases ?? [], tasteNames: [...new Set(tastes.map(plainName))], goal, taste: combineTastes(tastes), harmony: ingredients.find((i) => i.kind === 'harmonie')?.harmony ?? null },
+      strings.zin,
+    )
   },
 
   /** Wissel twee kleuren in het flesje van rol */

@@ -10,6 +10,7 @@ import { Fles } from './Fles'
 import { Meenemen } from './Meenemen'
 import { Monocle } from './Monocle'
 import { Proefvel } from './Proefvel'
+import { Reeksen } from './Reeksen'
 import { Tabs } from './Tabs'
 
 interface FlesjeProps {
@@ -44,6 +45,8 @@ export const Flesje = forwardRef<HTMLElement, FlesjeProps>(function Flesje({ onC
 
   const { bottle, brew, from } = flask
   const swatches = bottle.swatches
+  const goal = bottle.recipe.goal
+  const sentence = store.sentence(bottle)
   // Kurken horen bij de ketel. Ze kunnen alleen op een flesje dat net uit de ketel komt, en even groot is
   const corkable = from === 'ketel' && swatches.length === size
   // Welke kleuren nu onder een drempel zitten: bij een knop de knop, anders de voorgrond. Die krijgen een stempeltje
@@ -156,6 +159,7 @@ export const Flesje = forwardRef<HTMLElement, FlesjeProps>(function Flesje({ onC
           </button>
         )}
       </div>
+      {sentence && <p className="flesje-zin">{sentence}</p>}
       {brew?.mud && <p className="toonbank-modder hand">{strings.fles.modder}</p>}
 
       {corkable && (
@@ -194,7 +198,7 @@ export const Flesje = forwardRef<HTMLElement, FlesjeProps>(function Flesje({ onC
                 return (
                   <li key={i} className="staal">
                     <button type="button" className="staal-kleur" style={{ background: s.hex }} aria-label={strings.fles.kopieer(s.hex)} onClick={() => void copy(i)} />
-                    <span className="staal-rol hand">{strings.fles.rol(s.role, n)}</span>
+                    <span className="staal-rol hand">{strings.fles.rol(s.role, n, goal)}</span>
                     <code className="staal-hex">
                       {s.hex}
                       {weakAt.has(i) && <span className="stempel">{strings.fles.teZwak}</span>}
@@ -210,7 +214,7 @@ export const Flesje = forwardRef<HTMLElement, FlesjeProps>(function Flesje({ onC
                       </button>
                     </span>
                     {tuning === i && (
-                      <div id={`bijstellen-${i}`} className="bijstellen" role="group" aria-label={`${strings.bijstellen.knop}: ${strings.fles.rol(s.role, n)}`}>
+                      <div id={`bijstellen-${i}`} className="bijstellen" role="group" aria-label={`${strings.bijstellen.knop}: ${strings.fles.rol(s.role, n, goal)}`}>
                         <div className="bijstellen-stappen">
                           {ADJUSTMENTS.map((how) => (
                             <button key={how} type="button" className="quiet" onClick={() => store.adjust(i, how)}>
@@ -230,7 +234,7 @@ export const Flesje = forwardRef<HTMLElement, FlesjeProps>(function Flesje({ onC
                           >
                             {swatches.map((other, j) => (
                               <option key={j} value={j}>
-                                {j === i ? `${strings.fles.rol(other.role, roleNumber(swatches, j))} (${strings.bijstellen.houd})` : strings.bijstellen.wissel(strings.fles.rol(other.role, roleNumber(swatches, j)))}
+                                {j === i ? `${strings.fles.rol(other.role, roleNumber(swatches, j), goal)} (${strings.bijstellen.houd})` : strings.bijstellen.wissel(strings.fles.rol(other.role, roleNumber(swatches, j), goal))}
                               </option>
                             ))}
                           </select>
@@ -246,8 +250,9 @@ export const Flesje = forwardRef<HTMLElement, FlesjeProps>(function Flesje({ onC
                 )
               })}
             </ul>
+                <Reeksen ramps={bottle.ramps ?? []} editable />
                 <h3 className="toonbank-sub">{strings.proefvel.kop}</h3>
-                <Proefvel swatches={swatches} />
+                <Proefvel swatches={swatches} goal={goal} />
               </>
             ),
           },
@@ -257,7 +262,7 @@ export const Flesje = forwardRef<HTMLElement, FlesjeProps>(function Flesje({ onC
             content: (
               <>
                 <Contrastcheck flask={flask} onPinch={() => store.pinchFlask()} />
-                <Monocle swatches={swatches} />
+                <Monocle swatches={swatches} goal={goal} />
               </>
             ),
           },

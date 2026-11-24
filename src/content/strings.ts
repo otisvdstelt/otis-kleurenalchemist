@@ -26,6 +26,8 @@ const ROLNAMEN: Record<Role, string> = {
   grafiek: 'grafiek',
 }
 
+const HUISSTIJL: Partial<Record<Role, string>> = { accent: 'steunkleur', achtergrond: 'neutraal licht', tekst: 'neutraal donker' }
+
 const KLEUREN: Record<HueWord, string> = {
   rood: 'rood',
   oranje: 'oranje',
@@ -179,7 +181,11 @@ export const strings = {
     kopieer: (hex: string) => `Kopieer ${hex}`,
     gekopieerd: 'gekopieerd!',
     nietGekopieerd: 'kopiëren lukte niet',
-    rol: (role: Role, n: number) => (n > 1 ? `${ROLNAMEN[role]} ${n}` : ROLNAMEN[role]),
+    rol: (role: Role, n: number, goal?: GoalId) => {
+      // Bij een huisstijl heten de rollen naar wat een huisstijl heeft
+      const name = (goal === 'huisstijl' && HUISSTIJL[role]) || ROLNAMEN[role]
+      return n > 1 || role === 'grafiek' ? `${name} ${n}` : name
+    },
     modder: 'Modder is geen fout. Het is gewoon een heel eerlijk palet.',
     wegzetten: 'zet weg',
     terugNaarKetel: 'Terug naar de ketel',
@@ -200,7 +206,19 @@ export const strings = {
     tekst: 'Zo ziet je palet eruit als er echt iets op staat: een kop, een stukje tekst, een knop en een label.',
     knop: 'Doe maar',
     label: 'Nieuw',
-    link: 'nog een kleur',
+    link: 'Lees verder',
+    zacht: 'Een regel in de zachte tekstkleur, voor wat minder belangrijk is.',
+    appTitel: 'Goedenavond',
+    melding: { goed: 'Opgeslagen', 'let-op': 'Bijna vol', fout: 'Mislukt' },
+    afficheTitel: 'Zomer op het plein',
+    afficheTekst: 'Elke vrijdag vanaf vijf uur. Koffie, taart en muziek.',
+    afficheKnop: 'Kom langs',
+    kaartjeNaam: 'Atelier Alchemist',
+    kaartjeWat: 'kleur op maat',
+    kaartjeAdres: 'Werkplaatsstraat 7 · 1234 AB Ketelstad',
+    diaTitel: 'Hoe het kwartaal ging',
+    diaSub: 'Zes producten, omzet per maand',
+    diaGrafiek: 'Een staafgrafiek met zes staven, elk in een eigen grafiekkleur',
   },
   contrast: {
     kop: 'Is het leesbaar?',
@@ -254,6 +272,7 @@ export const strings = {
     bijgesteld: (rol: string, hoe: string, hex: string) => `${rol.replace(/^./, (c) => c.toUpperCase())} ${hoe}: ${hex}.`,
     gewisseld: (a: string, b: string) => `${a.replace(/^./, (c) => c.toUpperCase())} en ${b} zijn van rol gewisseld.`,
     ongedaan: 'Ongedaan gemaakt.',
+    reeksBijgesteld: (reeks: string, hoe: string) => `De reeks ${reeks} ${hoe}.`,
     doel: (doel: string) => `Doel: ${doel}.`,
     basis: (hex: string, n: number) => `${hex} in de kolf. ${n === 1 ? 'Dit wordt de hoofdkleur.' : 'Dit wordt het accent.'}`,
     basisWeg: 'De kolf is leeggegoten.',
@@ -283,6 +302,12 @@ export const strings = {
     bezig: 'De kleuren worden eruit gehaald',
     loslaten: 'Laat los, dan valt hij in de ketel',
     heic: 'Dit is een HEIC-foto, van een iPhone. Deze browser kan die niet lezen. Bewaar hem als JPG, of maak er een schermafbeelding van.',
+  },
+  reeksen: {
+    kop: 'Reeksen',
+    namen: { neutraal: 'neutraal', hoofd: 'hoofdkleur', accent: 'accent' },
+    kopieer: (stap: string, hex: string) => `Kopieer ${stap}, ${hex}`,
+    bijstellen: (reeks: string) => `De hele reeks ${reeks} bijstellen`,
   },
   bijstellen: {
     lichter: 'lichter',
