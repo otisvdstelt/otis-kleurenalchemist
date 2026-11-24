@@ -57,8 +57,18 @@ describe('flesje als link', () => {
     expect(decodeBottle(encodeBottle(tampered))!.swatches[3].hex).toBe('#123456')
   })
 
-  it('is kort genoeg voor een chat', () => {
-    expect(encodeBottle(fill()).length).toBeLessThan(120)
+  it('is kort genoeg voor een chat, ook met drie reeksen', () => {
+    expect(encodeBottle(fill()).length).toBeLessThan(420)
+  })
+
+  it('v2 bewaart doel, basis, reeksen en opnieuw roeren zonder verlies', () => {
+    const ingredients = take('zeeschuim', 'analoog')
+    const result = brew({ ingredients, goal: 'presentatie', bases: ['#3b533e'], stirs: 6, reroll: 2 })!
+    const original = bottle(result, ingredients, 6, 5, 'Groen aan zee', '2026-11-24', { bases: ['#3b533e'], reroll: 2 })
+    const decoded = decodeBottle(encodeBottle(original))!
+    expect(decoded).toEqual(original)
+    expect(decoded.ramps!.map((r) => r.name)).toEqual(['neutraal', 'hoofd'])
+    expect(decoded.recipe.goal).toBe('presentatie')
   })
 
   it('weigert rommel zonder te struikelen', () => {

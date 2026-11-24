@@ -2,11 +2,32 @@
 
 import type { Hex } from './color.ts'
 
-export type Role = 'achtergrond' | 'oppervlak' | 'tekst' | 'accent' | 'signaal'
+/**
+ * De rollen die een kleur kan hebben. Welke er in een palet zitten, hangt af van het doel.
+ * `signaal` komt uit de eerste versie (v1-links) en wordt niet meer gemaakt
+ */
+export type Role = 'achtergrond' | 'oppervlak' | 'rand' | 'tekst' | 'zachte-tekst' | 'hoofd' | 'op-hoofd' | 'accent' | 'signaal' | 'goed' | 'let-op' | 'fout' | 'grafiek'
+
+/** Alle rollen, in een vaste volgorde. De plek is het nummer in een deellink */
+export const ROLES: readonly Role[] = ['achtergrond', 'oppervlak', 'tekst', 'accent', 'signaal', 'rand', 'zachte-tekst', 'hoofd', 'op-hoofd', 'goed', 'let-op', 'fout', 'grafiek']
 
 export interface Swatch {
   hex: Hex
   role: Role
+}
+
+/** De stappen van een reeks, van licht naar donker, zoals Tailwind ze noemt */
+export const STEPS = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950] as const
+export type Step = (typeof STEPS)[number]
+
+export type RampName = 'neutraal' | 'hoofd' | 'accent'
+export const RAMP_NAMES: readonly RampName[] = ['neutraal', 'hoofd', 'accent']
+
+/** Een reeks van 50 tot 950 in één tint */
+export interface Ramp {
+  name: RampName
+  /** Hex per stap, in de volgorde van STEPS */
+  steps: Hex[]
 }
 
 export const MIN_SIZE = 3

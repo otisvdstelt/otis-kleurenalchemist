@@ -2,7 +2,8 @@
 // De woorden zelf staan in src/content/strings.ts. Hier staat alleen hoe ze gekozen worden
 
 import { fromHex } from './color.ts'
-import { isSpecial, plainName, type Ingredient } from './ingredients.ts'
+import { hueWord, type HueWord } from './describe.ts'
+import { plainName, type Ingredient } from './ingredients.ts'
 import type { Brew } from './mix.ts'
 import { mulberry32, pick } from './prng.ts'
 
@@ -17,6 +18,8 @@ export interface NameWords {
   joiners: readonly string[]
   /** Een staartje per stemming, zoals "na regen" */
   tails: Readonly<Record<Mood, readonly string[]>>
+  /** Kleurnamen, voor een palet dat alleen uit een basis komt: "Groen na regen" */
+  hues: Readonly<Record<HueWord, string>>
 }
 
 const capital = (text: string) => text.charAt(0).toUpperCase() + text.slice(1)
@@ -42,10 +45,10 @@ export function moodOf(brew: Brew): Mood[] {
 }
 
 /** Geef het flesje een naam. Hetzelfde brouwsel geeft altijd dezelfde naam */
-export function nameBrew(brew: Brew, ingredients: readonly Ingredient[], words: NameWords): string {
+export function nameBrew(brew: Brew, ingredients: readonly Ingredient[], words: NameWords, bases: readonly string[] = []): string {
   if (brew.mud) return words.mud
   const random = mulberry32(brew.seed ^ 0x9e3779b9)
-  const colours = ingredients.filter((i) => !isSpecial(i))
+  const colours = ingredients.filter((i) => i.kind === 'smaak')
   // Het potje dat het vaakst in de ketel ging, en bij gelijkspel het eerste
   const counts = new Map<string, { ingredient: Ingredient; count: number; first: number }>()
   colours.forEach((ingredient, index) => {
@@ -55,7 +58,8 @@ export function nameBrew(brew: Brew, ingredients: readonly Ingredient[], words: 
   })
   const ranked = [...counts.values()].sort((a, b) => b.count - a.count || a.first - b.first)
   const noun = (i: Ingredient) => (i.id.startsWith('foto') ? words.photo : plainName(i))
-  const main = noun(ranked[0].ingredient)
+  // Een basis zonder smaken krijgt de naam van zijn kleur
+  const main = ranked[0] ? noun(ranked[0].ingredient) : words.hues[hueWord(bases[0] ?? brew.swatches.find((s) => s.role === 'hoofd')?.hex ?? brew.blend)]
   const moods = moodOf(brew)
   const mood = moods[pick(random, moods.length)]
   const tails = words.tails[mood]

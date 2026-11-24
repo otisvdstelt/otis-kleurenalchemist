@@ -2,7 +2,7 @@
 
 import { fromHex, hexToRgb } from './color.ts'
 import type { Bottle } from './bottle.ts'
-import { roleNumber, type Swatch } from './palette.ts'
+import { roleNumber, STEPS, type Ramp, type Swatch } from './palette.ts'
 
 /** De naam van een kleur in code: achtergrond, accent, accent-2 */
 export function tokenName(swatches: readonly Swatch[], index: number): string {
@@ -20,16 +20,42 @@ export function cssOklch(hex: string): string {
 /** Haal tekens weg die een CSS-commentaar zouden breken */
 const safeComment = (text: string) => text.replace(/\*\//g, '* /').replace(/[\r\n]+/g, ' ')
 
-/** CSS custom properties op :root */
-export function toCss(bottle: Bottle): string {
-  const lines = bottle.swatches.map((s, i) => `  --kleur-${tokenName(bottle.swatches, i)}: ${s.hex};`)
-  return `/* ${safeComment(bottle.name)} · ${bottle.date} · Kleurenalchemist */\n:root {\n${lines.join('\n')}\n}\n`
+/** Waar een rolkleur in de reeksen staat, als die er precies in zit: bijvoorbeeld neutraal-900 */
+export function rampStepOf(ramps: readonly Ramp[], hex: string): string | null {
+  for (const r of ramps) {
+    const i = r.steps.indexOf(hex)
+    if (i >= 0) return `${r.name}-${STEPS[i]}`
+  }
+  return null
 }
 
-/** Een @theme-blok voor Tailwind CSS v4. Daarna werken bg-achtergrond, text-tekst, border-accent enzovoort */
+/** De variabelen: eerst de reeksen, dan de rollen. Een rol die precies in een reeks staat, verwijst ernaar */
+function variables(bottle: Bottle, prefix: string): string[] {
+  const ramps = bottle.ramps ?? []
+  const lines: string[] = []
+  for (const r of ramps) {
+    r.steps.forEach((hex, i) => lines.push(`  --${prefix}-${r.name}-${STEPS[i]}: ${hex};`))
+    lines.push('')
+  }
+  if (ramps.length) lines.push('  /* Rollen */')
+  bottle.swatches.forEach((s, i) => {
+    const step = rampStepOf(ramps, s.hex)
+    lines.push(`  --${prefix}-${tokenName(bottle.swatches, i)}: ${step ? `var(--${prefix}-${step})` : s.hex};`)
+  })
+  return lines
+}
+
+/** CSS custom properties op :root, met de reeksen en de rollen */
+export function toCss(bottle: Bottle): string {
+  return `/* ${safeComment(bottle.name)} · ${bottle.date} · Kleurenalchemist */\n:root {\n${variables(bottle, 'kleur').join('\n')}\n}\n`
+}
+
+/**
+ * Een @theme-blok voor Tailwind CSS v4. Daarna werken bg-neutraal-50 tot text-hoofd-950,
+ * en de rollen als bg-achtergrond, text-tekst, bg-hoofd en text-op-hoofd
+ */
 export function toTailwind(bottle: Bottle): string {
-  const lines = bottle.swatches.map((s, i) => `  --color-${tokenName(bottle.swatches, i)}: ${s.hex};`)
-  return `/* ${safeComment(bottle.name)} · ${bottle.date} · Kleurenalchemist */\n@theme {\n${lines.join('\n')}\n}\n`
+  return `/* ${safeComment(bottle.name)} · ${bottle.date} · Kleurenalchemist */\n@theme {\n${variables(bottle, 'color').join('\n')}\n}\n`
 }
 
 export function toJson(bottle: Bottle): string {
@@ -37,7 +63,9 @@ export function toJson(bottle: Bottle): string {
     {
       naam: bottle.name,
       datum: bottle.date,
-      kleuren: bottle.swatches.map((s, i) => ({ rol: s.role, token: tokenName(bottle.swatches, i), hex: s.hex, oklch: cssOklch(s.hex) })),
+      doel: bottle.recipe.goal ?? null,
+      kleuren: bottle.swatches.map((s, i) => ({ rol: s.role, token: tokenName(bottle.swatches, i), hex: s.hex, oklch: cssOklch(s.hex), reeks: rampStepOf(bottle.ramps ?? [], s.hex) })),
+      reeksen: Object.fromEntries((bottle.ramps ?? []).map((r) => [r.name, Object.fromEntries(r.steps.map((hex, i) => [STEPS[i], hex]))])),
       recept: {
         ingredienten: bottle.recipe.items.map((item) => item.id),
         roerslagen: bottle.recipe.stirs,
@@ -57,7 +85,7 @@ export function toSvg(bottle: Bottle): string {
   const size = 120
   const gap = 16
   const n = bottle.swatches.length
-  const width = n * size + (n - 1) * gap + 48
+  const width = Math.max(n * size + (n - 1) * gap + 48, 760)
   const rows = bottle.swatches
     .map((s, i) => {
       const x = 24 + i * (size + gap)
@@ -68,11 +96,23 @@ export function toSvg(bottle: Bottle): string {
       ].join('\n')
     })
     .join('\n')
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${64 + size + 72}" viewBox="0 0 ${width} ${64 + size + 72}" font-family="system-ui, sans-serif" fill="#2c2823">
+  // De reeksen eronder, elk als een strook van 50 tot 950
+  const ramps = bottle.ramps ?? []
+  const top = 64 + size + 72
+  const cell = Math.min(60, (width - 48 - 90) / STEPS.length)
+  const strips = ramps
+    .map((r, k) => {
+      const y = top + k * (cell + 30)
+      return [`  <text x="24" y="${y + cell / 2 + 5}" font-size="14">${r.name}</text>`, ...r.steps.map((hex, i) => `  <rect x="${114 + i * cell}" y="${y}" width="${cell}" height="${cell}" fill="${hex}"/>`)].join('\n')
+    })
+    .join('\n')
+  const height = top + ramps.length * (cell + 30) + (ramps.length ? 16 : 0)
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" font-family="system-ui, sans-serif" fill="#2c2823">
   <title>${xml(bottle.name)}</title>
   <rect width="100%" height="100%" fill="#f7f4eb"/>
   <text x="24" y="40" font-size="22">${xml(bottle.name)}</text>
 ${rows}
+${strips}
 </svg>
 `
 }
@@ -82,11 +122,16 @@ ${rows}
  * Figma leest ze in als variabelen via een import-plugin, net als Tokens Studio en Style Dictionary
  */
 export function toDesignTokens(bottle: Bottle): string {
-  const colours: Record<string, { $type: 'color'; $value: string; $description: string }> = {}
+  const ramps = bottle.ramps ?? []
+  const kleur: Record<string, unknown> = {}
+  for (const r of ramps) kleur[r.name] = Object.fromEntries(r.steps.map((hex, i) => [STEPS[i], { $type: 'color', $value: hex }]))
+  const rollen: Record<string, { $type: 'color'; $value: string; $description: string }> = {}
   bottle.swatches.forEach((s, i) => {
-    colours[tokenName(bottle.swatches, i)] = { $type: 'color', $value: s.hex, $description: s.role }
+    const step = rampStepOf(ramps, s.hex)
+    // Een rol die in een reeks staat, verwijst ernaar: zo blijven ze in Figma aan elkaar gekoppeld
+    rollen[tokenName(bottle.swatches, i)] = { $type: 'color', $value: step ? `{kleur.${step.replace('-', '.')}}` : s.hex, $description: s.role }
   })
-  return `${JSON.stringify({ $description: `${bottle.name} · Kleurenalchemist`, kleur: colours }, null, 2)}\n`
+  return `${JSON.stringify({ $description: `${bottle.name} · Kleurenalchemist`, kleur: { ...kleur, rol: rollen } }, null, 2)}\n`
 }
 
 /**
@@ -119,20 +164,28 @@ export function toAse(bottle: Bottle): Uint8Array {
     u32(body.length)
     bytes.push(...body)
   }
-  bytes.push(0x41, 0x53, 0x45, 0x46) // ASEF
-  u16(1)
-  u16(0)
-  u32(bottle.swatches.length + 2)
-  block(0xc001, name(bottle.name))
-  bottle.swatches.forEach((s, i) => {
-    const body = name(tokenName(bottle.swatches, i))
+  const colour = (label: string, hex: string) => {
+    const body = name(label)
     body.push(0x52, 0x47, 0x42, 0x20) // 'RGB '
     const start = bytes.length
-    for (const v of hexToRgb(s.hex)) f32(v)
+    for (const v of hexToRgb(hex)) f32(v)
     u16(2) // normaal, geen steunkleur
     body.push(...bytes.splice(start))
     block(0x0001, body)
-  })
+  }
+  const ramps = bottle.ramps ?? []
+  bytes.push(0x41, 0x53, 0x45, 0x46) // ASEF
+  u16(1)
+  u16(0)
+  u32(bottle.swatches.length + 2 + ramps.reduce((sum, r) => sum + r.steps.length + 2, 0))
+  // Eerst de rollen, dan elke reeks als eigen groep
+  block(0xc001, name(bottle.name))
+  bottle.swatches.forEach((s, i) => colour(tokenName(bottle.swatches, i), s.hex))
   block(0xc002, [])
+  for (const r of ramps) {
+    block(0xc001, name(r.name))
+    r.steps.forEach((hex, i) => colour(`${r.name}-${STEPS[i]}`, hex))
+    block(0xc002, [])
+  }
   return Uint8Array.from(bytes)
 }

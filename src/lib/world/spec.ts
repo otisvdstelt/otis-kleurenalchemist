@@ -94,6 +94,14 @@ export function jarForm(shape: JarShape, scale: number): JarForm {
     case 'kolf':
       outline = [[0, 0], [0.112, 0], [0.118, 0.014], [0.05, h * 0.62], [0.04, h * 0.7], [0.04, h]]
       break
+    case 'blik':
+      // Een blik: recht, met een randje boven en onder
+      outline = [[0, 0], [0.095, 0], [0.1, 0.008], [0.098, 0.02], [0.098, h * 0.9], [0.1, h * 0.93], [0.092, h], [0.09, h]]
+      break
+    case 'zakje':
+      // Een linnen zakje: bol onderin, dichtgeknoopt bovenin
+      outline = [[0, 0], [0.09, 0.005], [0.115, h * 0.25], [0.11, h * 0.55], [0.06, h * 0.78], [0.035, h * 0.84], [0.05, h * 0.92], [0.04, h]]
+      break
   }
   outline = outline.map(([r, y]) => [r * w, y])
   const mouth = outline[outline.length - 1][0]

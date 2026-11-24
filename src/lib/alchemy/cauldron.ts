@@ -1,13 +1,22 @@
 // Wat er in de ketel zit, en wat je ermee kunt doen. Een pure reducer: de store om hem heen houdt hem vast
 
-import type { Hex } from './color.ts'
+import { isHex, type Hex } from './color.ts'
+import type { GoalId } from './ingredients.ts'
+import { DEFAULT_GOAL } from './goals.ts'
 import { clampSize, DEFAULT_SIZE } from './palette.ts'
 
 /** Meer dan dit past er echt niet in, ook niet als het al overkookt */
 export const MAX_ITEMS = 12
 
+/** Hooguit twee basiskleuren: de hoofdkleur, en eventueel het accent */
+export const MAX_BASES = 2
+
 export interface Cauldron {
-  /** Ids van de ingrediënten, in de volgorde waarin ze erin gingen */
+  /** Waar het palet voor is. Er is altijd precies één doel */
+  goal: GoalId
+  /** Jouw eigen kleuren, die precies zo blijven */
+  bases: Hex[]
+  /** Ids van smaken, harmonieën en bewerkingen, in de volgorde waarin ze erin gingen */
   items: string[]
   stirs: number
   size: number
@@ -29,11 +38,16 @@ export type CauldronAction =
   | { type: 'size'; size: number }
   | { type: 'cork'; index: number; hex: Hex | null }
   | { type: 'empty' }
-  | { type: 'load'; items: string[]; stirs: number; size: number; seed?: number }
+  | { type: 'load'; items: string[]; stirs: number; size: number; seed?: number; goal?: GoalId; bases?: Hex[] }
+  /** Een ander doel. Het palet krijgt een andere opbouw, dus de kurken gaan eraf */
+  | { type: 'goal'; goal: GoalId }
+  /** Een basiskleur erbij, of op plek `index` een andere */
+  | { type: 'base'; hex: Hex; index?: number }
+  | { type: 'unbase'; index: number }
   /** Eén van dit ingrediënt eruit, het laatst toegevoegde */
   | { type: 'remove'; id: string }
 
-export const emptyCauldron = (size = DEFAULT_SIZE): Cauldron => ({ items: [], stirs: 0, size: clampSize(size), corks: [], reroll: 0, seed: null })
+export const emptyCauldron = (size = DEFAULT_SIZE, goal: GoalId = DEFAULT_GOAL): Cauldron => ({ goal, bases: [], items: [], stirs: 0, size: clampSize(size), corks: [], reroll: 0, seed: null })
 
 export function cauldron(state: Cauldron, action: CauldronAction): Cauldron {
   switch (action.type) {
@@ -67,8 +81,30 @@ export function cauldron(state: Cauldron, action: CauldronAction): Cauldron {
       return { ...state, corks }
     }
     case 'empty':
-      return emptyCauldron(state.size)
+      return emptyCauldron(state.size, state.goal)
     case 'load':
-      return { items: action.items.slice(0, MAX_ITEMS), stirs: Math.max(0, Math.round(action.stirs)), size: clampSize(action.size), corks: [], reroll: 0, seed: action.seed ?? null }
+      return {
+        goal: action.goal ?? state.goal,
+        bases: (action.bases ?? []).filter(isHex).slice(0, MAX_BASES),
+        items: action.items.slice(0, MAX_ITEMS),
+        stirs: Math.max(0, Math.round(action.stirs)),
+        size: clampSize(action.size),
+        corks: [],
+        reroll: 0,
+        seed: action.seed ?? null,
+      }
+    case 'goal':
+      return action.goal === state.goal ? state : { ...state, goal: action.goal, corks: [], seed: null }
+    case 'base': {
+      if (!isHex(action.hex)) return state
+      const bases = [...state.bases]
+      if (action.index !== undefined && action.index < bases.length) bases[action.index] = action.hex
+      else if (bases.length < MAX_BASES) bases.push(action.hex)
+      else return state
+      return { ...state, bases, corks: [], seed: null }
+    }
+    case 'unbase':
+      if (!state.bases[action.index]) return state
+      return { ...state, bases: state.bases.filter((_, i) => i !== action.index), corks: [], seed: null }
   }
 }

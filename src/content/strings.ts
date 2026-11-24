@@ -2,6 +2,8 @@
 
 import type { Level } from '../lib/alchemy/contrast'
 import type { Boil } from '../lib/alchemy/mix'
+import type { HueWord } from '../lib/alchemy/describe'
+import type { GoalId, HarmonyId } from '../lib/alchemy/ingredients'
 import type { Role } from '../lib/alchemy/palette'
 
 const GETALLEN = ['nul', 'één', 'twee', 'drie', 'vier', 'vijf', 'zes', 'zeven', 'acht', 'negen', 'tien', 'elf', 'twaalf']
@@ -11,9 +13,48 @@ export const inWoorden = (n: number) => GETALLEN[n] ?? String(n)
 const ROLNAMEN: Record<Role, string> = {
   achtergrond: 'achtergrond',
   oppervlak: 'oppervlak',
+  rand: 'rand',
   tekst: 'tekst',
+  'zachte-tekst': 'zachte tekst',
+  hoofd: 'hoofdkleur',
+  'op-hoofd': 'tekst op de hoofdkleur',
   accent: 'accent',
   signaal: 'signaal',
+  goed: 'goed',
+  'let-op': 'let op',
+  fout: 'fout',
+  grafiek: 'grafiek',
+}
+
+const KLEUREN: Record<HueWord, string> = {
+  rood: 'rood',
+  oranje: 'oranje',
+  geel: 'geel',
+  groen: 'groen',
+  blauwgroen: 'blauwgroen',
+  blauw: 'blauw',
+  paars: 'paars',
+  roze: 'roze',
+  bruin: 'bruin',
+  grijs: 'grijs',
+  zwart: 'zwart',
+  wit: 'wit',
+}
+
+const DOELEN: Record<GoalId, string> = {
+  website: 'website',
+  donker: 'app in het donker',
+  affiche: 'affiche',
+  huisstijl: 'logo en huisstijl',
+  presentatie: 'presentatie',
+}
+
+const HARMONIEEN: Record<HarmonyId, string> = {
+  complementair: 'complementair',
+  analoog: 'analoog',
+  drieklank: 'drieklank',
+  gesplitst: 'gesplitst complementair',
+  'een-tint': 'één tint',
 }
 
 export const strings = {
@@ -287,10 +328,22 @@ export const strings = {
     welkomVerder: 'Brouw verder',
     verder: 'Brouw ermee verder',
   },
+  /** Het recept in één zin: "Jouw groen, voor een website, fris en koel, analoog" */
+  zin: {
+    hues: KLEUREN,
+    yours: (kleur: string) => `jouw ${kleur}`,
+    goals: { website: 'voor een website', donker: 'voor een app in het donker', affiche: 'voor een affiche', huisstijl: 'voor een logo en huisstijl', presentatie: 'voor een presentatie' } satisfies Record<GoalId, string>,
+    harmonies: HARMONIEEN,
+    taste: { warm: 'warm', koel: 'koel', licht: 'licht', diep: 'diep', fel: 'fel', zacht: 'zacht', strak: 'strak', fris: 'fris' },
+    and: 'en',
+  },
+  doelen: DOELEN,
+  harmonieen: HARMONIEEN,
   /** Woorden voor de naam op het etiket */
   namen: {
     mud: 'Modder, maar wel van jou',
     photo: 'kiekje',
+    hues: KLEUREN,
     joiners: ['met', 'met een vleugje', 'en een beetje', 'over'],
     tails: {
       donker: ['bij nacht', 'na middernacht', 'in de kelder', 'onder de trap', 'zonder maan'],

@@ -1,9 +1,9 @@
 // Een flesje: de uitkomst, en het recept om verder te brouwen
 
-import { fromHex, toHex } from './color.ts'
-import { isSpecial, photoIngredient, type Ingredient, type Pigment } from './ingredients.ts'
+import { fromHex, toHex, type Hex } from './color.ts'
+import { photoIngredient, type GoalId, type Ingredient, type Pigment } from './ingredients.ts'
 import type { Brew } from './mix.ts'
-import type { Swatch } from './palette.ts'
+import type { Ramp, Swatch } from './palette.ts'
 
 /** Een potje uit de kast heeft genoeg aan zijn id. Een foto neemt zijn pigmenten mee */
 export interface RecipeItem {
@@ -16,11 +16,19 @@ export interface Recipe {
   stirs: number
   size: number
   seed: number
+  /** Waar het voor is. Ontbreekt bij een flesje uit de eerste versie */
+  goal?: GoalId
+  /** Jouw eigen kleuren */
+  bases?: Hex[]
+  /** Hoe vaak er opnieuw geroerd is */
+  reroll?: number
 }
 
 export interface Bottle {
   /** De hexwaarden zelf, zodat een gedeeld flesje er hetzelfde uit blijft zien, ook als het mengen later verandert */
   swatches: Swatch[]
+  /** De reeksen van 50 tot 950. Leeg bij een flesje uit de eerste versie */
+  ramps?: Ramp[]
   recipe: Recipe
   name: string
   /** Als JJJJ-MM-DD */
@@ -37,14 +45,18 @@ function compactPigment(p: Pigment): Pigment {
 }
 
 /** Vul een flesje met wat er nu in de ketel zit */
-export function bottle(brew: Brew, ingredients: readonly Ingredient[], stirs: number, size: number, name: string, date = today()): Bottle {
+export function bottle(brew: Brew, ingredients: readonly Ingredient[], stirs: number, size: number, name: string, date = today(), extra: { bases?: Hex[]; reroll?: number } = {}): Bottle {
   return {
     swatches: brew.swatches.map((s) => ({ ...s })),
+    ramps: brew.ramps.map((r) => ({ name: r.name, steps: [...r.steps] })),
     recipe: {
-      items: ingredients.map((i) => (isPhoto(i.id) && !isSpecial(i) ? { id: i.id, pigments: i.pigments.map(compactPigment) } : { id: i.id })),
+      items: ingredients.map((i) => (isPhoto(i.id) ? { id: i.id, pigments: i.pigments.map(compactPigment) } : { id: i.id })),
       stirs,
       size,
       seed: brew.seed,
+      goal: brew.goal,
+      bases: extra.bases ?? [],
+      reroll: extra.reroll ?? 0,
     },
     name,
     date,

@@ -5,7 +5,7 @@ const run = (...actions: CauldronAction[]): Cauldron => actions.reduce(cauldron,
 
 describe('cauldron', () => {
   it('begint leeg, met vijf kleuren', () => {
-    expect(emptyCauldron()).toEqual({ items: [], stirs: 0, size: 5, corks: [], reroll: 0, seed: null })
+    expect(emptyCauldron()).toEqual({ goal: 'website', bases: [], items: [], stirs: 0, size: 5, corks: [], reroll: 0, seed: null })
   })
 
   it('iets erin gooien zet het roeren terug op nul', () => {
@@ -46,7 +46,18 @@ describe('cauldron', () => {
 
   it('leegmaken houdt de grootte, laden zet een recept terug', () => {
     expect(run({ type: 'size', size: 6 }, { type: 'add', id: 'mos' }, { type: 'empty' })).toEqual(emptyCauldron(6))
-    expect(run({ type: 'load', items: ['mos', 'klei'], stirs: 7, size: 4, seed: 99 })).toEqual({ items: ['mos', 'klei'], stirs: 7, size: 4, corks: [], reroll: 0, seed: 99 })
+    expect(run({ type: 'load', items: ['mos', 'klei'], stirs: 7, size: 4, seed: 99, goal: 'affiche', bases: ['#3b533e'] })).toEqual({ goal: 'affiche', bases: ['#3b533e'], items: ['mos', 'klei'], stirs: 7, size: 4, corks: [], reroll: 0, seed: 99 })
+  })
+
+  it('heeft altijd één doel, en hooguit twee basiskleuren', () => {
+    const state = run({ type: 'goal', goal: 'donker' }, { type: 'base', hex: '#111111' }, { type: 'base', hex: '#222222' }, { type: 'base', hex: '#333333' })
+    expect(state.goal).toBe('donker')
+    expect(state.bases).toEqual(['#111111', '#222222'])
+    expect(cauldron(state, { type: 'base', hex: '#444444', index: 1 }).bases).toEqual(['#111111', '#444444'])
+    expect(cauldron(state, { type: 'unbase', index: 0 }).bases).toEqual(['#222222'])
+    expect(cauldron(state, { type: 'base', hex: 'rood' })).toBe(state)
+    // Leegmaken houdt het doel, en de basis gaat eruit
+    expect(cauldron(state, { type: 'empty' })).toMatchObject({ goal: 'donker', bases: [] })
   })
 
   it('opnieuw roeren telt op, en een verandering laat de vaste seed los', () => {

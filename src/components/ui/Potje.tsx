@@ -17,6 +17,10 @@ function bodyPath(shape: JarShape, top: number): string {
       return `M24 ${top}H36V${top + 5}C38 ${top + 14} 52 ${mid} 51 ${BOTTOM - 8}C50 ${BOTTOM} 10 ${BOTTOM} 9 ${BOTTOM - 8}C8 ${mid} 22 ${top + 14} 24 ${top + 5}Z`
     case 'kolf':
       return `M25 ${top}H35V${top + 14}L51 ${BOTTOM - 5}Q53 ${BOTTOM} 48 ${BOTTOM}H12Q7 ${BOTTOM} 9 ${BOTTOM - 5}L25 ${top + 14}Z`
+    case 'blik':
+      return `M12 ${top + 2}H48V${BOTTOM - 2}Q48 ${BOTTOM} 46 ${BOTTOM}H14Q12 ${BOTTOM} 12 ${BOTTOM - 2}Z`
+    case 'zakje':
+      return `M24 ${top + 6}C20 ${top + 12} 9 ${mid} 10 ${BOTTOM - 8}C11 ${BOTTOM} 49 ${BOTTOM} 50 ${BOTTOM - 8}C51 ${mid} 40 ${top + 12} 36 ${top + 6}Z`
   }
 }
 
@@ -27,6 +31,8 @@ const CORK: Record<JarShape, [number, number]> = {
   bol: [24, 36],
   buik: [23, 37],
   kolf: [24, 36],
+  blik: [12, 48],
+  zakje: [25, 35],
 }
 
 interface PotjeProps {

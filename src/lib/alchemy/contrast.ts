@@ -105,23 +105,37 @@ export function labelFor(swatches: readonly { hex: Hex; role: Role }[], index: n
   return candidates.reduce((best, i) => (shift(i) < shift(best) ? i : best))
 }
 
+/** Rollen die als onderdeel tegen de achtergrond moeten opvallen (3:1) */
+const PARTS: readonly Role[] = ['hoofd', 'accent', 'signaal', 'goed', 'let-op', 'fout', 'grafiek']
+/** Rollen waar tekst op komt, als op een knop */
+const BUTTONS: readonly Role[] = ['hoofd', 'accent', 'signaal']
+
 /**
- * De paren die ertoe doen: tekst op achtergrond en op oppervlak, elk accent en het signaal op de achtergrond,
- * en de tekst op een knop in elk accent en het signaal
+ * De paren die ertoe doen:
+ * - tekst en zachte tekst op de achtergrond en het oppervlak;
+ * - de hoofdkleur, de accenten, het signaal, goed, let op, fout en de grafiekkleuren tegen de achtergrond;
+ * - tekst op een knop in de hoofdkleur (de rol "op-hoofd" als die er is), in elk accent en het signaal
  */
 export function pairsFor(swatches: readonly { hex: Hex; role: Role }[]): { fg: number; bg: number; kind: PairKind }[] {
   const roles = swatches.map((s) => s.role)
   const background = roles.indexOf('achtergrond')
   const surface = roles.indexOf('oppervlak')
-  const text = roles.indexOf('tekst')
   const pairs: { fg: number; bg: number; kind: PairKind }[] = []
-  if (text >= 0 && background >= 0) pairs.push({ fg: text, bg: background, kind: 'tekst' })
-  if (text >= 0 && surface >= 0) pairs.push({ fg: text, bg: surface, kind: 'tekst' })
   roles.forEach((role, index) => {
-    if ((role === 'accent' || role === 'signaal') && background >= 0) pairs.push({ fg: index, bg: background, kind: 'onderdeel' })
+    if (role !== 'tekst' && role !== 'zachte-tekst') return
+    if (background >= 0) pairs.push({ fg: index, bg: background, kind: 'tekst' })
+    if (surface >= 0) pairs.push({ fg: index, bg: surface, kind: 'tekst' })
   })
   roles.forEach((role, index) => {
-    if (role !== 'accent' && role !== 'signaal') return
+    if (PARTS.includes(role) && background >= 0) pairs.push({ fg: index, bg: background, kind: 'onderdeel' })
+  })
+  const onMain = roles.indexOf('op-hoofd')
+  roles.forEach((role, index) => {
+    if (!BUTTONS.includes(role)) return
+    if (role === 'hoofd' && onMain >= 0) {
+      pairs.push({ fg: onMain, bg: index, kind: 'knop' })
+      return
+    }
     const label = labelFor(swatches, index)
     if (label >= 0) pairs.push({ fg: label, bg: index, kind: 'knop' })
   })

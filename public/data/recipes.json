@@ -1,0 +1,12 @@
+[
+  { "id": "portfolio", "naam": "Rustige portfoliosite", "uitleg": "Warm papier, een groene hand, niks schreeuwt.", "doel": "website", "smaken": ["oud-papier", "mos"], "harmonie": "analoog", "roerslagen": 9 },
+  { "id": "cafe", "naam": "Speels café-menu", "uitleg": "Zonnig, zuur en vrolijk. Een krijtbord met lef.", "doel": "affiche", "smaken": ["zonsondergang", "citroen"], "harmonie": "drieklank", "roerslagen": 4 },
+  { "id": "donkere-app", "naam": "Strakke app in het donker", "uitleg": "Diep blauw, één felle knop.", "doel": "donker", "smaken": ["diepzee", "neon"], "harmonie": "complementair", "roerslagen": 10 },
+  { "id": "huisstijl", "naam": "Warme huisstijl", "uitleg": "Een bakker, een boekbinder, een ambacht.", "doel": "huisstijl", "smaken": ["herfst", "klei"], "harmonie": "gesplitst", "roerslagen": 8 },
+  { "id": "presentatie", "naam": "Rustige presentatie", "uitleg": "Koel en kalm, met grafieken die iedereen leest.", "doel": "presentatie", "smaken": ["zeeschuim", "as"], "harmonie": "een-tint", "roerslagen": 12 },
+  { "id": "webshop", "naam": "Frisse webshop", "uitleg": "Licht, schoon, met een knop die je ziet.", "doel": "website", "smaken": ["citroen", "zeeschuim"], "harmonie": "complementair", "roerslagen": 8 },
+  { "id": "festival", "naam": "Nachtelijk festival", "uitleg": "Een affiche dat zoemt als een tl-buis.", "doel": "affiche", "smaken": ["nachtlucht", "neon"], "harmonie": "complementair", "roerslagen": 3 },
+  { "id": "trouwkaart", "naam": "Zachte trouwkaart", "uitleg": "Bloesem en lavendel, nergens hard.", "doel": "huisstijl", "smaken": ["kersenbloesem", "lavendel"], "harmonie": "analoog", "roerslagen": 10 },
+  { "id": "boekhandel", "naam": "Boekhandel om de hoek", "uitleg": "Papier, inkt en een rode stempel.", "doel": "website", "smaken": ["oud-papier", "inkt"], "harmonie": "gesplitst", "roerslagen": 9 },
+  { "id": "duurzaam", "naam": "Groene startup", "uitleg": "Mos en zee, rustig en eerlijk.", "doel": "huisstijl", "smaken": ["mos", "zeeschuim"], "harmonie": "analoog", "roerslagen": 8 }
+]

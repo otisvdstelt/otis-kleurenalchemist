@@ -19,12 +19,12 @@ describe('store', () => {
     expect(currentBrew()).toBe(brew)
     const flask = store.pour()!
     expect(flask.bottle.swatches).toEqual(brew!.swatches)
-    expect(store.get().news?.text).toMatch(/^Flesje gevuld: .+, vijf kleuren, /)
+    expect(store.get().news?.text).toMatch(/^Flesje gevuld: .+, [a-z]+ kleuren, /)
   })
 
   it('waarschuwt bij onrustig borrelen en overkoken', () => {
     store.empty()
-    for (const id of ['mos', 'klei', 'neon', 'citroen']) store.add(id)
+    for (const id of ['mos', 'klei', 'neon']) store.add(id)
     store.add('lavendel')
     expect(store.get().news?.text).toContain('borrelt onrustig')
     store.add('inkt')

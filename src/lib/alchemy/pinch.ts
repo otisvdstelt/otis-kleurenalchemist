@@ -133,7 +133,9 @@ export function pinch(input: readonly Swatch[], locked: readonly boolean[] = [])
       if (contrastRatio(swatches[fg].hex, swatches[bg].hex) >= required) continue
       const before = checkPalette(swatches)
       // Eerst de voorgrond, dan de achtergrond. Bij een knop eerst de knop zelf: die is het minst belangrijk
-      const order: (readonly [number, number])[] = kind === 'knop' ? [[bg, fg], [fg, bg]] : [[fg, bg], [bg, fg]]
+      // Bij tekst op de hoofdkleur eerst die tekst: de hoofdkleur zelf is het belangrijkst
+      const textFirst = kind !== 'knop' || swatches[fg].role === 'op-hoofd'
+      const order: (readonly [number, number])[] = textFirst ? [[fg, bg], [bg, fg]] : [[bg, fg], [fg, bg]]
       for (const [mover, partner] of order) {
         if (locked[mover]) continue
         const candidate = reach(swatches[mover].hex, swatches[partner].hex, required)
@@ -152,7 +154,9 @@ export function pinch(input: readonly Swatch[], locked: readonly boolean[] = [])
   // Elke knopkleur die nog niet past, op zijn eigen manier passend maken
   const failing = () => new Set(checkPalette(swatches).filter((c) => !c.passes && c.kind !== 'tekst').flatMap((c) => [c.fg, c.bg]))
   for (const index of failing()) {
-    if (locked[index] || (swatches[index].role !== 'accent' && swatches[index].role !== 'signaal')) continue
+    const role = swatches[index].role
+    const ownLabel = role === 'hoofd' && swatches.some((s) => s.role === 'op-hoofd')
+    if (locked[index] || !(role === 'accent' || role === 'signaal' || (role === 'hoofd' && !ownLabel))) continue
     fitButton(swatches, index)
   }
 
@@ -161,7 +165,7 @@ export function pinch(input: readonly Swatch[], locked: readonly boolean[] = [])
     for (const { fg, bg, kind } of pairsFor(swatches)) {
       const required = requiredFor(kind)
       if (contrastRatio(swatches[fg].hex, swatches[bg].hex) >= required) continue
-      const first = kind === 'knop' ? bg : fg
+      const first = kind === 'knop' && swatches[fg].role !== 'op-hoofd' ? bg : fg
       const second = first === fg ? bg : fg
       const mover = !locked[first] ? first : !locked[second] ? second : -1
       if (mover < 0) continue

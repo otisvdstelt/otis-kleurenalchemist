@@ -107,12 +107,13 @@ let cache: { cauldron: Cauldron; catalogue: State['catalogue']; photos: State['p
 /** Wat er nu in de ketel zit, als palet. Null als er nog geen kleur in zit */
 export function currentBrew(s: State = state): Brew | null {
   if (cache && cache.cauldron === s.cauldron && cache.catalogue === s.catalogue && cache.photos === s.photos) return cache.brew
-  const result = brew({ ingredients: ingredientsIn(s), stirs: s.cauldron.stirs, size: s.cauldron.size, corks: s.cauldron.corks, reroll: s.cauldron.reroll, seed: s.cauldron.seed ?? undefined })
+  const result = brew({ ingredients: ingredientsIn(s), goal: s.cauldron.goal, bases: s.cauldron.bases, stirs: s.cauldron.stirs, corks: s.cauldron.corks, reroll: s.cauldron.reroll, seed: s.cauldron.seed ?? undefined })
   cache = { cauldron: s.cauldron, catalogue: s.catalogue, photos: s.photos, brew: result }
   return result
 }
 
-const colourCount = (s: State) => ingredientsIn(s).filter((i) => !isSpecial(i)).length
+const tasteCount = (s: State) => ingredientsIn(s).filter((i) => i.kind === 'smaak').length
+const harmonyCount = (s: State) => ingredientsIn(s).filter((i) => i.kind === 'harmonie').length
 const capital = (text: string) => text.charAt(0).toUpperCase() + text.slice(1)
 
 function apply(action: CauldronAction): Cauldron {
@@ -153,11 +154,11 @@ export const store = {
   add(id: string) {
     const ingredient = state.photos[id] ?? state.catalogue?.find((i) => i.id === id)
     if (!ingredient) return
-    const before = boilState(colourCount(state))
+    const before = boilState(tasteCount(state), harmonyCount(state))
     const cauldron = apply({ type: 'add', id })
     if (cauldron === state.cauldron) return
     const after = { ...state, cauldron }
-    const boil = boilState(colourCount(after))
+    const boil = boilState(tasteCount(after), harmonyCount(after))
     const warning = boil !== before && boil === 'onrustig' ? ` ${strings.nieuws.onrustig}` : boil !== before && boil === 'overkoken' ? ` ${strings.nieuws.overkookt}` : ''
     set({ cauldron, ...remember(cauldron), ...say(strings.nieuws.erin(capital(plainName(ingredient)), cauldron.items.length) + warning) })
   },
@@ -236,8 +237,8 @@ export const store = {
     const result = currentBrew()
     if (!result) return null
     const ingredients = ingredientsIn()
-    const name = nameBrew(result, ingredients, strings.namen)
-    const bottle = fill(result, ingredients, state.cauldron.stirs, state.cauldron.size, name)
+    const name = nameBrew(result, ingredients, strings.namen, state.cauldron.bases)
+    const bottle = fill(result, ingredients, state.cauldron.stirs, state.cauldron.size, name, undefined, { bases: state.cauldron.bases, reroll: state.cauldron.reroll })
     const flask: Flask = { bottle, brew: result, from: 'ketel', pinch: result.pinch }
     const readable = checkPalette(bottle.swatches).every((c) => c.passes)
     const recent = [bottle, ...state.recent.filter((b) => encodeBottle(b) !== encodeBottle(bottle))].slice(0, 5)

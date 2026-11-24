@@ -3,12 +3,11 @@
 
 import { fromHex, isHex, toHex } from './color.ts'
 import type { Bottle, RecipeItem } from './bottle.ts'
-import type { Role } from './palette.ts'
+import { GOAL_IDS } from './ingredients.ts'
+import { RAMP_NAMES, ROLES, STEPS, type Ramp } from './palette.ts'
 
-export const BOTTLE_VERSION = 1
+export const BOTTLE_VERSION = 2
 export const SHELF_VERSION = 1
-
-const ROLES: readonly Role[] = ['achtergrond', 'oppervlak', 'tekst', 'accent', 'signaal']
 const EPOCH = Date.UTC(2020, 0, 1)
 const DAY = 86_400_000
 
@@ -108,6 +107,7 @@ export function fromBase64Url(code: string): Uint8Array {
 const daysOf = (date: string) => Math.round((Date.parse(`${date}T00:00:00Z`) - EPOCH) / DAY)
 const dateOf = (days: number) => new Date(EPOCH + days * DAY).toISOString().slice(0, 10)
 
+/** Een flesje als bytes, versie 2: met reeksen, doel en basiskleuren. Zie docs/LINKFORMAAT.md */
 function writeBottle(bottle: Bottle): Uint8Array {
   const w = new Writer()
   w.byte(BOTTLE_VERSION)
@@ -116,13 +116,29 @@ function writeBottle(bottle: Bottle): Uint8Array {
     w.hex(s.hex)
     w.byte(ROLES.indexOf(s.role))
   }
+  const ramps = bottle.ramps ?? []
+  w.byte(ramps.length)
+  for (const r of ramps) {
+    w.byte(RAMP_NAMES.indexOf(r.name))
+    for (const hex of r.steps) w.hex(hex)
+  }
   w.text(bottle.name.slice(0, 80))
   w.varint(Math.max(0, daysOf(bottle.date)))
+  w.byte(GOAL_IDS.indexOf(bottle.recipe.goal ?? 'website'))
+  const bases = bottle.recipe.bases ?? []
+  w.byte(bases.length)
+  for (const hex of bases) w.hex(hex)
   w.varint(bottle.recipe.stirs)
+  w.varint(bottle.recipe.reroll ?? 0)
   w.byte(bottle.recipe.size)
   w.uint32(bottle.recipe.seed)
-  w.byte(bottle.recipe.items.length)
-  for (const item of bottle.recipe.items) {
+  writeItems(w, bottle.recipe.items)
+  return w.done()
+}
+
+function writeItems(w: Writer, items: readonly RecipeItem[]) {
+  w.byte(items.length)
+  for (const item of items) {
     w.byte(item.pigments ? 1 : 0)
     w.text(item.id)
     if (item.pigments) {
@@ -133,32 +149,59 @@ function writeBottle(bottle: Bottle): Uint8Array {
       }
     }
   }
-  return w.done()
 }
 
-/** Versie 1: zoals hierboven geschreven. Een nieuwe versie krijgt een eigen lezer, en deze blijft staan */
-function readBottleV1(r: Reader): Bottle {
-  const count = r.byte()
-  if (count < 1 || count > 12) throw new RangeError('vreemd aantal kleuren')
-  const swatches = Array.from({ length: count }, () => {
-    const hex = r.hex()
-    const role = ROLES[r.byte()]
-    if (!role) throw new RangeError('onbekende rol')
-    return { hex, role }
-  })
-  const name = r.text()
-  const date = dateOf(r.varint())
-  const stirs = r.varint()
-  const size = r.byte()
-  const seed = r.uint32()
-  const itemCount = r.byte()
-  const items: RecipeItem[] = Array.from({ length: itemCount }, () => {
+function readItems(r: Reader): RecipeItem[] {
+  return Array.from({ length: r.byte() }, () => {
     const photo = r.byte() === 1
     const id = r.text()
     if (!photo) return { id }
     const pigments = Array.from({ length: r.byte() }, () => ({ color: fromHex(r.hex()), weight: r.byte() / 10 }))
     return { id, pigments }
   })
+}
+
+function readSwatches(r: Reader) {
+  const count = r.byte()
+  if (count < 1 || count > 16) throw new RangeError('vreemd aantal kleuren')
+  return Array.from({ length: count }, () => {
+    const hex = r.hex()
+    const role = ROLES[r.byte()]
+    if (!role) throw new RangeError('onbekende rol')
+    return { hex, role }
+  })
+}
+
+/** Versie 2: met reeksen, doel en basiskleuren */
+function readBottleV2(r: Reader): Bottle {
+  const swatches = readSwatches(r)
+  const ramps: Ramp[] = Array.from({ length: r.byte() }, () => {
+    const name = RAMP_NAMES[r.byte()]
+    if (!name) throw new RangeError('onbekende reeks')
+    return { name, steps: STEPS.map(() => r.hex()) }
+  })
+  const name = r.text()
+  const date = dateOf(r.varint())
+  const goal = GOAL_IDS[r.byte()]
+  if (!goal) throw new RangeError('onbekend doel')
+  const bases = Array.from({ length: r.byte() }, () => r.hex())
+  const stirs = r.varint()
+  const reroll = r.varint()
+  const size = r.byte()
+  const seed = r.uint32()
+  const items = readItems(r)
+  return { swatches, ramps, recipe: { items, stirs, size, seed, goal, bases, reroll }, name, date }
+}
+
+/** Versie 1, zoals hij tot november 2026 gedeeld werd: alleen rollen, zonder reeksen of doel. Deze lezer blijft staan */
+function readBottleV1(r: Reader): Bottle {
+  const swatches = readSwatches(r)
+  const name = r.text()
+  const date = dateOf(r.varint())
+  const stirs = r.varint()
+  const size = r.byte()
+  const seed = r.uint32()
+  const items = readItems(r)
   return { swatches, recipe: { items, stirs, size, seed }, name, date }
 }
 
@@ -166,6 +209,7 @@ function readBottle(bytes: Uint8Array): Bottle {
   const r = new Reader(bytes)
   const version = r.byte()
   if (version === 1) return readBottleV1(r)
+  if (version === 2) return readBottleV2(r)
   throw new RangeError(`onbekende versie ${version}`)
 }
 

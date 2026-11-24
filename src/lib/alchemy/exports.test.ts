@@ -40,7 +40,7 @@ describe('exports', () => {
   it('schrijft JSON met hex en oklch', () => {
     const data = JSON.parse(toJson(bottle))
     expect(data.naam).toBe('Roest */ met mos')
-    expect(data.kleuren[2]).toEqual({ rol: 'tekst', token: 'tekst', hex: '#2c2823', oklch: cssOklch('#2c2823') })
+    expect(data.kleuren[2]).toEqual({ rol: 'tekst', token: 'tekst', hex: '#2c2823', oklch: cssOklch('#2c2823'), reeks: null })
     expect(data.recept.ingredienten).toEqual(['mos', 'roest'])
   })
 
@@ -61,8 +61,8 @@ describe('meer exportvormen', () => {
 
   it('schrijft design tokens die Figma kan inlezen', () => {
     const tokens = JSON.parse(toDesignTokens(bottle))
-    expect(tokens.kleur.tekst).toEqual({ $type: 'color', $value: '#2c2823', $description: 'tekst' })
-    expect(Object.keys(tokens.kleur)).toHaveLength(6)
+    expect(tokens.kleur.rol.tekst).toEqual({ $type: 'color', $value: '#2c2823', $description: 'tekst' })
+    expect(Object.keys(tokens.kleur.rol)).toHaveLength(6)
   })
 
   it('schrijft een geldig .ase-bestand', () => {
@@ -88,5 +88,34 @@ describe('meer exportvormen', () => {
     const model = first + 6 + 2 + nameLength * 2
     expect(String.fromCharCode(...ase.slice(model, model + 4))).toBe('RGB ')
     expect(view.getFloat32(model + 4)).toBeCloseTo(0xf7 / 255, 5)
+  })
+})
+
+describe('met reeksen', () => {
+  const steps = ['#fafafa', '#f0f0f0', '#e0e0e0', '#c8c8c8', '#a8a8a8', '#888888', '#6c6c6c', '#555555', '#404040', '#2c2c2c', '#1a1a1a']
+  const withRamps: Bottle = {
+    ...bottle,
+    swatches: [
+      { hex: '#fafafa', role: 'achtergrond' },
+      { hex: '#2c2c2c', role: 'tekst' },
+      { hex: '#3b533e', role: 'hoofd' },
+    ],
+    ramps: [{ name: 'neutraal', steps }],
+    recipe: { ...bottle.recipe, goal: 'website' },
+  }
+
+  it('zet de reeksen in het Tailwind-thema, en de rollen als verwijzing', () => {
+    const theme = toTailwind(withRamps)
+    expect(theme).toContain('--color-neutraal-50: #fafafa;')
+    expect(theme).toContain('--color-neutraal-950: #1a1a1a;')
+    expect(theme).toContain('--color-achtergrond: var(--color-neutraal-50);')
+    expect(theme).toContain('--color-tekst: var(--color-neutraal-900);')
+    expect(theme).toContain('--color-hoofd: #3b533e;')
+  })
+
+  it('koppelt de rollen in Figma aan de reeks', () => {
+    const tokens = JSON.parse(toDesignTokens(withRamps))
+    expect(tokens.kleur.neutraal['500'].$value).toBe('#888888')
+    expect(tokens.kleur.rol.tekst.$value).toBe('{kleur.neutraal.900}')
   })
 })
