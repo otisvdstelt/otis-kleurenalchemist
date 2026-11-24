@@ -8,6 +8,7 @@ import { bottle as fill, ingredientsOf, type Bottle } from './alchemy/bottle'
 import { cauldron as step, emptyCauldron, type Cauldron, type CauldronAction } from './alchemy/cauldron'
 import { checkPalette } from './alchemy/contrast'
 import { recipeSentence } from './alchemy/describe'
+import type { BookRecipe } from './alchemy/recipes'
 import { combineTastes } from './alchemy/taste'
 import { pinch } from './alchemy/pinch'
 import type { Hex } from './alchemy/color'
@@ -56,6 +57,10 @@ export interface State {
   visiting: readonly Bottle[] | null
   /** Het laatste fotokaartje */
   photoDrop: PhotoDrop | null
+  /** Het receptenboek, zodra het binnen is */
+  recipes: readonly BookRecipe[]
+  /** Potjes die net uit het boek de ketel in vliegen, voor de werkplaats */
+  flying: { ids: string[]; at: number } | null
   /** De foto voor de pipet: het kleine plaatje en de kleuren die eruit gehaald zijn */
   photo: { url: string; pigments: Hex[] } | null
   /** Wat er net gebeurde, in woorden, voor de aria-live-regio */
@@ -76,6 +81,8 @@ let state: State = {
   visiting: null,
   photoDrop: null,
   photo: null,
+  recipes: [],
+  flying: null,
   news: null,
   stir: { at: 0, strokes: 0 },
 }
@@ -188,8 +195,23 @@ export const store = {
     })
   },
 
-  /** Verras me: een paar willekeurige potjes, al een beetje geroerd */
+  setRecipes(recipes: readonly BookRecipe[]) {
+    set({ recipes })
+  },
+
+  /** Een bladzijde uit het receptenboek: de potjes vliegen de ketel in, en daarna kun je alles aanpassen */
+  loadRecipe(recipe: BookRecipe) {
+    const items = [...recipe.tastes, ...(recipe.harmony ? [recipe.harmony] : [])]
+    const cauldron = step(state.cauldron, { type: 'load', items, stirs: recipe.stirs, size: state.cauldron.size, goal: recipe.goal, bases: recipe.bases })
+    set({ cauldron, ...remember(cauldron), flying: { ids: [recipe.goal, ...items], at: now() }, stir: { at: now(), strokes: 2 }, ...say(strings.nieuws.recept(recipe.name)) })
+  },
+
+  /** Verras me: een willekeurig recept uit het boek, of anders een paar willekeurige potjes */
   surprise() {
+    if (state.recipes.length > 0) {
+      this.loadRecipe(state.recipes[Math.floor(Math.random() * state.recipes.length)])
+      return
+    }
     const colours = (state.catalogue ?? []).filter((i) => !isSpecial(i))
     if (colours.length === 0) return
     const count = 2 + Math.floor(Math.random() * 2)

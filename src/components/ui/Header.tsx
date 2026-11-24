@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from 'react'
 import { strings } from '../../content/strings'
 import { sound } from '../../lib/sound'
+import { Boek } from './Boek'
 import { Colofon } from './Colofon'
 import type { Phase } from '../../lib/air'
 
@@ -10,16 +11,19 @@ interface HeaderProps {
   /** Met de werkplaats erbij: bij de ketel of bij de plank, en de weg ernaartoe */
   view?: 'werkplaats' | 'plank'
   onView?: (view: 'werkplaats' | 'plank') => void
+  /** Eerste bezoek, zonder gedeelde link: dan ligt het receptenboek open */
+  firstVisit?: boolean
 }
 
 /** Bovenaan: de naam op een snipper, en het uur als twee woorden waarvan het ware onderstreept is */
-export function Header({ phase, onPhase, view, onView }: HeaderProps) {
+export function Header({ phase, onPhase, view, onView, firstVisit = false }: HeaderProps) {
   const dark = phase === 'night'
   const loud = useSyncExternalStore(sound.subscribe, sound.on)
   return (
     <header className="kop">
       <div className="kop-links">
         <h1 className="slip paper woordmerk">{strings.titel}</h1>
+        <Boek firstVisit={firstVisit} />
         <Colofon />
       </div>
       <div className="kop-schakelaars">

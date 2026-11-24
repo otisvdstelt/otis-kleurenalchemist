@@ -11,6 +11,7 @@ import { Plank } from './components/ui/Plank'
 import type { CauldronOnScreen, View } from './components/World'
 import { strings } from './content/strings'
 import { useIngredients } from './hooks/useIngredients'
+import { useRecipes } from './hooks/useRecipes'
 import { usePhotoIntake } from './hooks/usePhotoIntake'
 import { canPaint, isModest, useMediaQuery } from './hooks/useLayout'
 import { keepPhase, readPhase, type Phase } from './lib/air'
@@ -114,6 +115,7 @@ export default function App() {
   const reducedMotion = useMediaQuery('(prefers-reduced-motion: reduce)')
   const hasFlask = flask !== null
   const ingredients = useIngredients()
+  useRecipes()
   const flaskRef = useRef<HTMLElement>(null)
   const [modest] = useState(isModest)
 
@@ -161,7 +163,7 @@ export default function App() {
           </Unpaintable>
         </div>
       )}
-      <Header phase={phase} onPhase={choosePhase} view={painted ? view : undefined} onView={setView} />
+      <Header phase={phase} onPhase={choosePhase} view={painted ? view : undefined} onView={setView} firstVisit={route.kind === 'werkplaats'} />
       {failed && <p className="mislukt slip paper hand">{strings.wereld.mislukt}</p>}
       <main>
         <div className="tafel">

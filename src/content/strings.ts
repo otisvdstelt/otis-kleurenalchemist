@@ -68,6 +68,15 @@ export const strings = {
     bezig: 'De ketel wordt opgestookt',
     klaar: 'De ketel staat klaar',
   },
+  boek: {
+    knop: 'receptenboek',
+    kop: 'Receptenboek',
+    sluit: 'sluit het boek',
+    intro: 'Weet je nog niet waar je moet beginnen? Sla een bladzijde open. De potjes vliegen de ketel in, en daarna pas je alles aan.',
+    brouw: 'Brouw dit',
+    zelf: 'Ik begin zelf',
+    smaken: 'met',
+  },
   colofon: {
     knop: 'over',
     kop: 'Over de Kleurenalchemist',
@@ -272,6 +281,7 @@ export const strings = {
     bijgesteld: (rol: string, hoe: string, hex: string) => `${rol.replace(/^./, (c) => c.toUpperCase())} ${hoe}: ${hex}.`,
     gewisseld: (a: string, b: string) => `${a.replace(/^./, (c) => c.toUpperCase())} en ${b} zijn van rol gewisseld.`,
     ongedaan: 'Ongedaan gemaakt.',
+    recept: (naam: string) => `${naam} staat in de ketel. Pas aan wat je wilt, en roer.`,
     reeksBijgesteld: (reeks: string, hoe: string) => `De reeks ${reeks} ${hoe}.`,
     doel: (doel: string) => `Doel: ${doel}.`,
     basis: (hex: string, n: number) => `${hex} in de kolf. ${n === 1 ? 'Dit wordt de hoofdkleur.' : 'Dit wordt het accent.'}`,

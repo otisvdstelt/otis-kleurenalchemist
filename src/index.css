@@ -2578,6 +2578,89 @@
     gap: 0.5rem;
   }
 
+  .boek {
+    width: min(56rem, calc(100vw - 2rem));
+  }
+
+  .boek-intro {
+    max-width: 52ch;
+  }
+
+  .boek-bladzijden {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+    gap: 1rem;
+    margin: 1rem 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* Elke bladzijde een gelinieerd vel met het recept erop */
+  .bladzijde {
+    display: grid;
+    align-content: start;
+    gap: 0.25rem;
+    padding: 0.8rem 0.9rem 0.9rem;
+    border-radius: 3px 5px 4px 6px;
+    background: var(--color-paper) var(--tooth);
+    box-shadow: var(--shadow-rest);
+  }
+
+  .bladzijde:nth-child(odd) {
+    rotate: -0.6deg;
+  }
+
+  .bladzijde:nth-child(even) {
+    rotate: 0.5deg;
+  }
+
+  .colofon .bladzijde p {
+    margin: 0;
+  }
+
+  .bladzijde-naam {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+  }
+
+  .bladzijde-uitleg {
+    font-size: 0.88rem;
+    color: var(--color-ink-soft);
+  }
+
+  .bladzijde-recept {
+    font-size: 0.98rem;
+  }
+
+  .colofon .bladzijde-kleuren {
+    display: flex;
+    gap: 0;
+    margin: 0.3rem 0 0.5rem;
+    padding: 0;
+    list-style: none;
+  }
+
+  .bladzijde-kleuren li {
+    flex: 1;
+    height: 1.5rem;
+  }
+
+  .bladzijde-kleuren li:first-child {
+    border-radius: 3px 0 0 3px;
+  }
+
+  .bladzijde-kleuren li:last-child {
+    border-radius: 0 3px 3px 0;
+  }
+
+  .bladzijde .inked {
+    justify-self: start;
+  }
+
+  .kop-boek {
+    rotate: -1deg;
+  }
+
   .kop-over {
     rotate: 1.5deg;
   }
