@@ -2,10 +2,10 @@
 // De app zoekt de stukken op naam op en geeft ze hun eigen materiaal
 
 import type { BufferGeometry } from 'three'
-import { isSpecial, jarLayers, type Ingredient } from '../alchemy/ingredients.ts'
+import { jarLayers, type Ingredient } from '../alchemy/ingredients.ts'
 import { bands, blob, box, cone, cyl, extrude, lathe, limb, part, put, ring, roughen, slab, type Part, type Tint } from './kit.ts'
 import { seeded } from './noise.ts'
-import { BENCH, BOTTLE_SHELF, CAULDRON, FLASK, FLASK_LIQUID, flaskOutline, jarForm, jarSlots, LADLE_PIVOT, labelOf, LIQUID_Y, radiusAt, ROOM, SHELVES, tilt, WINDOW, type Vec3 } from './spec.ts'
+import { BENCH, BOOK, BOTTLE_SHELF, CAULDRON, KOLF, FLASK, FLASK_LIQUID, flaskOutline, jarForm, jarSlots, LADLE_PIVOT, labelOf, LIQUID_Y, radiusAt, ROOM, SHELVES, tilt, WINDOW, type Vec3 } from './spec.ts'
 
 // De kleuren van de werkplaats zelf: perkament, inkt, mos, mist, terracotta, en het hout en ijzer dat ertussen ligt
 const C = {
@@ -154,8 +154,9 @@ function powderOf(ingredient: Ingredient): { hex: string; share: number }[] {
 export function buildJars(ingredients: readonly Ingredient[]): Part[] {
   const forms = new Map(ingredients.map((i) => [i.id, jarForm(i.jar.shape, i.jar.height)]))
   const slots = jarSlots(
-    ingredients.filter((i) => !isSpecial(i)).map((i) => ({ id: i.id, widest: forms.get(i.id)!.widest })),
-    ingredients.filter(isSpecial).map((i) => ({ id: i.id, widest: forms.get(i.id)!.widest })),
+    ingredients.filter((i) => i.kind === 'smaak'),
+    ingredients.filter((i) => i.kind === 'doel'),
+    ingredients.filter((i) => i.kind === 'harmonie' || i.kind === 'bewerking'),
   )
   const parts: Part[] = []
   for (const ingredient of ingredients) {
@@ -163,6 +164,19 @@ export function buildJars(ingredients: readonly Ingredient[]): Part[] {
     const slot = slots.get(ingredient.id)
     if (!slot) continue
     const place = { at: slot.at, rot: [0, slot.turn, 0] as Vec3 }
+
+    // Een blik of een zakje: geen glas en geen poeder, maar een dicht ding met een etiket
+    if (ingredient.jar.shape === 'blik' || ingredient.jar.shape === 'zakje') {
+      const tin = ingredient.jar.shape === 'blik'
+      const body = lathe(form.outline, tin ? ['#7f868c', '#b6bcc1'] : ['#b9a47a', '#d8c7a0'], place, 14)
+      const label = labelOf(form)
+      const paper = put(box(label.width, 0.075, 0.006, C.paper, { at: [0, label.y - 0.0375, label.out] }), place)
+      // Een blik heeft een deksel in de kleur van zijn kurk, een zakje een touwtje
+      const top = tin ? cyl(form.mouth * 1.04, form.mouth * 1.04, 0.025, ingredient.jar.cork, { at: [0, form.height - 0.01, 0] }, 14) : ring(form.mouth * 1.1, 0.009, ingredient.jar.cork, { at: [0, form.height * 0.86, 0], rot: [Math.PI / 2, 0, 0] }, 12, 4)
+      put(top, tin ? place : place)
+      parts.push(part(`jar-${ingredient.id}`, [roughen(body, tin ? 0 : 0.004, 3), paper, top], 'paint', slot.at))
+      continue
+    }
 
     // Het poeder: hetzelfde profiel als het glas, iets smaller, tot de vulhoogte, in lagen
     const layers = powderOf(ingredient)
@@ -310,13 +324,11 @@ export function buildBench(): Part[] {
     pieces.push(box(0.34 - i * 0.03, h * 0.7, 0.24 - i * 0.015, C.paper, { at: [x1 - 0.41, y + h * 0.15, z0 + 0.265], rot: [0, 0.2 - i * 0.17, 0] }))
     y += h
   })
-  pieces.push(box(0.3, 0.05, 0.22, C.terracotta, { at: [x0 + 0.55, top, z0 + 0.2], rot: [0, -0.4, 0] }))
   // Losse papiertjes
-  pieces.push(box(0.24, 0.004, 0.17, C.parchment, { at: [x0 + 1.25, top, z1 - 0.2], rot: [0, 0.5, 0] }))
-  pieces.push(box(0.2, 0.004, 0.15, C.paper, { at: [x0 + 1.4, top + 0.004, z1 - 0.32], rot: [0, -0.3, 0] }))
+  pieces.push(box(0.24, 0.004, 0.17, C.parchment, { at: [x1 - 0.95, top, z0 + 0.62], rot: [0, 0.5, 0] }))
   // De vijzel met zijn stamper
-  const mx = x1 - 0.75
-  const mz = z1 - 0.28
+  const mx = x1 - 0.95
+  const mz = z0 + 0.3
   pieces.push(
     lathe(
       [
@@ -410,7 +422,34 @@ export function buildFlask(): Part[] {
   return [part('flask', [glass], 'glass', FLASK.at), part('flask-cork', [cork], 'paint', FLASK.at), part('flask-liquid', [liquid], 'liquid', FLASK.at)]
 }
 
+/** De lege kolf voor jouw kleur. Het glas, een kurk, en wat erin zit (wit gebakken, de app kleurt het) */
+export function buildKolf(): Part[] {
+  const h = KOLF.height
+  const r = KOLF.radius
+  const outline: [number, number][] = [[0, 0], [r * 0.92, 0], [r, 0.014], [r * 0.42, h * 0.62], [r * 0.32, h * 0.7], [r * 0.32, h]]
+  const glass = lathe(outline, '#ffffff', { at: KOLF.at }, 18)
+  const cork = cyl(r * 0.36, r * 0.3, 0.05, C.cork, { at: [KOLF.at[0], KOLF.at[1] + h - 0.02, KOLF.at[2]] }, 10)
+  const inner: [number, number][] = [[0, 0.01], [r * 0.85, 0.01], [r * 0.88, 0.02], [r * 0.5, h * 0.48], [0, h * 0.48]]
+  const liquid = lathe(inner, '#ffffff', { at: KOLF.at }, 18)
+  return [part('kolf', [glass], 'glass', KOLF.at), part('kolf-cork', [cork], 'paint', KOLF.at), part('kolf-liquid', [liquid], 'paint', KOLF.at)]
+}
+
+/** Het receptenboek, opengeslagen: twee bladzijden die een beetje omhoog buigen, op een leren band */
+export function buildBook(): Part[] {
+  const { width: w, depth: d } = BOOK
+  const [x, y, z] = BOOK.at
+  // Een kistje om op te liggen
+  const pieces: BufferGeometry[] = [roughen(box(0.62, y, 0.46, C.wood, { at: [x, 0, z] }), 0.006, 8), slab(x - 0.31, x + 0.31, y * 0.48, y * 0.52, z + 0.23, z + 0.235, C.woodDark), box(w + 0.04, 0.02, d + 0.03, C.rust, { at: [x, y, z], rot: [0, 0.25, 0] })]
+  for (const side of [-1, 1]) {
+    const page = box(w / 2 - 0.01, 0.025, d, C.paper, { at: [side * (w / 4), 0.02, 0], rot: [0, 0, side * -0.08] })
+    pieces.push(put(page, { at: [x, y, z], rot: [0, 0.25, 0] }))
+    // Lijntjes tekst op de bladzijde
+    for (let k = 0; k < 4; k++) pieces.push(put(box(w / 2 - 0.09, 0.002, 0.012, C.ink, { at: [side * (w / 4), 0.047, -d / 2 + 0.07 + k * 0.06], rot: [0, 0, side * -0.08] }), { at: [x, y, z], rot: [0, 0.25, 0] }))
+  }
+  return [part('book', pieces, 'paint', BOOK.at)]
+}
+
 /** Alles samen, in de volgorde waarin het gebakken wordt */
 export function buildWorkshop(ingredients: readonly Ingredient[]): Part[] {
-  return [...buildRoom(), ...buildWindow(), ...buildShelves(), ...buildBottleShelf(), ...buildJars(ingredients), ...buildCauldron(), ...buildFire(), ...buildLadle(), ...buildBench(), ...buildCandles(), ...buildOwl(), ...buildHerbs(), ...buildFlask()]
+  return [...buildRoom(), ...buildWindow(), ...buildShelves(), ...buildBottleShelf(), ...buildJars(ingredients), ...buildCauldron(), ...buildFire(), ...buildLadle(), ...buildBench(), ...buildCandles(), ...buildOwl(), ...buildHerbs(), ...buildFlask(), ...buildKolf(), ...buildBook()]
 }

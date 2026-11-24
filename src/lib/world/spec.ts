@@ -131,15 +131,16 @@ export function labelOf(form: JarForm): { y: number; out: number; width: number 
 }
 
 /**
- * Waar elk potje staat. Kleuren gaan op de planken, van boven naar beneden, links naar rechts.
- * De bijzondere potjes staan op de werkbank. Een beetje scheef en ongelijk, zoals in een echte werkplaats
+ * Waar elk potje staat. Smaken gaan op de planken, van boven naar beneden, links naar rechts.
+ * Doelen zijn blikken op de voorkant van de werkbank. Harmonieën en bewerkingen zijn zakjes op de vloer onder de planken.
+ * Een beetje scheef en ongelijk, zoals in een echte werkplaats
  */
-export function jarSlots(colours: readonly { id: string; widest: number }[], special: readonly { id: string; widest: number }[]): Map<string, { at: Vec3; turn: number }> {
+export function jarSlots(tastes: readonly { id: string }[], tins: readonly { id: string }[] = [], sacks: readonly { id: string }[] = []): Map<string, { at: Vec3; turn: number }> {
   const slots = new Map<string, { at: Vec3; turn: number }>()
-  const perShelf = Math.ceil(colours.length / SHELVES.heights.length)
+  const perShelf = Math.ceil(tastes.length / SHELVES.heights.length)
   SHELVES.heights.forEach((y, shelf) => {
     // Van boven naar beneden
-    const row = colours.slice((SHELVES.heights.length - 1 - shelf) * perShelf, (SHELVES.heights.length - shelf) * perShelf)
+    const row = tastes.slice((SHELVES.heights.length - 1 - shelf) * perShelf, (SHELVES.heights.length - shelf) * perShelf)
     const span = SHELVES.x1 - SHELVES.x0 - 0.3
     row.forEach((jar, i) => {
       const x = SHELVES.x0 + 0.15 + (span * (i + 0.5)) / row.length
@@ -147,11 +148,21 @@ export function jarSlots(colours: readonly { id: string; widest: number }[], spe
       slots.set(jar.id, { at: [x + wobble * 0.05, y + SHELVES.thickness + tilt(shelf, x), SHELVES.z + 0.02 + wobble * 0.04], turn: wobble * 0.6 })
     })
   })
-  special.forEach((jar, i) => {
-    slots.set(jar.id, { at: [BENCH.x0 + 0.75 + i * 0.32, BENCH.top, BENCH.z1 - 0.28 - (i % 2) * 0.12], turn: i * 0.4 - 0.3 })
+  tins.forEach((jar, i) => {
+    slots.set(jar.id, { at: [BENCH.x0 + 0.58 + i * 0.29, BENCH.top, BENCH.z1 - 0.22 - (i % 2) * 0.06], turn: i * 0.3 - 0.4 })
+  })
+  sacks.forEach((jar, i) => {
+    const x = SHELVES.x0 + 0.2 + i * 0.36
+    slots.set(jar.id, { at: [x, 0, ROOM.back + 0.42 + (i % 2) * 0.1], turn: Math.sin(i * 3.1) * 0.6 })
   })
   return slots
 }
+
+/** De lege kolf voor jouw kleur, links achter op de werkbank */
+export const KOLF = { at: [BENCH.x0 + 0.3, BENCH.top, BENCH.z0 + 0.35] as Vec3, height: 0.36, radius: 0.13 }
+
+/** Het receptenboek, opengeslagen op een kistje links naast de ketel */
+export const BOOK = { at: [-1.05, 0.46, -1.7] as Vec3, width: 0.5, depth: 0.34 }
 
 /** De planken hangen een beetje scheef: hoeveel hoger of lager de plank is op deze x */
 export function tilt(shelf: number, x: number): number {

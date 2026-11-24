@@ -28,6 +28,12 @@ export function Boek({ firstVisit }: { firstVisit: boolean }) {
   const dialog = useRef<HTMLDialogElement>(null)
   const recipes = useAlchemy((s) => s.recipes)
   const catalogue = useAlchemy((s) => s.catalogue)
+  const bookAt = useAlchemy((s) => s.bookAt)
+
+  // Vanuit de werkplaats: iemand drukte op het boek op de werkbank
+  useEffect(() => {
+    if (bookAt) dialog.current?.showModal()
+  }, [bookAt])
 
   useEffect(() => {
     if (!firstVisit || recipes.length === 0 || seen()) return

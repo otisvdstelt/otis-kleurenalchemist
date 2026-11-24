@@ -59,6 +59,8 @@ export interface State {
   photoDrop: PhotoDrop | null
   /** Het receptenboek, zodra het binnen is */
   recipes: readonly BookRecipe[]
+  /** Wanneer iemand in de werkplaats op het boek drukte, om het open te slaan */
+  bookAt: number
   /** Potjes die net uit het boek de ketel in vliegen, voor de werkplaats */
   flying: { ids: string[]; at: number } | null
   /** De foto voor de pipet: het kleine plaatje en de kleuren die eruit gehaald zijn */
@@ -83,6 +85,7 @@ let state: State = {
   photo: null,
   recipes: [],
   flying: null,
+  bookAt: 0,
   news: null,
   stir: { at: 0, strokes: 0 },
 }
@@ -193,6 +196,11 @@ export const store = {
       stir: { at: now(), strokes },
       ...say(strings.nieuws.geroerd(strings.ketel.slagen(cauldron.stirs), strings.ketel.glad(result?.homogeneity ?? 0))),
     })
+  },
+
+  /** Sla het receptenboek open, vanuit de werkplaats */
+  openBook() {
+    set({ bookAt: now() })
   },
 
   setRecipes(recipes: readonly BookRecipe[]) {

@@ -847,6 +847,7 @@
       display: flex;
       overflow-x: auto;
       scrollbar-width: none;
+      padding-block: 0.5rem 0.7rem;
     }
 
     .kast .doel {
@@ -2731,7 +2732,15 @@
   }
 
   @media (min-width: 1024px) {
+    /* De kast scrollt zelf, dus het papier hoort aan de kast, niet aan een laag die stil blijft staan */
+    .papier[data-wereld='true'] .kast::before {
+      display: none;
+    }
+
     .papier[data-wereld='true'] .kast {
+      background: var(--color-canvas) var(--tooth);
+      border-radius: 3px 5px 4px 6px;
+      box-shadow: var(--shadow-rest);
       top: 4.8rem;
       left: clamp(1rem, 2.5vw, 2rem);
       max-height: calc(100svh - 5.8rem);
