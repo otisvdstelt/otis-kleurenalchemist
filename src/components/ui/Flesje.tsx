@@ -1,6 +1,7 @@
 import { forwardRef, useEffect, useRef, useState } from 'react'
 import { strings } from '../../content/strings'
 import { ADJUSTMENTS } from '../../lib/alchemy/adjust'
+import { checkPalette } from '../../lib/alchemy/contrast'
 import { roleNumber } from '../../lib/alchemy/palette'
 import { encodeBottle } from '../../lib/alchemy/share'
 import { store, useAlchemy } from '../../lib/store'
@@ -21,7 +22,6 @@ export const Flesje = forwardRef<HTMLElement, FlesjeProps>(function Flesje({ onC
   const flask = useAlchemy((s) => s.flask)
   const corks = useAlchemy((s) => s.cauldron.corks)
   const size = useAlchemy((s) => s.cauldron.size)
-  const hasContrast = useAlchemy((s) => s.cauldron.items.includes('contrast'))
   const shelf = useAlchemy((s) => s.shelf)
   const [copied, setCopied] = useState<{ index: number; ok: boolean } | null>(null)
   const [tuning, setTuning] = useState<number | null>(null)
@@ -47,6 +47,12 @@ export const Flesje = forwardRef<HTMLElement, FlesjeProps>(function Flesje({ onC
   const swatches = bottle.swatches
   // Kurken horen bij de ketel. Ze kunnen alleen op een flesje dat net uit de ketel komt, en even groot is
   const corkable = from === 'ketel' && swatches.length === size
+  // Welke kleuren nu onder een drempel zitten: bij een knop de knop, anders de voorgrond. Die krijgen een stempeltje
+  const weakAt = new Set(
+    checkPalette(swatches)
+      .filter((c) => !c.passes)
+      .map((c) => (c.kind === 'knop' ? c.bg : c.fg)),
+  )
   const code = encodeBottle(bottle)
   const onShelf = shelf.some((b) => encodeBottle(b) === code)
 
@@ -69,10 +75,6 @@ export const Flesje = forwardRef<HTMLElement, FlesjeProps>(function Flesje({ onC
     store.pour()
   }
 
-  const pinch = () => {
-    store.add('contrast')
-    store.pour()
-  }
 
   return (
     <section ref={ref} className="toonbank" aria-labelledby="fles-kop" tabIndex={-1} style={drag ? { translate: `0 ${Math.max(0, drag.by)}px`, transition: 'none' } : undefined}>
@@ -165,7 +167,10 @@ export const Flesje = forwardRef<HTMLElement, FlesjeProps>(function Flesje({ onC
             <li key={i} className="staal">
               <button type="button" className="staal-kleur" style={{ background: s.hex }} aria-label={strings.fles.kopieer(s.hex)} onClick={() => void copy(i)} />
               <span className="staal-rol hand">{strings.fles.rol(s.role, n)}</span>
-              <code className="staal-hex">{s.hex}</code>
+              <code className="staal-hex">
+                {s.hex}
+                {weakAt.has(i) && <span className="stempel">{strings.fles.teZwak}</span>}
+              </code>
               <span className="staal-knoppen">
                 {corkable && (
                   <button type="button" className="staal-kurk" aria-pressed={corked} title={strings.fles.kurkUitleg} onClick={() => store.cork(i, corked ? null : s.hex)}>
@@ -237,7 +242,7 @@ export const Flesje = forwardRef<HTMLElement, FlesjeProps>(function Flesje({ onC
       <h3 className="toonbank-sub">{strings.proefvel.kop}</h3>
       <Proefvel swatches={swatches} />
 
-      <Contrastcheck flask={flask} pinched={hasContrast || from !== 'ketel'} onPinch={pinch} />
+      <Contrastcheck flask={flask} onPinch={() => store.pinchFlask()} />
 
       <Monocle swatches={swatches} />
 

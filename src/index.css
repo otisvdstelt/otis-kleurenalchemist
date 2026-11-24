@@ -1116,6 +1116,20 @@
     font-size: 0.95rem;
   }
 
+  /* Een stempeltje bij een kleur die onder de drempel zit */
+  .stempel {
+    display: inline-block;
+    margin-left: 0.5rem;
+    padding: 0 0.35rem;
+    border: 1.5px solid var(--color-rust);
+    border-radius: 3px;
+    color: var(--color-rust);
+    font-family: var(--font-hand);
+    font-size: 0.8rem;
+    line-height: 1.3;
+    rotate: -4deg;
+  }
+
   .staal-kurk {
     min-height: 2.75rem;
     padding: 0 0.5rem;
