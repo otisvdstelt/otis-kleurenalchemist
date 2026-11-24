@@ -2,7 +2,7 @@
 
 Een kleurpalet kiezen voelt meestal als een formulier invullen. Je schuift wat met een kleurwiel, kopieert vijf hexcodes en hoopt dat de tekst leesbaar is. Het klopt dan misschien, maar het voelt naar niks.
 
-Dus bouw ik de versie die ik zelf wil gebruiken. Je staat in een rommelige werkplaats met planken vol potjes. Je gooit er een paar in de ketel, je roert, de damp verkleurt en er komt een flesje uit met jouw palet. Op het etiket staat een naam die iemand met de hand heeft geschreven.
+Dus bouw ik de versie die ik zelf wil gebruiken. Je staat in een rommelige werkplaats met planken vol potjes. De potjes zijn de keuzes die je bij een echt palet maakt: je eigen kleur in een lege kolf, een blik met waar het voor is, smaken die het warmer of koeler maken, en een zakje kleurtheorie. Je roert, de damp verkleurt en er komt een flesje uit met jouw palet, reeksen en al. Op het etiket staat een naam die iemand met de hand heeft geschreven.
 
 Onder het spel zit gewoon een echt gereedschap. De kleuren worden gemengd zoals verf mengt en niet zoals een computer gemiddeldes neemt. Het contrast wordt echt gemeten, en het flesje dat je deelt ziet er bij een ander precies zo uit als bij jou.
 
@@ -17,7 +17,8 @@ Het hoort bij mijn portfolio. Het is dezelfde hand, maar een andere plek.
 - Het toetsenbord komt overal waar de muis komt. Wat er in de ketel gebeurt, wordt hardop gezegd.
 - Geen beweging waar niemand om vroeg. Met minder beweging blijven de stappen hetzelfde, maar klotst er niks meer.
 - Geen geluid waar niemand om vroeg. Het borrelen staat uit tot je het zelf aanzet.
-- Modder is geen fout. Te veel ingrediënten geeft bruin, en dat mag je gewoon bottelen.
+- Een potje is een keuze, geen losse kleur. Wat eruit komt, moet je echt in een project kunnen gebruiken.
+- Modder is geen fout. Te veel smaken geeft bruin, en dat mag je gewoon bottelen.
 - Een check die zegt dat iets leesbaar is, moet dat ook echt kunnen bewijzen. De kleurkern is getest.
 - Je foto blijft op je eigen apparaat. Er is geen backend, geen analytics en er zijn geen cookies.
 - Er is niets met de hand gemodelleerd. Wat in de werkplaats staat, is in code geschreven en gebakken.

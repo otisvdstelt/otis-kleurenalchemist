@@ -1,8 +1,13 @@
 # Kleurenalchemist
 
-Een werkplaats waar je kleurpaletten brouwt. Je pakt een paar potjes van de plank, zoals zonsondergang, mos, oud papier of neon, en gooit ze in de ketel. Dan roer je met de pollepel. De damp verkleurt, en er komt een flesje uit met jouw palet en een etiket dat met de hand geschreven is.
+Een werkplaats waar je kleurpaletten brouwt voor echte projecten. De potjes zijn de keuzes die je bij een palet maakt. Je vult de lege kolf met je eigen kleur, kiest een blik met het doel (een website, een app in het donker, een affiche, een huisstijl of een presentatie), en gooit er een paar smaken in, zoals mos, zeeschuim of neon. Die maken het warmer, koeler, lichter of feller. Een zakje kruiden zet de kleurtheorie erin: complementair, analoog of drieklank. Dan roer je, en er komt een flesje uit.
 
-Het is een spel, maar er zit een echt gereedschap onder. De kleuren mengen zoals verf: blauw met geel geeft groen, en niet grijs. Gooi je er te veel in, dan kookt de ketel over en krijg je modder. Die mag je gewoon bottelen. Een snuifje contrast maakt het palet leesbaar, en dat wordt ook echt gemeten. Een foto kun je erin gooien als ingrediënt. En een flesje deel je met een link, die er bij een ander precies zo uitziet als bij jou.
+In dat flesje zit een bruikbaar palet:
+- reeksen van 50 tot 950 voor neutraal, de hoofdkleur en het accent;
+- rollen zoals achtergrond, tekst, hoofdkleur en goed, let op en fout;
+- een proefvel dat laat zien hoe het eruitziet voor jouw doel.
+
+Tekst is altijd leesbaar, en dat wordt echt gemeten. Je neemt het mee als Tailwind-thema, CSS, Figma-variabelen, .ase of een link. Weet je niet waar je moet beginnen? Het receptenboek ligt open op een kistje naast de ketel.
 
 Het hoort bij mijn portfolio, [otisstelt.vercel.app](https://otisstelt.vercel.app). Het is dezelfde hand, maar een andere plek.
 
@@ -14,6 +19,8 @@ Het hoort bij mijn portfolio, [otisstelt.vercel.app](https://otisstelt.vercel.ap
 - Het schilderij eroverheen is dezelfde postprocessing-pass als in mijn portfolio. Hij zet inktlijnen, geeft het papier tand en laat de mist overrollen als je naar de plank gaat.
 - De draaikolk in de ketel en de lagen in het flesje zijn eigen shaders.
 - Alle kleurlogica staat in `src/lib/alchemy`, als pure TypeScript zonder React of three, en alles is getest met Vitest:
+  - doelen, smaken en harmonieën, en reeksen van 50 tot 950 in OKLCH;
+  - grafiekkleuren die je ook bij kleurenblindheid uit elkaar houdt;
   - mengen in OKLab/OKLCH
   - spectrale menging met [spectral.js](https://github.com/rvanwijnen/spectral.js)
   - gamut mapping zoals in CSS Color 4, met [culori](https://culorijs.org)

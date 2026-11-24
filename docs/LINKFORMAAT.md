@@ -4,6 +4,27 @@ Een flesje uit de Kleurenalchemist reist als link: `/fles/<code>`. Een hele plan
 
 De code is base64url zonder opvulling (`A–Z a–z 0–9 - _`). Daaronder zit dit, byte voor byte:
 
+## Flesje, versie 2 (sinds 24 november 2026)
+
+| Veld | Vorm |
+|---|---|
+| versie | 1 byte, `2` |
+| aantal kleuren | 1 byte (de lezer accepteert 1 tot 16) |
+| per kleur | 3 bytes sRGB, dan 1 byte rol: 0 achtergrond, 1 oppervlak, 2 tekst, 3 accent, 4 signaal, 5 rand, 6 zachte tekst, 7 hoofd, 8 op-hoofd, 9 goed, 10 let op, 11 fout, 12 grafiek |
+| aantal reeksen | 1 byte |
+| per reeks | 1 byte naam (0 neutraal, 1 hoofd, 2 accent), dan 11 × 3 bytes sRGB, van 50 tot 950 |
+| naam | varint lengte, dan UTF-8, hooguit 80 tekens |
+| datum | varint, dagen sinds 1 januari 2020 (UTC) |
+| doel | 1 byte: 0 website, 1 donker, 2 affiche, 3 huisstijl, 4 presentatie |
+| basiskleuren | 1 byte aantal (0 tot 2), dan 3 bytes sRGB per kleur |
+| roerslagen | varint |
+| opnieuw geroerd | varint |
+| grootte | 1 byte (uit v1, niet meer gebruikt) |
+| seed | 4 bytes, little-endian |
+| ingrediënten | zoals in versie 1 |
+
+Voor de Letterzetterij is versie 2 even makkelijk: de rollen `tekst`, `achtergrond` en `accent` hebben dezelfde nummers als in versie 1.
+
 ## Flesje, versie 1
 
 | Veld | Vorm |

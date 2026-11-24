@@ -117,3 +117,55 @@ Wat ik zelf gekozen heb, met de reden erbij. Nieuwste onderaan.
 - **De Letterzetterij** gebruikt hetzelfde linkformaat. Dat staat byte voor byte in `docs/LINKFORMAAT.md`. `codeFromLink` leest een geplakte link van welke site ook, en `inkAndPaper` maakt van tekst, achtergrond en accent inkt, papier en tweede inkt.
 - **Foto's**: grijs, effen, en een bestand van 60 MB (5000×4000) gaan allemaal goed. HEIC (iPhone) kan alleen Safari lezen. Elders komt er een uitleg hoe je hem toch gebruikt. Fouten staan voortaan ook zichtbaar bij de knop, en worden niet alleen voorgelezen.
 - **Toetsenbord**: een ronde met alleen Tab, Enter, spatie, de pijltjes en Cmd+Z, op papier en in 3D. Elke stop is zichtbaar en heeft een focusrand, en de hele stroom van kiezen tot bottelen werkt. axe-core geeft weer nul bevindingen. Een ronde met VoiceOver is nog niet gedaan.
+
+## Ombouw: een echt paletgereedschap
+
+- **De potjes zijn de keuzes die je bij een echt palet maakt.** Er zijn vier soorten:
+  - **basis:** jouw kleur, in de lege kolf;
+  - **doel:** waar het palet voor is;
+  - **smaak:** de oude potjes;
+  - **kruiden:** een harmonie, en de bewerkingen.
+
+  Een smaak gooit zijn kleuren niet meer in de ketel. Hij stuurt: warmer of koeler (de tint draait tot 25° naar 55° of 245°), lichter of donkerder, feller of zachter, en meer of minder contrast. Smaken tellen op en blijven tussen -1 en 1. Hun pigmenten zijn er alleen nog voor het oog: de damp en de draaikolk.
+- **De hoofdkleur** is de basis, en anders de tint van de zwaarste smaak. Bij gelijke stand telt het eerste potje. Dat is bewust: wat je het eerst kiest, is waar je mee begint. De seed hangt niet van de volgorde af, de hoofdkleur wel.
+- **De accenten** komen van de harmonie als die er is, en anders van de andere smaken, in hun eigen tint. Pas als er maar één smaak is, kiest de seed een buurtint. Zo verdwijnt de zonsondergang niet meer tussen mos en diepzee: hij wordt het accent.
+- **Reeksen 50–950:**
+  - De lichtheid ligt vast per stap (0,975 tot 0,24, ongeveer zoals Tailwind).
+  - De chroma is het hoogst rond 500–600 en loopt naar de uiteinden af, met gamut mapping per stap.
+  - Een basis komt letterlijk in zijn reeks, op de stap met de dichtstbijzijnde lichtheid.
+  - Neutralen hebben de tint van de hoofdkleur, met 0,012 tot 0,035 chroma: warmer of koeler naar de smaak.
+  - Een lichte smaak pakt voor de rollen een lichtere stap, een diepe smaak een donkerdere. De stappen zelf blijven staan.
+- **De rollen per doel:**
+  - **website:** achtergrond, oppervlak, rand, tekst, zachte tekst, hoofdkleur, tekst op de hoofdkleur, accent (soms twee), goed, let op en fout.
+  - **app in het donker:** dezelfde rollen, omgekeerd ingezet, met rustigere accenten.
+  - **affiche:** vier kleuren. De achtergrond is lichtgetint in de hoofdkleur, de rest fel.
+  - **huisstijl:** hoofdkleur, steunkleur, neutraal licht en neutraal donker.
+  - **presentatie:** achtergrond, tekst, zachte tekst, hoofdkleur en zes grafiekkleuren.
+- **Goed, let op en fout** hebben een vaste tint (145, 75 en 25). Hun lichtheid en chroma passen bij het palet.
+- **Grafiekkleuren:** de hoofdkleur, en dan steeds de kandidaat die het verst van de al gekozen kleuren ligt, gewoon én bij deuteranopie en protanopie. Er zijn 168 kandidaten (24 tinten × 7 lichtheden), allemaal minstens 3,1:1 tegen de achtergrond. De test eist bij deuteranopie minstens 0,08 delta E OK tussen elk paar.
+- **Leesbaar vanaf het begin.** Tekst en de tekst op knoppen worden bij het brouwen al rechtgezet, met dezelfde zuinige lichtheidscorrectie als het snuifje. Of onderdelen (accenten, meldingen, grafiek) 3:1 halen tegen de achtergrond, laat het palet eerlijk zien. Daar is het snuifje voor. Zo haalt scenario 1 (merkkleur en website) altijd AA, ook met lastige basiskleuren zoals geel.
+- **De knoptekst** is de kleur waarvoor de knop het minst hoeft te veranderen. Leest er al een goed, dan die.
+- **Overkoken:** 4 smaken borrelt onrustig, 5 of meer kookt over, en twee harmonieën ook. Bij de eerste keer is het al voor 0,7 modder.
+- **Deellink versie 2** bevat:
+  - de rollen (13 rolnummers, de eerste vijf zoals in v1);
+  - de reeksen (11 × 3 bytes elk);
+  - het doel, de basiskleuren, de slagen, opnieuw roeren, de seed en de ingrediënten.
+
+  Een website-flesje is ongeveer 315 tekens. De v1-lezer blijft staan, en de bevroren v1-code in de test leest nog. Zie `docs/LINKFORMAAT.md`.
+- **Exports:**
+  - Tailwind en CSS hebben eerst de reeksen en dan de rollen. Een rol die precies op een stap ligt, verwijst ernaar (`--color-tekst: var(--color-neutraal-900)`).
+  - Figma-tokens koppelen rollen aan de reeks met `{kleur.neutraal.900}`.
+  - .ase heeft een groep per reeks.
+- **De foto** is geen ingrediënt meer, maar een pipet. Je tikt op het plaatje of kiest een van de kleuren die eruit gehaald zijn, en die wordt je basis. Een foto uit een oude v1-link stuurt nog als smaak, naar zijn zwaarste kleur.
+- **Het receptenboek** heeft tien recepten in `public/data/recipes.json`, elk met een voorproefje. Bij een eerste bezoek zonder gedeelde link ligt het open. "Verras me" kiest een recept. In de werkplaats springen de potjes van het recept één voor één, en het boek ligt op een kistje naast de ketel.
+- **In 3D** hebben de soorten een eigen vorm. Doelen zijn blikken op de werkbank (het gekozen blik staat naar voren), kruiden zijn linnen zakjes op de vloer onder de planken, en de basis is een kolf die zich vult met jouw kleur. Gebakken: 68 stukken, 156 KB.
+- **De kast** heeft vier planken onder elkaar, en op een telefoon vier tabjes boven de strook. Het aantal kleuren kies je niet meer: dat bepaalt het doel.
+- **Het flesjespaneel** heeft drie tabbladen:
+  - Palet: de stalen, de reeksen, het recept in één zin en het proefvel per doel;
+  - Leesbaar: de contrastcheck en de monocle;
+  - Meenemen: alle exports en de link.
+
+  Een hele reeks stel je bij met warmer, koeler, feller of doffer. Lichter en donkerder gelden alleen per kleur, want de stappen liggen vast. Rollen op die reeks schuiven mee. Eerder gebrouwen staat nu op de plank.
+- **Het snuifje** werkt rechtstreeks op het flesje zoals het nu is, ook na bijstellen of uit een link. De knop staat er zolang er iets te zwak is. Een kleur onder de drempel krijgt een stempeltje.
+- **og:image en og:url** zijn volledige URL's. Het domein komt bij het bouwen uit `VITE_SITE_URL`, anders uit `VERCEL_PROJECT_PRODUCTION_URL`, en anders `otis-kleurenalchemist.vercel.app`.
+- **De vijf scenario's** zijn als script doorlopen in headless Chrome: merkkleur en website, café-menu, donkere app, foto en presentatie, en delen. Ze werken alle vijf. Bij het café-menu kwam eerst een mintgroene achtergrond met een accent dat wegviel. Nu krijgt een affiche een lichte achtergrond in de tint van de hoofdkleur, en een accent dat donker genoeg is om op te vallen.

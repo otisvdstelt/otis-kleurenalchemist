@@ -124,6 +124,9 @@ describe('doelen', () => {
     expect(result.swatches).toHaveLength(4)
     expect(contrastRatio(role(result, 'tekst'), role(result, 'achtergrond'))).toBeGreaterThan(10)
     expect(fromHex(role(result, 'hoofd')).c).toBeGreaterThan(0.12)
+    // Warm bij een warme hoofdkleur, en alle kleuren vallen op tegen de achtergrond
+    expect(hueGap(fromHex(role(result, 'achtergrond')).h, fromHex(role(result, 'hoofd')).h)).toBeLessThan(25)
+    expect(checkPalette(result.swatches).every((c) => c.passes)).toBe(true)
   })
 
   it('een presentatie heeft zes grafiekkleuren die je ook bij deuteranopie uit elkaar houdt', () => {

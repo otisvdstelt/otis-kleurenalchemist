@@ -231,7 +231,8 @@ export function brew({ ingredients, goal: goalId = DEFAULT_GOAL, bases = [], sti
   const pick = (role: Role): Hex => {
     switch (role) {
       case 'achtergrond':
-        if (goal.id === 'affiche') return toHex(inGamut({ l: soft ? 0.9 : 0.95, c: 0.045 * chromaLevel, h: accentList[0]?.h ?? main.h }))
+        // Een affiche krijgt een lichte achtergrond in de tint van de hoofdkleur: warm bij oranje, koel bij blauw
+        if (goal.id === 'affiche') return toHex(inGamut({ l: soft ? 0.9 : 0.95, c: 0.04 * chromaLevel, h: main.h }))
         return dark ? (strong ? '#0b0c0e' : at(n, 950)) : strong ? at(n, 50) : at(n, 50)
       case 'oppervlak':
         return dark ? at(n, 900) : at(n, 100)
@@ -249,7 +250,8 @@ export function brew({ ingredients, goal: goalId = DEFAULT_GOAL, bases = [], sti
         return textOn(mainHex, at(n, 50), at(n, 950))
       case 'accent': {
         const hex = accentHex(accentIndex++)
-        if (goal.id === 'affiche' && !bases[1]) return toHex(inGamut({ ...fromHex(hex), c: Math.max(fromHex(hex).c, 0.18) * chromaLevel }))
+        // Fel, maar donker genoeg om op de lichte achtergrond op te vallen
+        if (goal.id === 'affiche' && !bases[1]) return toHex(inGamut({ ...fromHex(hex), l: Math.min(fromHex(hex).l, 0.58), c: Math.max(fromHex(hex).c, 0.18) * chromaLevel }))
         return hex
       }
       case 'goed':

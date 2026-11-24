@@ -82,7 +82,7 @@ export const strings = {
     kop: 'Over de Kleurenalchemist',
     sluit: 'sluit',
     watKop: 'Wat het is',
-    wat: 'Een werkplaats waar je kleurpaletten brouwt. Je gooit potjes in de ketel, roert, en bottelt wat eruit komt. Het is een spel, maar het palet is echt: de kleuren mengen zoals verf, het contrast wordt gemeten, en wat je deelt ziet er bij een ander precies zo uit.',
+    wat: 'Een werkplaats waar je kleurpaletten brouwt voor echte projecten. Je vult de kolf met je eigen kleur, kiest waar het voor is, gooit er een paar smaken en wat kleurtheorie in, en roert. Er komt een palet uit met reeksen van 50 tot 950, rollen en leesbare tekst, dat je meeneemt als Tailwind, CSS, Figma-variabelen of een link.',
     wieKop: 'Wie',
     wie: 'Gemaakt door Otis van der Stelt. Het hoort bij mijn portfolio, en het is dezelfde hand, maar een andere plek.',
     portfolio: 'Naar het portfolio',
