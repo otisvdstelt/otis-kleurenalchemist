@@ -15,13 +15,13 @@ Het hoort bij mijn portfolio, [otisstelt.vercel.app](https://otisstelt.vercel.ap
 
 - De pagina is React 19 en TypeScript, gebouwd met Vite.
 - Het uiterlijk is Tailwind CSS v4. Het gescheurde papier, de bibberende pennenlijnen en de rafelranden zijn CSS en SVG-filters, zonder plaatjes.
-- De werkplaats is Three.js met React Three Fiber en drei. Er is niets met de hand gemodelleerd. Elke plank, elk potje en de ketel staan als code in `src/lib/world`, en `npm run world` bakt ze tot één `.glb` met Draco, van ongeveer 135 KB. De potjes, het flesje en de ketel zijn gedraaid op een draaibank (`LatheGeometry`).
+- De werkplaats is Three.js met React Three Fiber en drei. Er is niets met de hand gemodelleerd. Elke plank, elk potje en de ketel staan als code in `src/lib/world`, en `npm run world` bakt ze tot één `.glb` met Draco, van ongeveer 156 KB. De potjes, het flesje en de ketel zijn gedraaid op een draaibank (`LatheGeometry`).
 - Het schilderij eroverheen is dezelfde postprocessing-pass als in mijn portfolio. Hij zet inktlijnen, geeft het papier tand en laat de mist overrollen als je naar de plank gaat.
 - De draaikolk in de ketel en de lagen in het flesje zijn eigen shaders.
 - Alle kleurlogica staat in `src/lib/alchemy`, als pure TypeScript zonder React of three, en alles is getest met Vitest:
   - doelen, smaken en harmonieën, en reeksen van 50 tot 950 in OKLCH;
   - grafiekkleuren die je ook bij kleurenblindheid uit elkaar houdt;
-  - mengen in OKLab/OKLCH
+  - mengen in OKLab/OKLCH (de damp en de draaikolk mengen spectraal)
   - spectrale menging met [spectral.js](https://github.com/rvanwijnen/spectral.js)
   - gamut mapping zoals in CSS Color 4, met [culori](https://culorijs.org)
   - contrast volgens WCAG 2.2, met APCA ernaast
