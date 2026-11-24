@@ -3,6 +3,7 @@ import { strings } from '../../content/strings'
 import type { Bottle } from '../../lib/alchemy/bottle'
 import { encodeShelf } from '../../lib/alchemy/share'
 import { store, useAlchemy } from '../../lib/store'
+import { Eerder } from './Eerder'
 import { Fles } from './Fles'
 import { ZelfKopieren } from './ZelfKopieren'
 
@@ -197,6 +198,7 @@ export function Plank({ onOpen }: { onOpen: () => void }) {
           </p>
         </>
       )}
+      <Eerder />
     </section>
   )
 }

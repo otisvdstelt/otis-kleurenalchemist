@@ -1536,6 +1536,54 @@
     pointer-events: none;
   }
 
+  /* ============================================================ tabbladen */
+
+  .tabs {
+    margin-top: 1.2rem;
+  }
+
+  .tabs-rij {
+    display: flex;
+    gap: 0.2rem;
+    border-bottom: 1.5px solid var(--color-rule);
+  }
+
+  /* Ezelsoren: het open blad ligt bovenop en loopt door in het vel */
+  .tab {
+    min-height: 2.75rem;
+    margin-bottom: -1.5px;
+    padding: 0.3rem 0.9rem;
+    border: 1.5px solid transparent;
+    border-radius: 6px 8px 0 0;
+    background: none;
+    color: var(--color-ink-soft);
+    font-family: var(--font-hand);
+    font-size: 1.08rem;
+  }
+
+  .tab[aria-selected='true'] {
+    border-color: var(--color-rule);
+    border-bottom-color: var(--color-canvas);
+    background: var(--color-canvas);
+    color: var(--color-ink);
+  }
+
+  .tab-vel {
+    padding-top: 0.4rem;
+  }
+
+  .tab-vel:focus-visible {
+    outline-offset: 4px;
+  }
+
+  .plank-sub {
+    margin: 1rem 0 0.4rem;
+    font-family: var(--font-hand);
+    font-weight: 400;
+    font-size: 1.05rem;
+    color: var(--color-rust);
+  }
+
   /* ============================================================ eerder gebrouwen */
 
   .eerder {

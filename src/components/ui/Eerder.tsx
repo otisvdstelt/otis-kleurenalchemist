@@ -10,7 +10,7 @@ export function Eerder() {
   if (others.length === 0) return null
   return (
     <section className="eerder" aria-labelledby="eerder-kop">
-      <h3 id="eerder-kop" className="toonbank-sub">
+      <h3 id="eerder-kop" className="plank-sub">
         {strings.ketel.eerder}
       </h3>
       <ol className="eerder-rij">

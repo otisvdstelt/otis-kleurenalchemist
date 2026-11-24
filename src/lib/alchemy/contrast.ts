@@ -1,6 +1,6 @@
 // Is het leesbaar? Volgens WCAG 2.2, met APCA ernaast als extra informatie
 
-import { hexToRgb, linearize, type Hex } from './color.ts'
+import { fromHex, hexToRgb, linearize, toHex, type Hex } from './color.ts'
 import type { Role } from './palette.ts'
 
 /** Relatieve luminantie volgens WCAG 2.2 */
@@ -70,13 +70,39 @@ export interface Check {
 }
 
 /**
- * Welke kleur de tekst op een knop in deze kleur krijgt: de achtergrond of de tekstkleur, wat het best leest.
+ * Hoeveel de lichtheid van `hex` moet schuiven (van `partner` af) voordat tekst in `partner` erop leesbaar is.
+ * Infinity als het niet kan
+ */
+export function shiftNeeded(hex: Hex, partner: Hex, required: number = THRESHOLDS.text): number {
+  if (contrastRatio(hex, partner) >= required) return 0
+  const own = fromHex(hex)
+  const towards = own.l < fromHex(partner).l ? 0 : 1
+  const at = (t: number) => toHex({ ...own, l: own.l + (towards - own.l) * t })
+  if (contrastRatio(at(1), partner) < required) return Infinity
+  let lo = 0
+  let hi = 1
+  for (let i = 0; i < 16; i++) {
+    const mid = (lo + hi) / 2
+    if (contrastRatio(at(mid), partner) >= required) hi = mid
+    else lo = mid
+  }
+  return Math.abs(towards - own.l) * hi
+}
+
+/**
+ * Welke kleur de tekst op een knop in deze kleur krijgt: de achtergrond of de tekstkleur.
+ * Leest er een al goed, dan die (de best leesbare). Anders de kleur waarvoor de knop het minst hoeft te veranderen.
  * Geeft de plek in het palet terug, of -1 als er geen van beide is
  */
 export function labelFor(swatches: readonly { hex: Hex; role: Role }[], index: number): number {
   const candidates = [swatches.findIndex((s) => s.role === 'achtergrond'), swatches.findIndex((s) => s.role === 'tekst')].filter((i) => i >= 0)
   if (candidates.length === 0) return -1
-  return candidates.reduce((best, i) => (contrastRatio(swatches[i].hex, swatches[index].hex) > contrastRatio(swatches[best].hex, swatches[index].hex) ? i : best))
+  const button = swatches[index].hex
+  const ratio = (i: number) => contrastRatio(swatches[i].hex, button)
+  const reading = candidates.filter((i) => ratio(i) >= THRESHOLDS.text)
+  if (reading.length > 0) return reading.reduce((best, i) => (ratio(i) > ratio(best) ? i : best))
+  const shift = (i: number) => shiftNeeded(button, swatches[i].hex)
+  return candidates.reduce((best, i) => (shift(i) < shift(best) ? i : best))
 }
 
 /**

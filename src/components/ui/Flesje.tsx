@@ -6,11 +6,11 @@ import { roleNumber } from '../../lib/alchemy/palette'
 import { encodeBottle } from '../../lib/alchemy/share'
 import { store, useAlchemy } from '../../lib/store'
 import { Contrastcheck } from './Contrastcheck'
-import { Eerder } from './Eerder'
 import { Fles } from './Fles'
 import { Meenemen } from './Meenemen'
 import { Monocle } from './Monocle'
 import { Proefvel } from './Proefvel'
+import { Tabs } from './Tabs'
 
 interface FlesjeProps {
   /** Met de werkplaats erbij ligt het flesje op een vel dat je weg kunt leggen */
@@ -38,7 +38,6 @@ export const Flesje = forwardRef<HTMLElement, FlesjeProps>(function Flesje({ onC
           {strings.fles.kop}
         </h2>
         <p className="toonbank-leeg slip paper hand">{strings.fles.leeg}</p>
-        <Eerder />
       </section>
     )
   }
@@ -159,65 +158,6 @@ export const Flesje = forwardRef<HTMLElement, FlesjeProps>(function Flesje({ onC
       </div>
       {brew?.mud && <p className="toonbank-modder hand">{strings.fles.modder}</p>}
 
-      <ul className="stalen">
-        {swatches.map((s, i) => {
-          const n = roleNumber(swatches, i)
-          const corked = corkable && corks[i] === s.hex
-          return (
-            <li key={i} className="staal">
-              <button type="button" className="staal-kleur" style={{ background: s.hex }} aria-label={strings.fles.kopieer(s.hex)} onClick={() => void copy(i)} />
-              <span className="staal-rol hand">{strings.fles.rol(s.role, n)}</span>
-              <code className="staal-hex">
-                {s.hex}
-                {weakAt.has(i) && <span className="stempel">{strings.fles.teZwak}</span>}
-              </code>
-              <span className="staal-knoppen">
-                {corkable && (
-                  <button type="button" className="staal-kurk" aria-pressed={corked} title={strings.fles.kurkUitleg} onClick={() => store.cork(i, corked ? null : s.hex)}>
-                    {corked ? strings.fles.kurkEraf : strings.fles.kurk}
-                  </button>
-                )}
-                <button type="button" className="staal-kurk" aria-expanded={tuning === i} aria-controls={`bijstellen-${i}`} onClick={() => setTuning(tuning === i ? null : i)}>
-                  {tuning === i ? strings.bijstellen.dicht : strings.bijstellen.knop}
-                </button>
-              </span>
-              {tuning === i && (
-                <div id={`bijstellen-${i}`} className="bijstellen" role="group" aria-label={`${strings.bijstellen.knop}: ${strings.fles.rol(s.role, n)}`}>
-                  <div className="bijstellen-stappen">
-                    {ADJUSTMENTS.map((how) => (
-                      <button key={how} type="button" className="quiet" onClick={() => store.adjust(i, how)}>
-                        {strings.bijstellen[how]}
-                      </button>
-                    ))}
-                  </div>
-                  <label className="bijstellen-rol">
-                    <span className="hand">{strings.bijstellen.rol}</span>
-                    <select
-                      value={i}
-                      onChange={(event) => {
-                        const to = Number(event.target.value)
-                        store.swap(i, to)
-                        setTuning(to)
-                      }}
-                    >
-                      {swatches.map((other, j) => (
-                        <option key={j} value={j}>
-                          {j === i ? `${strings.fles.rol(other.role, roleNumber(swatches, j))} (${strings.bijstellen.houd})` : strings.bijstellen.wissel(strings.fles.rol(other.role, roleNumber(swatches, j)))}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                </div>
-              )}
-              {copied?.index === i && (
-                <span className="staal-bevestiging tag" aria-hidden="true">
-                  {copied.ok ? strings.fles.gekopieerd : strings.fles.nietGekopieerd}
-                </span>
-              )}
-            </li>
-          )
-        })}
-      </ul>
       {corkable && (
         <button type="button" className="inked toonbank-opnieuw" onClick={again}>
           {strings.fles.roerOpnieuw}
@@ -239,16 +179,91 @@ export const Flesje = forwardRef<HTMLElement, FlesjeProps>(function Flesje({ onC
         )}
       </div>}
 
-      <h3 className="toonbank-sub">{strings.proefvel.kop}</h3>
-      <Proefvel swatches={swatches} />
-
-      <Contrastcheck flask={flask} onPinch={() => store.pinchFlask()} />
-
-      <Monocle swatches={swatches} />
-
-      <Meenemen bottle={bottle} />
-
-      <Eerder />
+      <Tabs
+        label={strings.fles.tabs}
+        tabs={[
+          {
+            id: 'palet',
+            label: strings.fles.tabPalet,
+            content: (
+              <>
+            <ul className="stalen">
+              {swatches.map((s, i) => {
+                const n = roleNumber(swatches, i)
+                const corked = corkable && corks[i] === s.hex
+                return (
+                  <li key={i} className="staal">
+                    <button type="button" className="staal-kleur" style={{ background: s.hex }} aria-label={strings.fles.kopieer(s.hex)} onClick={() => void copy(i)} />
+                    <span className="staal-rol hand">{strings.fles.rol(s.role, n)}</span>
+                    <code className="staal-hex">
+                      {s.hex}
+                      {weakAt.has(i) && <span className="stempel">{strings.fles.teZwak}</span>}
+                    </code>
+                    <span className="staal-knoppen">
+                      {corkable && (
+                        <button type="button" className="staal-kurk" aria-pressed={corked} title={strings.fles.kurkUitleg} onClick={() => store.cork(i, corked ? null : s.hex)}>
+                          {corked ? strings.fles.kurkEraf : strings.fles.kurk}
+                        </button>
+                      )}
+                      <button type="button" className="staal-kurk" aria-expanded={tuning === i} aria-controls={`bijstellen-${i}`} onClick={() => setTuning(tuning === i ? null : i)}>
+                        {tuning === i ? strings.bijstellen.dicht : strings.bijstellen.knop}
+                      </button>
+                    </span>
+                    {tuning === i && (
+                      <div id={`bijstellen-${i}`} className="bijstellen" role="group" aria-label={`${strings.bijstellen.knop}: ${strings.fles.rol(s.role, n)}`}>
+                        <div className="bijstellen-stappen">
+                          {ADJUSTMENTS.map((how) => (
+                            <button key={how} type="button" className="quiet" onClick={() => store.adjust(i, how)}>
+                              {strings.bijstellen[how]}
+                            </button>
+                          ))}
+                        </div>
+                        <label className="bijstellen-rol">
+                          <span className="hand">{strings.bijstellen.rol}</span>
+                          <select
+                            value={i}
+                            onChange={(event) => {
+                              const to = Number(event.target.value)
+                              store.swap(i, to)
+                              setTuning(to)
+                            }}
+                          >
+                            {swatches.map((other, j) => (
+                              <option key={j} value={j}>
+                                {j === i ? `${strings.fles.rol(other.role, roleNumber(swatches, j))} (${strings.bijstellen.houd})` : strings.bijstellen.wissel(strings.fles.rol(other.role, roleNumber(swatches, j)))}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+                      </div>
+                    )}
+                    {copied?.index === i && (
+                      <span className="staal-bevestiging tag" aria-hidden="true">
+                        {copied.ok ? strings.fles.gekopieerd : strings.fles.nietGekopieerd}
+                      </span>
+                    )}
+                  </li>
+                )
+              })}
+            </ul>
+                <h3 className="toonbank-sub">{strings.proefvel.kop}</h3>
+                <Proefvel swatches={swatches} />
+              </>
+            ),
+          },
+          {
+            id: 'leesbaar',
+            label: strings.fles.tabLeesbaar,
+            content: (
+              <>
+                <Contrastcheck flask={flask} onPinch={() => store.pinchFlask()} />
+                <Monocle swatches={swatches} />
+              </>
+            ),
+          },
+          { id: 'meenemen', label: strings.fles.tabMeenemen, content: <Meenemen bottle={bottle} /> },
+        ]}
+      />
 
       {onClose && (
         <button type="button" className="inked toonbank-terug" onClick={onClose}>

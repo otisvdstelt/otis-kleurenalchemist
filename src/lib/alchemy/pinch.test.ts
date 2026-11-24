@@ -57,6 +57,18 @@ describe('pinch', () => {
     expect(after.swatches[2].hex).toBe(before[2].hex)
   })
 
+  it('kiest de knoptekst waarvoor de knop het minst hoeft te veranderen', () => {
+    // Een lichtroze knop: donkere tekst erop volstaat als de knop net 3,1:1 haalt tegen de achtergrond
+    const before = palette(['#fcfaf3', '#1c1917', '#c99cb0'])
+    const after = pinch(before)
+    const knop = checkPalette(after.swatches).find((c) => c.kind === 'knop')!
+    expect(knop.passes).toBe(true)
+    expect(knop.fgRole).toBe('tekst')
+    // Veel minder ver dan de #895f72 van vroeger
+    const moved = Math.abs(fromHex(after.swatches[2].hex).l - fromHex('#c99cb0').l)
+    expect(moved).toBeLessThan(Math.abs(fromHex('#895f72').l - fromHex('#c99cb0').l) * 0.6)
+  })
+
   it('verschuift zo weinig mogelijk: tekst die net te licht is wordt net donker genoeg', () => {
     const after = pinch(palette(['#ffffff', '#777777', '#000000']))
     // Grijs #777777 haalt 4,48:1 op wit. Het snuifje mag er maar een tikje aan veranderen

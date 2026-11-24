@@ -1,6 +1,6 @@
 // Een snuifje contrast. Schuift alleen de lichtheid, en zo weinig mogelijk, tot elk paar zijn drempel haalt
 
-import { checkPalette, contrastRatio, labelFor, luminance, pairsFor, requiredFor, THRESHOLDS, type Check } from './contrast.ts'
+import { checkPalette, contrastRatio, luminance, pairsFor, requiredFor, THRESHOLDS, type Check } from './contrast.ts'
 import { fromHex, toHex, type Hex } from './color.ts'
 import type { Swatch } from './palette.ts'
 
@@ -98,11 +98,9 @@ function settleText(swatches: Swatch[], locked: readonly boolean[]) {
 function fitButton(swatches: Swatch[], index: number): boolean {
   const bg = swatches.findIndex((s) => s.role === 'achtergrond')
   if (bg < 0) return true
-  const fits = (hex: Hex, margin: number) => {
-    const trial = swatches.map((s, i) => (i === index ? { ...s, hex } : s))
-    const label = labelFor(trial, index)
-    return contrastRatio(hex, swatches[bg].hex) >= THRESHOLDS.large + margin && (label < 0 || contrastRatio(hex, trial[label].hex) >= THRESHOLDS.text + margin)
-  }
+  const labels = [bg, swatches.findIndex((s) => s.role === 'tekst')].filter((i) => i >= 0)
+  // Genoeg als hij opvalt tegen de achtergrond en er óf lichte óf donkere tekst op leest
+  const fits = (hex: Hex, margin: number) => contrastRatio(hex, swatches[bg].hex) >= THRESHOLDS.large + margin && labels.some((l) => contrastRatio(hex, swatches[l].hex) >= THRESHOLDS.text + margin)
   if (fits(swatches[index].hex, 0)) return true
   const own = fromHex(swatches[index].hex).l
   for (const margin of [MARGIN, 0]) {
