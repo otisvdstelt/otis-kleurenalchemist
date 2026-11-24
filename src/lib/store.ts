@@ -9,7 +9,7 @@ import { cauldron as step, emptyCauldron, type Cauldron, type CauldronAction } f
 import { checkPalette } from './alchemy/contrast'
 import { pinch } from './alchemy/pinch'
 import type { Hex } from './alchemy/color'
-import { isSpecial, photoIngredient, plainName, type Ingredient } from './alchemy/ingredients'
+import { isSpecial, photoIngredient, plainName, type GoalId, type Ingredient } from './alchemy/ingredients'
 import { boilState, brew, type Brew } from './alchemy/mix'
 import { nameBrew } from './alchemy/names'
 import { roleNumber } from './alchemy/palette'
@@ -54,6 +54,8 @@ export interface State {
   visiting: readonly Bottle[] | null
   /** Het laatste fotokaartje */
   photoDrop: PhotoDrop | null
+  /** De foto voor de pipet: het kleine plaatje en de kleuren die eruit gehaald zijn */
+  photo: { url: string; pigments: Hex[] } | null
   /** Wat er net gebeurde, in woorden, voor de aria-live-regio */
   news: { text: string; at: number } | null
   /** Wanneer er voor het laatst geroerd werd, en hoe hard, voor de draaikolk */
@@ -71,6 +73,7 @@ let state: State = {
   removed: null,
   visiting: null,
   photoDrop: null,
+  photo: null,
   news: null,
   stir: { at: 0, strokes: 0 },
 }
@@ -244,6 +247,31 @@ export const store = {
     const recent = [bottle, ...state.recent.filter((b) => encodeBottle(b) !== encodeBottle(bottle))].slice(0, 5)
     set({ flask, recent, ...say(strings.nieuws.gebotteld(name, bottle.swatches.length, readable)) })
     return flask
+  },
+
+  /** Een ander doel: website, app in het donker, affiche, huisstijl of presentatie */
+  setGoal(goal: GoalId) {
+    const cauldron = apply({ type: 'goal', goal })
+    if (cauldron === state.cauldron) return
+    set({ cauldron, ...remember(cauldron), ...say(strings.nieuws.doel(strings.doelen[goal])) })
+  },
+
+  /** Jouw kleur in de lege kolf. Met `index` vervang je er een */
+  addBase(hex: Hex, index?: number) {
+    const cauldron = apply({ type: 'base', hex: hex.toLowerCase(), index })
+    if (cauldron === state.cauldron) return
+    set({ cauldron, ...remember(cauldron), ...say(strings.nieuws.basis(hex.toLowerCase(), cauldron.bases.length)) })
+  },
+
+  removeBase(index: number) {
+    const cauldron = apply({ type: 'unbase', index })
+    if (cauldron === state.cauldron) return
+    set({ cauldron, ...remember(cauldron), ...say(strings.nieuws.basisWeg) })
+  },
+
+  /** Een foto voor de pipet. Hij blijft op dit apparaat */
+  setPhoto(url: string, pigments: Hex[]) {
+    set({ photo: { url, pigments }, photoDrop: { id: 'pipet', url, at: now() }, ...say(strings.nieuws.fotoPipet) })
   },
 
   /** Een foto als ingrediënt: hij komt bij de foto's, en gaat meteen de ketel in */

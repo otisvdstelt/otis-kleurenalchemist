@@ -20,7 +20,8 @@ export function usePhotoIntake() {
     const release = progress.hold()
     try {
       const photo = await readPhoto(file)
-      store.addPhoto(photo.id, photo.pigments, photo.url)
+      // De foto wordt geen ingrediënt meer: je prikt er je basis uit met de pipet
+      store.setPhoto(photo.url, photo.hexes)
     } catch {
       // Zeg het hardop, en zet het ook bij de knop
       const why = isHeic(file) ? strings.foto.heic : strings.nieuws.fotoMislukt

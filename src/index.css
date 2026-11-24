@@ -633,6 +633,227 @@
     }
   }
 
+  /* ============================================================ vier planken, en de kolf */
+
+  .kast-plank + .kast-plank {
+    margin-top: 0.4rem;
+  }
+
+  .kast-sub {
+    display: grid;
+  }
+
+  .kast-uitleg {
+    font-family: var(--font-sans);
+    font-size: 0.82rem;
+    color: var(--color-ink-soft);
+  }
+
+  .kast-tabjes {
+    display: none;
+  }
+
+  .doelen {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
+    gap: 0.6rem;
+    margin: 0;
+    padding: 0 0 0.6rem;
+    border: 0;
+  }
+
+  .doel {
+    position: relative;
+    display: block;
+    cursor: pointer;
+  }
+
+  .doel input {
+    position: absolute;
+    opacity: 0;
+    inset: 0;
+    margin: 0;
+    cursor: pointer;
+  }
+
+  .doel-kaart {
+    height: auto;
+    min-height: 6.4rem;
+  }
+
+  .doel input:checked + .doel-kaart {
+    translate: 0 -3px;
+    rotate: 0deg;
+  }
+
+  .doel input:checked + .doel-kaart::before {
+    box-shadow:
+      inset 0 0 0 2.5px var(--color-terracotta),
+      inset 0 0 0 1px rgb(58 42 32 / 0.1);
+  }
+
+  .doel input:focus-visible + .doel-kaart {
+    outline: 2.5px solid var(--color-dusk);
+    outline-offset: 3px;
+  }
+
+  .kolf {
+    display: grid;
+    gap: 0.5rem;
+    padding-bottom: 0.6rem;
+  }
+
+  .kolf-kleuren {
+    display: grid;
+    gap: 0.3rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .kolf-kleur {
+    display: grid;
+    grid-template-columns: 2rem auto 1fr auto;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .kolf-staal {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 58% 42% 55% 45% / 45% 58% 42% 55%;
+    box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--color-ink) 32%, transparent);
+  }
+
+  .kolf-kleur code {
+    font-size: 0.9rem;
+    color: var(--color-ink-soft);
+  }
+
+  .kolf-weg {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 0;
+    border-radius: 50%;
+    background: none;
+    color: var(--color-ink-soft);
+    font-size: 1.3rem;
+    line-height: 1;
+  }
+
+  .kolf-weg:hover {
+    color: var(--color-rust);
+  }
+
+  .kolf-vullen {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 0.5rem 0.6rem;
+  }
+
+  .kolf-hex {
+    flex: 1 1 7rem;
+  }
+
+  .kolf-kiezer input {
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: none;
+    cursor: pointer;
+  }
+
+  .kolf-vol {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--color-ink-soft);
+  }
+
+  .pipet {
+    display: grid;
+    gap: 0.3rem;
+  }
+
+  .pipet-kop {
+    margin: 0;
+  }
+
+  .pipet-foto {
+    width: 100%;
+    max-width: 16rem;
+    border-radius: 3px;
+    box-shadow: var(--shadow-rest);
+    cursor: crosshair;
+  }
+
+  .pipet-kleuren {
+    display: flex;
+    gap: 0.35rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .pipet-kleur {
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 0;
+    border-radius: 58% 42% 55% 45% / 45% 58% 42% 55%;
+    box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--color-ink) 32%, transparent);
+  }
+
+  @media (max-width: 1023px) {
+    .kast-tabjes {
+      display: flex;
+      gap: 0.3rem;
+      padding: 0 clamp(1rem, 3vw, 2.5rem) 0.3rem;
+    }
+
+    .kast-tabje {
+      min-height: 2.5rem;
+      padding: 0.2rem 0.8rem;
+      border: 1.5px solid transparent;
+      border-radius: 999px;
+      background: none;
+      color: var(--color-ink-soft);
+      font-family: var(--font-hand);
+      font-size: 1rem;
+    }
+
+    .kast-tabje[aria-pressed='true'] {
+      border-color: var(--color-ink);
+      color: var(--color-ink);
+    }
+
+    .kast-plank[data-open='false'] {
+      display: none;
+    }
+
+    .kast-plank .kast-sub {
+      display: none;
+    }
+
+    .kast .kolf,
+    .kast .doelen {
+      padding-inline: clamp(1rem, 3vw, 2.5rem);
+    }
+
+    .kast .doelen {
+      display: flex;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .kast .doel {
+      flex: 0 0 auto;
+    }
+  }
+
   /* ============================================================ de haard */
 
   .haard {
@@ -2214,6 +2435,19 @@
       overscroll-behavior: contain;
       scrollbar-width: thin;
       scrollbar-color: var(--color-rule) transparent;
+    }
+
+    .papier[data-wereld='true'] .doelen {
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+
+    .papier[data-wereld='true'] .doel-kaart {
+      min-height: 2.2rem;
+    }
+
+    .papier[data-wereld='true'] .kast-uitleg {
+      display: none;
     }
 
     /* Over de werkplaats heen is de kast een lijstje: de potjes zelf staan op de planken */

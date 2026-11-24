@@ -1,7 +1,7 @@
 import { Component, lazy, Suspense, useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { PaperFilters } from './components/ui/Chrome'
 import { Flesje } from './components/ui/Flesje'
-import { FotoKnop } from './components/ui/FotoKnop'
+import { Kolf } from './components/ui/Kolf'
 import { Header } from './components/ui/Header'
 import { Kast } from './components/ui/Kast'
 import { Ketel } from './components/ui/Ketel'
@@ -165,7 +165,7 @@ export default function App() {
       {failed && <p className="mislukt slip paper hand">{strings.wereld.mislukt}</p>}
       <main>
         <div className="tafel">
-        <Kast ingredients={ingredients.data} failed={ingredients.isError} photo={<FotoKnop busy={intake.busy} trouble={intake.trouble} onFile={(file) => void intake.take(file)} />} />
+        <Kast ingredients={ingredients.data} failed={ingredients.isError} kolf={<Kolf busy={intake.busy} trouble={intake.trouble} onFile={(file) => void intake.take(file)} />} />
         <Ketel onPoured={poured} onScreen={painted && worldReady ? onScreen : undefined} />
         {(!painted || (hasFlask && flaskOpen)) && <Flesje ref={flaskRef} onClose={painted ? putAway : undefined} />}
         {painted && hasFlask && !flaskOpen && (

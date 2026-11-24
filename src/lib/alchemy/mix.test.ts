@@ -75,8 +75,8 @@ describe('basis', () => {
     for (const goal of GOAL_IDS) {
       const result = brew({ ingredients: take('zeeschuim', 'neon', 'contrast', 'water'), goal, bases: ['#3b533e'], stirs: 4 })!
       expect(role(result, 'hoofd'), goal).toBe('#3b533e')
-      const hoofd = result.ramps.find((r) => r.name === 'hoofd')
-      if (hoofd) expect(hoofd.steps).toContain('#3b533e')
+      const hoofd = result.ramps.filter((r) => r.name === 'hoofd')
+      expect(hoofd.every((r) => r.steps.includes('#3b533e')), goal).toBe(true)
     }
   })
 

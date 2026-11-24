@@ -1,6 +1,7 @@
 // Een foto in de ketel: verkleinen, dan in een worker de kleuren eruit halen. De foto verlaat het apparaat nooit
 
 import type { PhotoResult } from '../workers/photo.worker'
+import { toHex, type Hex } from './alchemy/color'
 import type { Pigment } from './alchemy/ingredients'
 
 /** Zo groot (de langste kant) gaat de foto de worker in. Meer is niet nodig voor een palet */
@@ -9,6 +10,8 @@ const SIDE = 160
 export interface Photo {
   id: string
   pigments: Pigment[]
+  /** De pigmenten als hexwaarde, voor de pipet */
+  hexes: Hex[]
   /** Een blob-URL van het kleine plaatje */
   url: string
 }
@@ -31,7 +34,7 @@ export async function readPhoto(file: Blob): Promise<Photo> {
       worker.onerror = (event) => reject(new Error(event.message))
       worker.postMessage({ bitmap: small }, [small])
     })
-    return { id: result.id, pigments: result.pigments, url: URL.createObjectURL(result.thumb) }
+    return { id: result.id, pigments: result.pigments, hexes: result.pigments.map((p) => toHex(p.color)), url: URL.createObjectURL(result.thumb) }
   } finally {
     worker.terminate()
   }

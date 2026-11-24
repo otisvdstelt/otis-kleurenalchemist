@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react'
 import { strings } from '../../content/strings'
-import { MAX_SIZE, MIN_SIZE } from '../../lib/alchemy/palette'
 import { boilState } from '../../lib/alchemy/mix'
-import { isSpecial, plainName } from '../../lib/alchemy/ingredients'
+import { plainName } from '../../lib/alchemy/ingredients'
 import { currentIngredients, store, useAlchemy, useBrew } from '../../lib/store'
 import type { CauldronOnScreen } from '../World'
 import { KetelTekening } from './KetelTekening'
@@ -16,8 +15,6 @@ interface KetelProps {
 
 const capital = (text: string) => text.charAt(0).toUpperCase() + text.slice(1)
 
-const SIZES = Array.from({ length: MAX_SIZE - MIN_SIZE + 1 }, (_, i) => MIN_SIZE + i)
-
 /** De ketel op het vuur, met alles wat je ermee kunt: roeren, afscheppen, leegmaken en bottelen */
 export function Ketel({ onPoured, onScreen }: KetelProps) {
   const drawn = onScreen === undefined
@@ -25,7 +22,9 @@ export function Ketel({ onPoured, onScreen }: KetelProps) {
   const cauldron = useAlchemy((s) => s.cauldron)
   const stirredAt = useAlchemy((s) => s.stir.at)
   const inside = useAlchemy(currentIngredients)
-  const boil = boilState(inside.filter((i) => !isSpecial(i)).length)
+  // Leeg is pas leeg als er ook geen basis in de kolf zit
+  const empty = inside.length === 0 && cauldron.bases.length === 0
+  const boil = boilState(inside.filter((i) => i.kind === 'smaak').length, inside.filter((i) => i.kind === 'harmonie').length)
   const fast = useRecent(stirredAt, 1400)
   const canUndo = useAlchemy((s) => s.past.length > 0)
   const circling = useRef<{ angle: number; turned: number } | null>(null)
@@ -86,8 +85,8 @@ export function Ketel({ onPoured, onScreen }: KetelProps) {
         {strings.ketel.kop}
       </h2>
       <p className="haard-toestand hand" data-boil={boil}>
-        {inside.length === 0 ? strings.ketel.leeg : strings.ketel.toestand[boil]}
-        {inside.length > 0 && (
+        {empty ? strings.ketel.leeg : brew ? strings.ketel.toestand[boil === 'leeg' ? 'rustig' : boil] : strings.ketel.nogGeenSmaak}
+        {brew && (
           <span className="haard-slagen">
             {' '}
             {capital(strings.ketel.slagen(cauldron.stirs))}, {strings.ketel.glad(brew?.homogeneity ?? 0)}.
@@ -145,7 +144,7 @@ export function Ketel({ onPoured, onScreen }: KetelProps) {
       )}
 
       <div className="haard-knoppen">
-        {inside.length === 0 && (
+        {empty && (
           <button type="button" className="inked" data-tone="rust" onClick={() => store.surprise()}>
             {strings.ketel.verras}
           </button>
@@ -170,17 +169,6 @@ export function Ketel({ onPoured, onScreen }: KetelProps) {
         )}
       </div>
 
-      <fieldset className="grootte">
-        <legend className="hand">{strings.ketel.grootte}</legend>
-        <div className="grootte-keuzes">
-          {SIZES.map((n) => (
-            <label key={n} className="grootte-keuze">
-              <input type="radio" name="grootte" value={n} checked={cauldron.size === n} onChange={() => store.size(n)} />
-              <span>{n}</span>
-            </label>
-          ))}
-        </div>
-      </fieldset>
 
       <button type="button" className="plaque haard-bottel" disabled={!brew} onClick={pour}>
         {strings.ketel.bottelen}
